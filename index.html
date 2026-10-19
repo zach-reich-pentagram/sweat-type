@@ -1,0 +1,4063 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sweat Type</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='12' r='5' fill='%23ff2a98'/%3E%3Ccircle cx='22' cy='12' r='5' fill='%23ff2a98'/%3E%3Cpath d='M16 14c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z' fill='%2316161b'/%3E%3C/svg%3E">
+<style>
+  /* ------------------------------------------------------------------ tokens
+     Apple's semantic colours: labels, fills and separators by vibrancy tier,
+     the grouped backgrounds, and the system accent — light, dark, and high
+     contrast. Colour is used sparingly: the accent marks only what is chosen
+     and the one primary action. */
+  :root {
+    color-scheme: light dark;
+    --blue: rgb(0, 136, 255);
+    --blue-soft: rgba(0, 136, 255, 0.14);
+    --blue-ring: rgba(0, 136, 255, 0.35);
+    --label: #000;
+    --label-2: rgba(60, 60, 67, 0.60);
+    --label-3: rgba(60, 60, 67, 0.30);
+    --label-4: rgba(60, 60, 67, 0.18);
+    --fill: rgba(120, 120, 128, 0.20);
+    --fill-2: rgba(120, 120, 128, 0.16);
+    --fill-3: rgba(118, 118, 128, 0.12);
+    --separator: rgba(60, 60, 67, 0.29);
+    --separator-opaque: rgb(198, 198, 200);
+    --bg: #F2F2F7;                           /* systemGroupedBackground */
+    --bg-2: #FFFFFF;                         /* secondarySystemGroupedBackground */
+    --bg-3: #F2F2F7;                         /* tertiarySystemGroupedBackground */
+    --card: rgba(255, 255, 255, 0.78);       /* regular standard material, inside the glass */
+    --glass: rgba(255, 255, 255, 0.72);      /* Liquid Glass, regular */
+    --sidebar: #FBFBFD;                      /* that glass over the plain light page */
+    --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+    --glass-sheen: rgba(255, 255, 255, 0.35);  /* the light caught along the top of the glass */
+    --card-glass: rgba(118, 118, 128, 0.07);   /* a grouped section inside floating glass */
+    --seg-on: #FFFFFF;
+    --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+    --knob: #FFFFFF;
+    --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --gray: rgb(142, 142, 147);
+    --gray-4: rgb(209, 209, 214);
+    --gray-6: rgb(242, 242, 247);
+    --target: 44px;                          /* the smallest thing anyone has to hit */
+    --margin: 20px;                          /* regular width */
+    --gutter: 12px;
+    --radius-glass: 22px;
+    --radius-card: 14px;
+    --radius-control: 10px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Helvetica, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --blue: rgb(0, 145, 255);
+      --blue-soft: rgba(0, 145, 255, 0.22);
+      --blue-ring: rgba(0, 145, 255, 0.45);
+      --label: #FFF;
+      --label-2: rgba(235, 235, 245, 0.60);
+      --label-3: rgba(235, 235, 245, 0.30);
+      --label-4: rgba(235, 235, 245, 0.16);
+      --fill: rgba(120, 120, 128, 0.36);
+      --fill-2: rgba(120, 120, 128, 0.32);
+      --fill-3: rgba(118, 118, 128, 0.24);
+      --separator: rgba(84, 84, 88, 0.65);
+      --separator-opaque: rgb(56, 56, 58);
+      --bg: #000000;
+      --bg-2: #1C1C1E;
+      --bg-3: #2C2C2E;
+      --card: rgba(44, 44, 46, 0.62);
+      --glass: rgba(28, 28, 30, 0.75);
+      --sidebar: #151517;                    /* that glass over the plain dark page */
+      --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+      --glass-sheen: rgba(255, 255, 255, 0.07);
+      --card-glass: rgba(255, 255, 255, 0.06);
+      --seg-on: rgb(99, 99, 102);
+      --knob: rgb(229, 229, 234);
+      --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+      --gray-4: rgb(58, 58, 60);
+      --gray-6: rgb(28, 28, 30);
+    }
+  }
+  @media (prefers-contrast: more) {
+    :root {
+      --blue: rgb(30, 110, 244);
+      --label-2: rgba(60, 60, 67, 0.80);
+      --label-3: rgba(60, 60, 67, 0.55);
+      --separator: rgba(60, 60, 67, 0.55);
+      --gray: rgb(108, 108, 112);
+    }
+  }
+  @media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+    :root {
+      --blue: rgb(92, 184, 255);
+      --label-2: rgba(235, 235, 245, 0.80);
+      --label-3: rgba(235, 235, 245, 0.55);
+      --separator: rgba(160, 160, 168, 0.8);
+      --gray: rgb(174, 174, 178);
+    }
+  }
+
+  /* ------------------------------------------------------------- type
+     The macOS desktop scale, tracked per size the way SF Pro is:
+     Title 3 15/20 for the name, Headline 13/16 for section heads, Body 13/16,
+     Subheadline 11/14 for notes and Footnote 10/13 for the smallest marks. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--label);
+    font-family: var(--font);
+    font-size: 13px; line-height: 16px; letter-spacing: -0.08px; font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  button, input, textarea, select { font: inherit; color: inherit; letter-spacing: inherit; }
+  ::selection { background: var(--blue-ring); }
+  :focus-visible { outline: 3px solid var(--blue-ring); outline-offset: 1px; border-radius: var(--radius-control); }
+
+  /* ------------------------------------------------------------ shell
+     The canvas is the content and runs edge to edge; the two sidebars are the
+     controls layer, floating over it in Liquid Glass. */
+  .app { height: 100vh; }
+  .body { position: relative; height: 100%; }
+
+  .col {
+    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); bottom: max(var(--margin), env(safe-area-inset-bottom));
+    z-index: 4; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    color: var(--label);
+    /* Liquid Glass, regular: it blurs and lifts what is behind it, catches the
+       light along its top edge, and is rimmed with light — a rounded rectangle,
+       as larger glass is */
+    background: linear-gradient(180deg, var(--glass-sheen), transparent 120px), var(--glass);
+    -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+    border-radius: var(--radius-glass);
+    box-shadow: var(--glass-edge), var(--glass-shadow);
+    transform: translateZ(0);   /* its own layer, so the blur is redrawn cleanly on resize */
+  }
+  .col.left { left: max(var(--margin), env(safe-area-inset-left)); width: 320px; }
+  .col.right { right: max(var(--margin), env(safe-area-inset-right)); width: 300px; }
+  /* sections inside the glass are lighter still, so the glass reads through them */
+  .col .panel { background: var(--card-glass); }
+
+  /* in a column that scrolls, nothing is squeezed to fit: it scrolls instead */
+  .col > *, .panel > * { flex-shrink: 0; }
+  /* the scroll bar kept inside the rounded glass: clear of the corners, in from the edge */
+  .col { scrollbar-width: thin; scrollbar-color: var(--fill) transparent; }
+  .col::-webkit-scrollbar { width: 14px; }
+  .col::-webkit-scrollbar-track { background: transparent; margin: var(--radius-glass) 0; }
+  .col::-webkit-scrollbar-thumb { background: var(--fill); border-radius: 999px; border: 4px solid transparent; background-clip: padding-box; }
+  .col::-webkit-scrollbar-corner { background: transparent; }
+
+  /* ----------------------------------------------------------- sections
+     Grouped cards in the content layer — a regular standard material, never glass. */
+  .panel { background: var(--card); border-radius: var(--radius-card); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .panel.off { opacity: 0.45; }
+  .panel.off .btn, .panel.off .chip, .panel.off .seg, .panel.off .drop { pointer-events: none; }
+  .phead { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 16px; font-weight: 400; letter-spacing: -0.08px; }
+  .badge {
+    width: 20px; height: 20px; min-width: 20px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--fill-3); color: var(--label-2);
+    font-size: 10px; line-height: 13px; font-weight: 600; letter-spacing: 0.12px; font-variant-numeric: tabular-nums;
+  }
+  .note { color: var(--label-2); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
+
+  /* ---------------------------------------------------------- controls */
+  /* push buttons: sized to their label, a quiet fill, the label in the label
+     colour; the accent only for the one primary action */
+  .btn {
+    height: 30px; padding: 0 14px; border: 0; border-radius: 9px;
+    background: var(--fill-2); color: var(--label);
+    font-weight: 500; cursor: pointer; text-align: center; white-space: nowrap;
+    transition: background-color .15s ease;
+  }
+  .btn:hover { background: var(--fill); }
+  .btn:active { background: var(--fill); }
+  .btn.on, .btn.primary { background: var(--blue); color: #fff; font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn[disabled] { color: var(--label-3); background: var(--fill-3); cursor: default; }
+  /* buttons that belong together sit together, in one row */
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start; align-items: center; }
+
+  /* segmented controls: a sunken track, the chosen segment raised in the material */
+  .seg {
+    display: flex; gap: 2px; padding: 2px; min-height: var(--target);
+    background: var(--fill-3); border-radius: calc(var(--radius-control) + 2px);
+  }
+  .seg button {
+    flex: 1 1 0; min-width: 60px; border: 0; background: transparent; border-radius: var(--radius-control);
+    padding: 0 8px; cursor: pointer; white-space: nowrap; font-weight: 500; color: var(--label);
+    transition: background-color .15s ease, box-shadow .15s ease;
+  }
+  .seg button:hover:not(.on) { background: var(--fill-3); }
+  .seg button.on { background: var(--seg-on); box-shadow: var(--seg-shadow); font-weight: 600; }
+
+  /* choice chips: capsules, the chosen one in the accent */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    min-height: var(--target); min-width: 60px; padding: 0 16px; border: 0; border-radius: 999px;
+    background: var(--fill-3); color: var(--label); font-weight: 500; cursor: pointer;
+    transition: background-color .15s ease;
+  }
+  .chip:hover:not(.on) { background: var(--fill-2); }
+  .chip.on { background: var(--blue); color: #fff; font-weight: 600; }
+
+  /* pop-up menus: label on the left, the choice on the right beside the
+     up-and-down chevrons in a small round well, rows split by a hairline */
+  .popup { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--target); }
+  .popup + .popup, .rows > .popup + .popup { border-top: 0.5px solid var(--separator); }
+  .rows { display: flex; flex-direction: column; }
+  .plabel { color: var(--label); white-space: nowrap; }
+  .pwrap {
+    position: relative; display: inline-flex; align-items: center; min-width: 0;
+    min-height: var(--target); padding: 0 32px 0 8px; border-radius: var(--radius-control);
+  }
+  .pvalue { color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* the menu itself, over the whole of the choice and the chevrons, unseen */
+  .pwrap select {
+    position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: 3;
+    -webkit-appearance: none; appearance: none; border: 0; background: transparent;
+    opacity: 0; cursor: pointer; font-size: 16px;
+  }
+  .pwrap:has(select:focus-visible) { outline: 3px solid var(--blue-ring); outline-offset: -2px; }
+  /* the round well behind the chevrons */
+  .pwrap::after {
+    content: ""; position: absolute; right: 0; top: 50%; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%;
+    background: var(--fill-2); pointer-events: none; z-index: 0;
+  }
+  .pwrap::before {
+    content: ""; position: absolute; right: 7px; top: 50%; width: 8px; height: 12px; margin-top: -6px; z-index: 2;
+    background: var(--label-2); pointer-events: none;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 12'%3E%3Cpath d='M1 4.3 4 1.3 7 4.3M1 7.7 4 10.7 7 7.7' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 12'%3E%3Cpath d='M1 4.3 4 1.3 7 4.3M1 7.7 4 10.7 7 7.7' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .pwrap:hover::after { background: var(--fill); }
+
+  .drop {
+    min-height: 96px; border: 1.5px dashed var(--label-3); border-radius: var(--radius-card);
+    padding: 18px 12px; text-align: center; cursor: pointer; background: var(--fill-3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .drop:hover { border-color: var(--label-2); }
+  .drop.hot { background: var(--blue-soft); border-color: var(--blue); }
+
+  .field {
+    border: 0; border-radius: var(--radius-control); padding: 10px 12px; width: 100%;
+    background: var(--fill-3); resize: vertical; outline: none;
+    transition: box-shadow .15s ease;
+  }
+  .field::placeholder { color: var(--label-3); }
+  .field:focus { box-shadow: 0 0 0 3px var(--blue-ring); }
+  textarea.field { min-height: 88px; line-height: 16px; }
+
+  .row { display: flex; flex-direction: column; gap: 2px; }
+  .rowhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .rowhead .val { color: var(--label-2); font-variant-numeric: tabular-nums; }
+
+  /* a value you can type into: nothing until you go near it, a field while you do */
+  .val.typein { cursor: text; padding: 1px 6px; margin: -1px -6px; border-radius: 6px; transition: background-color .15s ease; }
+  .val.typein:hover { background: var(--fill-3); }
+  .val.typein.editing { background: var(--bg-2); color: var(--label); box-shadow: 0 0 0 3px var(--blue-ring); outline: none; min-width: 36px; text-align: right; }
+
+  /* sliders, drawn like the system's: a thick rounded track filled in the accent
+     up to a wide capsule handle, a full target tall */
+  input[type=range] {
+    --p: 50%;
+    -webkit-appearance: none; appearance: none; width: 100%; height: var(--target); margin: 0;
+    background: transparent; cursor: pointer;
+  }
+  .row input[type=range] { margin: -6px 0; }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, var(--blue) 0 var(--p), var(--fill) var(--p) 100%);
+  }
+  /* a tick across the track where the font's own range ends */
+  input[type=range].marked::-webkit-slider-runnable-track {
+    background:
+      linear-gradient(to right, transparent calc(var(--m) - 1.5px), var(--label) calc(var(--m) - 1.5px), var(--label) calc(var(--m) + 1.5px), transparent calc(var(--m) + 1.5px)),
+      linear-gradient(to right, var(--blue) 0 var(--p), var(--fill) var(--p) 100%);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 28px; height: 20px; margin-top: -6px; border-radius: 10px; border: 0;
+    background: var(--knob); box-shadow: var(--knob-shadow);
+  }
+  input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--fill); }
+  input[type=range]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--blue); }
+  input[type=range]::-moz-range-thumb { width: 28px; height: 20px; border-radius: 10px; border: 0; background: var(--knob); box-shadow: var(--knob-shadow); }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.04); }
+  input[type=range]:focus-visible { outline: none; }
+  input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: var(--knob-shadow), 0 0 0 3px var(--blue-ring); }
+  input[type=range]:disabled { cursor: default; opacity: 0.5; }
+
+  /* the one on/off choice is a switch */
+  .check { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--target); cursor: pointer; }
+  .check > span:last-child { order: -1; }
+  .box {
+    width: 42px; min-width: 42px; height: 26px; border-radius: 13px; background: var(--fill); position: relative;
+    transition: background-color .2s ease;
+  }
+  .box::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
+    transition: transform .2s ease;
+  }
+  .check.on .box { background: rgb(52, 199, 89); }
+  .check.on .box::after { transform: translateX(16px); }
+  @media (prefers-color-scheme: dark) { .check.on .box { background: rgb(48, 209, 88); } }
+
+  .disclose {
+    display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: var(--target);
+    border: 0; background: transparent; cursor: pointer; padding: 0; margin: -10px 0; color: var(--label);
+  }
+  .disclose .caret { color: var(--label-3); font-size: 18px; font-weight: 600; transition: transform .2s ease; }
+  .disclose.open .caret { transform: rotate(90deg); }
+  .advbody { display: none; flex-direction: column; gap: 14px; padding-top: 12px; }
+  .advbody.open { display: flex; }
+  .group { display: flex; flex-direction: column; gap: 8px; }
+  .grouphead {
+    border-top: 0.5px solid var(--separator); padding-top: 12px;
+    font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06px; text-transform: uppercase; color: var(--label-2);
+  }
+
+
+  /* ------------------------------------------------------------- stage
+     The canvas is content: solid, edge to edge in its card, with the toolbar
+     over it floating in glass. */
+  .stagewrap { position: absolute; inset: 0; overflow: hidden; }
+  .stagebar {
+    /* centred over the open canvas between the two sidebars */
+    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); left: calc(50% + 10px); transform: translateX(-50%); z-index: 3;
+    display: flex; align-items: center; gap: 12px; padding: 7px 14px; color: var(--label);
+    background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 999px; box-shadow: var(--glass-edge), var(--glass-shadow);
+    max-width: calc(100% - 720px); white-space: nowrap;
+  }
+  .stagebar .note { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  /* the artwork is fitted to the open canvas between the sidebars */
+  .stage { position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
+           padding: 68px calc(var(--margin) * 2 + 300px + 24px) 32px calc(var(--margin) * 2 + 320px + 24px); }
+  .hint { position: absolute; bottom: 18px; left: calc(var(--margin) * 2 + 320px + 8px); color: rgba(235, 235, 245, 0.6); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
+  .stage.light .hint { color: rgba(60, 60, 67, 0.6); }
+
+  .kv { display: flex; justify-content: space-between; gap: 8px; min-height: 24px; align-items: center; }
+  .kv + .kv { border-top: 0.5px solid var(--separator); }
+  .kv .val { color: var(--label-2); font-variant-numeric: tabular-nums; }
+
+  /* ------------------------------------------------------------ size classes
+     Regular width: a sidebar floating either side of the canvas. Narrower:
+     both float stacked down the left. Compact: one column, canvas first, the
+     sections below it in the page, solid rather than floating. */
+  @media (max-width: 1179px) {
+    .col.left, .col.right { left: max(var(--margin), env(safe-area-inset-left)); right: auto; width: 330px; }
+    .col.left { bottom: auto; height: calc(60% - var(--margin) - var(--gutter) / 2); }
+    .col.right { top: auto; height: calc(40% - var(--margin) - var(--gutter) / 2); }
+    .stage { padding: 68px 32px 32px calc(var(--margin) * 2 + 330px + 24px); }
+    .stagebar { left: calc(50% + 185px); max-width: calc(100% - 420px); }
+    .hint { left: calc(var(--margin) * 2 + 330px + 8px); }
+  }
+  @media (max-width: 759px) {
+    :root { --margin: 16px; }
+    body { overflow: auto; background: var(--bg); }
+    .app { height: auto; min-height: 100vh; }
+    .body { height: auto; display: flex; flex-direction: column; gap: var(--gutter); padding: var(--margin);
+            padding-top: max(var(--margin), env(safe-area-inset-top)); }
+    .stagewrap { position: relative; inset: auto; order: -1; flex-shrink: 0; height: 58vh; border-radius: var(--radius-glass); box-shadow: 0 0 0 0.5px var(--separator); }
+    .stage { padding: 56px 20px 20px; }
+    .stagebar { left: 50%; max-width: calc(100% - 24px); }
+    .hint { left: 18px; }
+    /* in the page rather than over the canvas: nothing to see through, so solid */
+    .col.left, .col.right { position: static; width: auto; height: auto; overflow: visible;
+      background: var(--sidebar); -webkit-backdrop-filter: none; backdrop-filter: none; transform: none; }
+    .col .panel { background: var(--card); }
+  }
+
+  /* Liquid Glass takes its appearance from what is behind it. Over the canvas,
+     the floating glass is light over a light canvas and dark over a dark one,
+     whatever the system's own appearance; in the stacked phone layout it sits
+     on the page, which follows the system. */
+  @media (min-width: 760px) {
+    html[data-canvas="dark"] .col, html[data-canvas="dark"] .stagebar {
+      color-scheme: dark;
+      --blue: rgb(0, 145, 255);
+      --blue-soft: rgba(0, 145, 255, 0.22);
+      --blue-ring: rgba(0, 145, 255, 0.45);
+      --label: #FFF;
+      --label-2: rgba(235, 235, 245, 0.60);
+      --label-3: rgba(235, 235, 245, 0.30);
+      --label-4: rgba(235, 235, 245, 0.16);
+      --fill: rgba(120, 120, 128, 0.36);
+      --fill-2: rgba(120, 120, 128, 0.32);
+      --fill-3: rgba(118, 118, 128, 0.24);
+      --separator: rgba(84, 84, 88, 0.65);
+      --separator-opaque: rgb(56, 56, 58);
+      --bg: #000000;
+      --bg-2: #1C1C1E;
+      --bg-3: #2C2C2E;
+      --card: rgba(44, 44, 46, 0.62);
+      --glass: rgba(28, 28, 30, 0.75);
+      --sidebar: #151517;                    /* that glass over the plain dark page */
+      --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+      --seg-on: rgb(99, 99, 102);
+      --knob: rgb(229, 229, 234);
+      --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+      --gray-4: rgb(58, 58, 60);
+      --gray-6: rgb(28, 28, 30);
+      --glass-sheen: rgba(255, 255, 255, 0.07);
+      --card-glass: rgba(255, 255, 255, 0.06);
+    }
+    html[data-canvas="light"] .col, html[data-canvas="light"] .stagebar {
+      color-scheme: light;
+      --blue: rgb(0, 136, 255);
+      --blue-soft: rgba(0, 136, 255, 0.14);
+      --blue-ring: rgba(0, 136, 255, 0.35);
+      --label: #000;
+      --label-2: rgba(60, 60, 67, 0.60);
+      --label-3: rgba(60, 60, 67, 0.30);
+      --label-4: rgba(60, 60, 67, 0.18);
+      --fill: rgba(120, 120, 128, 0.20);
+      --fill-2: rgba(120, 120, 128, 0.16);
+      --fill-3: rgba(118, 118, 128, 0.12);
+      --separator: rgba(60, 60, 67, 0.29);
+      --separator-opaque: rgb(198, 198, 200);
+      --bg: #F2F2F7;                           /* systemGroupedBackground */
+      --bg-2: #FFFFFF;                         /* secondarySystemGroupedBackground */
+      --bg-3: #F2F2F7;                         /* tertiarySystemGroupedBackground */
+      --card: rgba(255, 255, 255, 0.78);       /* regular standard material, inside the glass */
+      --glass: rgba(255, 255, 255, 0.72);      /* Liquid Glass, regular */
+      --sidebar: #FBFBFD;                      /* that glass over the plain light page */
+      --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+      --seg-on: #FFFFFF;
+      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+      --knob: #FFFFFF;
+      --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+      --gray: rgb(142, 142, 147);
+      --gray-4: rgb(209, 209, 214);
+      --gray-6: rgb(242, 242, 247);
+      --glass-sheen: rgba(255, 255, 255, 0.35);
+      --card-glass: rgba(118, 118, 128, 0.07);
+    }
+  }
+
+  /* the styles as a segmented row, each with a dot of its own colour */
+  .seg.small { min-height: 32px; }
+  .seg.small button { min-width: 0; }
+  .chips.small .chip { min-height: 30px; min-width: 0; padding: 0 12px; font-size: 12px; }
+  .mono { font-variant-numeric: tabular-nums; }
+  .checks { display: flex; flex-direction: column; }
+  .checks .check + .check { border-top: 0.5px solid var(--separator); }
+  .check .sub { color: var(--label-2); font-size: 11px; line-height: 14px; display: block; }
+  .check > span:first-child { flex: 0 0 auto; }
+
+  /* ------------------------------------------------------------ this tool
+     Everything above is the Amigues tool's stylesheet as it stands. Below is
+     only what a live canvas, colour wells and a hideable interface need on top. */
+  [hidden] { display: none !important; }
+  :root { --stage: #E5E5EA; --letter: #000; }
+  @media (prefers-color-scheme: dark) { :root { --stage: #0B0B0C; } }
+  .stage { background: var(--stage); padding: 0; display: block; touch-action: none; }
+  #board { position: absolute; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28), 0 0 0 0.5px rgba(0, 0, 0, 0.12); cursor: default; touch-action: none; }
+  #board.typing { cursor: text; }
+  #board.tool-dots { cursor: crosshair; }
+  #board.tool-wipe { cursor: cell; }
+  #gl, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #overlay { pointer-events: none; }
+  #typing { position: fixed; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; resize: none; border: 0; padding: 0; }
+  .hint { pointer-events: none; color: var(--label-2); transition: opacity .6s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 36px); }
+  .hint.gone { opacity: 0; }
+  #fatal { position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); max-width: 520px; padding: 14px 16px; z-index: 6;
+           background: rgb(255, 59, 48); color: #fff; border-radius: var(--radius-card); font-weight: 500; }
+
+  /* the brand, set in the face itself */
+  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 4px 2px; }
+  .brand .mark { height: 22px; color: var(--label); }
+  .brand .mark svg { height: 100%; width: auto; display: block; }
+
+  /* a section that opens and closes */
+  .panel > .disclose { margin: -10px 0; }
+  .panel > .disclose .phead { pointer-events: none; }
+  .panel:not(.open) > .advbody { display: none; }
+  .panel > .advbody { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
+
+  .rowhead .lab { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+  .row.nested .rowhead .lab { color: var(--label-2); padding-left: 14px; }
+  .row .note { margin-top: -4px; }
+  /* sweep a light slider end to end: a small round control beside its label */
+  .osc { width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--fill-3); color: var(--label-2);
+         display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background-color .15s ease; }
+  .osc:hover { background: var(--fill-2); color: var(--label); }
+  .osc.on { background: var(--blue); color: #fff; }
+  .osc svg { width: 13px; height: 8px; display: block; }
+  .note svg { width: 14px; height: 9px; display: inline-block; vertical-align: -1px; }
+
+  /* colour: swatches and a round well, the value typeable beside them */
+  .colorrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--target); }
+  .popup + .colorrow, .colorrow + .colorrow, .colorrow + .popup { border-top: 0.5px solid var(--separator); }
+  .cwrap { display: flex; align-items: center; gap: 5px; min-width: 0; }
+  .colorrow .plabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .swatch { width: 18px; height: 18px; min-width: 18px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+            box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); transition: transform .12s ease; }
+  .swatch:hover { transform: scale(1.12); }
+  .swatch.on { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 0 0 2px var(--bg-2), 0 0 0 3.5px var(--blue); }
+  .well { position: relative; width: 26px; height: 26px; min-width: 26px; border-radius: 50%; overflow: hidden; cursor: pointer;
+          box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 0 0 2px var(--fill-3); }
+  .well input { position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px); border: 0; padding: 0; cursor: pointer; opacity: 0; }
+  .well span { position: absolute; inset: 0; border-radius: 50%; }
+  .cwrap .val { color: var(--label-2); font-variant-numeric: tabular-nums; font-size: 11px; min-width: 52px; text-align: right; text-transform: lowercase; margin-left: 2px; }
+
+  .pair { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: var(--target); }
+  .pair .fields { display: flex; align-items: center; gap: 6px; }
+  .pair .field { width: 76px; padding: 6px 8px; text-align: right; font-variant-numeric: tabular-nums; resize: none; }
+  .pair .x { color: var(--label-2); }
+
+  .imgrow { display: flex; align-items: center; gap: 10px; min-height: var(--target); }
+  .imgrow .thumb { width: 52px; height: 34px; border-radius: 8px; background: var(--fill-3) center / cover no-repeat; flex: 0 0 auto;
+                   box-shadow: inset 0 0 0 0.5px var(--separator); }
+  .imgrow .name { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drop { min-height: 72px; }
+  .drop .note { pointer-events: none; }
+  body.dragging .drop { background: var(--blue-soft); border-color: var(--blue); }
+
+  textarea.field.textbox { min-height: 86px; font-size: 15px; line-height: 20px; }
+  .seg.small button { font-size: 12px; }
+  .chips.small .chip { min-height: 28px; }
+
+  /* the stage bar: transport, the state of the sim, and the way out of the interface */
+  .stagebar { gap: 10px; padding: 5px 5px 5px 5px; }
+  .stagebar .btn { height: 28px; border-radius: 999px; padding: 0 12px; }
+  .stagebar .note { padding: 0 4px; min-width: 0; }
+  .stagebar .note b { color: var(--label); font-weight: 600; }
+
+  #toast { position: absolute; top: calc(max(var(--margin), env(safe-area-inset-top)) + 52px); left: 50%; transform: translate(-50%, -6px); z-index: 7;
+           padding: 8px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; white-space: nowrap;
+           background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
+           -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+           box-shadow: var(--glass-edge), var(--glass-shadow); color: var(--label); font-weight: 500; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* the interface hidden: the artwork alone, edge to edge */
+  html.ui-off .col, html.ui-off .stagebar, html.ui-off .hint { display: none !important; }
+  html.ui-off .stage { background: var(--letter); }
+  html.ui-off #board { box-shadow: none; }
+  html.ui-off #toast { top: max(var(--margin), env(safe-area-inset-top)); }
+  #showui { position: absolute; right: max(var(--margin), env(safe-area-inset-right)); bottom: max(var(--margin), env(safe-area-inset-bottom)); z-index: 8;
+            height: 32px; padding: 0 14px; border: 0; border-radius: 999px; cursor: pointer; font-weight: 500; color: var(--label);
+            background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
+            -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: var(--glass-edge), var(--glass-shadow); opacity: 0; transition: opacity .3s ease; pointer-events: none; display: none; }
+  html.ui-off #showui { display: block; }
+  html.ui-off.peek #showui { opacity: 1; pointer-events: auto; }
+  html.ui-off.idle, html.ui-off.idle #board { cursor: none; }
+
+  @media (max-width: 759px) {
+    .stagewrap { overflow: hidden; }
+    html.ui-off .stagewrap { position: fixed; inset: 0; height: auto; border-radius: 0; z-index: 5; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hint, #toast, #showui, .btn, .seg button, .chip, .box, .box::after { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="body">
+
+    <!-- ============ left column ============ -->
+    <aside class="col left" id="colLeft" aria-label="Type and liquid"></aside>
+
+    <!-- ============ stage ============ -->
+    <main class="stagewrap">
+      <div class="stagebar">
+        <button class="btn" id="pause" title="Pause or resume the liquid (Space)">Pause</button>
+        <div class="note" id="hud" aria-live="off">—</div>
+        <button class="btn" id="hideui" title="Hide the controls and show the artwork alone (H)">Hide UI</button>
+        <button class="btn" id="fullscreen" title="The artwork alone, full screen (F)">Full screen</button>
+      </div>
+      <div class="stage" id="stage">
+        <div id="board">
+          <canvas id="gl"></canvas>
+          <canvas id="overlay"></canvas>
+        </div>
+        <div class="hint" id="hint">Hover dots to sweat them together · click the artboard to type · H hides the controls</div>
+        <div id="fatal" hidden></div>
+      </div>
+      <div id="toast" role="status"></div>
+      <button id="showui" type="button" title="Show the controls (H or Esc)">Show controls</button>
+    </main>
+
+    <!-- ============ right column ============ -->
+    <aside class="col right" id="colRight" aria-label="Look and output"></aside>
+
+  </div>
+</div>
+<textarea id="typing" aria-label="Specimen text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+<input type="file" id="imgFile" accept="image/*" hidden>
+<script type="module">
+const FULLSCREEN_VS = `#version 300 es
+out vec2 vUv;
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  vUv = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+class GLKit {
+  constructor(canvas) {
+    const gl = canvas.getContext('webgl2', {
+      alpha: false, antialias: false, depth: false, stencil: false,
+      premultipliedAlpha: false, preserveDrawingBuffer: false,
+      powerPreference: 'high-performance',
+    });
+    if (!gl) throw new Error('WebGL2 is not available in this browser.');
+    this.gl = gl;
+    this.canvas = canvas;
+    this.floatRT = !!gl.getExtension('EXT_color_buffer_float');
+    this.halfRT = this.floatRT || !!gl.getExtension('EXT_color_buffer_half_float');
+    this.floatLinear = !!gl.getExtension('OES_texture_float_linear');
+    this.floatBlend = !!gl.getExtension('EXT_float_blend');
+    if (!this.halfRT) throw new Error('This GPU cannot render to float textures (EXT_color_buffer_float).');
+    this.vao = gl.createVertexArray();
+    this.fbos = new Map();
+    this.texId = 1;
+    this.programs = [];
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  }
+
+  // ---------- programs ----------
+  program(fs, vs = FULLSCREEN_VS, name = 'prog') {
+    const gl = this.gl;
+    const compile = (type, src) => {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        const log = gl.getShaderInfoLog(sh);
+        const numbered = src.split('\n').map((l, i) => `${String(i + 1).padStart(4)}| ${l}`).join('\n');
+        console.error(`[${name}] shader compile error\n${log}\n${numbered}`);
+        throw new Error(`Shader compile failed (${name}): ${log}`);
+      }
+      return sh;
+    };
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      throw new Error(`Program link failed (${name}): ${gl.getProgramInfoLog(p)}`);
+    }
+    const uniforms = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    let unit = 0;
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveUniform(p, i);
+      const key = info.name.replace(/\[0\]$/, '');
+      const sampler = info.type === gl.SAMPLER_2D || info.type === gl.SAMPLER_3D ||
+        info.type === gl.SAMPLER_2D_ARRAY || info.type === gl.INT_SAMPLER_2D || info.type === gl.UNSIGNED_INT_SAMPLER_2D;
+      uniforms[key] = { loc: gl.getUniformLocation(p, info.name), type: info.type, size: info.size, unit: sampler ? unit++ : -1 };
+    }
+    const prog = { p, uniforms, name };
+    this.programs.push(prog);
+    return prog;
+  }
+
+  setUniforms(prog, u) {
+    const gl = this.gl;
+    for (const k in u) {
+      const info = prog.uniforms[k];
+      if (!info) continue;
+      const v = u[k];
+      const loc = info.loc;
+      switch (info.type) {
+        case gl.FLOAT: info.size > 1 ? gl.uniform1fv(loc, v) : gl.uniform1f(loc, v); break;
+        case gl.FLOAT_VEC2: gl.uniform2fv(loc, v); break;
+        case gl.FLOAT_VEC3: gl.uniform3fv(loc, v); break;
+        case gl.FLOAT_VEC4: gl.uniform4fv(loc, v); break;
+        case gl.INT: case gl.BOOL: info.size > 1 ? gl.uniform1iv(loc, v) : gl.uniform1i(loc, v); break;
+        case gl.INT_VEC2: gl.uniform2iv(loc, v); break;
+        case gl.INT_VEC3: gl.uniform3iv(loc, v); break;
+        case gl.FLOAT_MAT3: gl.uniformMatrix3fv(loc, false, v); break;
+        case gl.FLOAT_MAT4: gl.uniformMatrix4fv(loc, false, v); break;
+        case gl.SAMPLER_2D: case gl.INT_SAMPLER_2D: case gl.UNSIGNED_INT_SAMPLER_2D:
+          gl.activeTexture(gl.TEXTURE0 + info.unit);
+          gl.bindTexture(gl.TEXTURE_2D, v ? v.tex : null);
+          gl.uniform1i(loc, info.unit);
+          break;
+        case gl.SAMPLER_3D:
+          gl.activeTexture(gl.TEXTURE0 + info.unit);
+          gl.bindTexture(gl.TEXTURE_3D, v ? v.tex : null);
+          gl.uniform1i(loc, info.unit);
+          break;
+        default: break;
+      }
+    }
+  }
+
+  // ---------- textures ----------
+  formatInfo(fmt) {
+    const gl = this.gl;
+    const f32 = this.floatRT;
+    switch (fmt) {
+      case 'rgba32f': return f32 ? [gl.RGBA32F, gl.RGBA, gl.FLOAT] : [gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT];
+      case 'rg32f': return f32 ? [gl.RG32F, gl.RG, gl.FLOAT] : [gl.RG16F, gl.RG, gl.HALF_FLOAT];
+      case 'r32f': return f32 ? [gl.R32F, gl.RED, gl.FLOAT] : [gl.R16F, gl.RED, gl.HALF_FLOAT];
+      case 'rgba16f': return [gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT];
+      case 'rg16f': return [gl.RG16F, gl.RG, gl.HALF_FLOAT];
+      case 'r16f': return [gl.R16F, gl.RED, gl.HALF_FLOAT];
+      case 'rgba8': return [gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE];
+      default: throw new Error('unknown format ' + fmt);
+    }
+  }
+
+  texture(w, h, fmt = 'rgba16f', opts = {}) {
+    const gl = this.gl;
+    const [ifmt, format, type] = this.formatInfo(fmt);
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    const linear = opts.filter === 'linear';
+    const isFloat32 = type === gl.FLOAT;
+    const canLinear = !isFloat32 || this.floatLinear;
+    const minF = opts.mipmap ? gl.LINEAR_MIPMAP_LINEAR : (linear && canLinear ? gl.LINEAR : gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minF);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, linear && canLinear ? gl.LINEAR : gl.NEAREST);
+    const wrap = opts.wrap === 'repeat' ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opts.wrapS === 'repeat' ? gl.REPEAT : wrap);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+    gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, format, type, opts.data || null);
+    if (opts.mipmap) gl.generateMipmap(gl.TEXTURE_2D);
+    return { tex, w, h, fmt, id: this.texId++, mipmap: !!opts.mipmap };
+  }
+
+  textureFromSource(source, opts = {}) {
+    const gl = this.gl;
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, opts.flipY !== false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    const f = opts.filter === 'linear' ? gl.LINEAR : gl.NEAREST;
+    if (opts.mipmap) gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opts.mipmap ? gl.LINEAR_MIPMAP_LINEAR : f);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return { tex, w: source.width, h: source.height, fmt: 'rgba8', id: this.texId++ };
+  }
+
+  deleteTexture(t) {
+    if (!t) return;
+    const gl = this.gl;
+    for (const [key, fbo] of this.fbos) {
+      if (key.split(',').includes(String(t.id))) { gl.deleteFramebuffer(fbo); this.fbos.delete(key); }
+    }
+    gl.deleteTexture(t.tex);
+  }
+
+  genMips(t) {
+    const gl = this.gl;
+    gl.bindTexture(gl.TEXTURE_2D, t.tex);
+    gl.generateMipmap(gl.TEXTURE_2D);
+  }
+
+  // ---------- framebuffers ----------
+  fbo(targets) {
+    const key = targets.map(t => t.id).join(',');
+    let f = this.fbos.get(key);
+    if (f) return f;
+    const gl = this.gl;
+    f = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+    const bufs = [];
+    targets.forEach((t, i) => {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, t.tex, 0);
+      bufs.push(gl.COLOR_ATTACHMENT0 + i);
+    });
+    gl.drawBuffers(bufs);
+    const st = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (st !== gl.FRAMEBUFFER_COMPLETE) throw new Error('Framebuffer incomplete: 0x' + st.toString(16));
+    this.fbos.set(key, f);
+    return f;
+  }
+
+  // run a program. target: null (canvas), a texture, or an array of textures (mrt)
+  run(prog, uniforms, target, opts = {}) {
+    const gl = this.gl;
+    gl.useProgram(prog.p);
+    this.setUniforms(prog, uniforms);
+    let w, h;
+    if (!target) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      w = this.canvas.width; h = this.canvas.height;
+    } else {
+      const arr = Array.isArray(target) ? target : [target];
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo(arr));
+      w = arr[0].w; h = arr[0].h;
+    }
+    const vp = opts.viewport || [0, 0, w, h];
+    gl.viewport(vp[0], vp[1], vp[2], vp[3]);
+    if (opts.clear) { gl.clearColor(...opts.clear); gl.clear(gl.COLOR_BUFFER_BIT); }
+    if (opts.blend) {
+      gl.enable(gl.BLEND);
+      gl.blendEquation(opts.blendEq || gl.FUNC_ADD);
+      gl.blendFunc(opts.blend[0], opts.blend[1]);
+    }
+    gl.bindVertexArray(this.vao);
+    if (opts.instances != null) {
+      if (opts.instances > 0) gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, opts.instances);
+    } else if (opts.elements) {
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, opts.elements.buffer);
+      gl.drawElements(gl.TRIANGLES, opts.elements.count, gl.UNSIGNED_INT, 0);
+    } else {
+      gl.drawArrays(gl.TRIANGLES, 0, opts.count || 3);
+    }
+    if (opts.blend) gl.disable(gl.BLEND);
+  }
+
+  clear(target, color = [0, 0, 0, 0]) {
+    const gl = this.gl;
+    const arr = Array.isArray(target) ? target : [target];
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo(arr));
+    gl.viewport(0, 0, arr[0].w, arr[0].h);
+    gl.clearColor(...color);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
+  indexBuffer(indices) {
+    const gl = this.gl;
+    const buffer = gl.createBuffer();
+    gl.bindVertexArray(this.vao);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    return { buffer, count: indices.length };
+  }
+
+  // synchronous read of a float texture (small textures only)
+  readFloat(t, x = 0, y = 0, w = t.w, h = t.h) {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo([t]));
+    const out = new Float32Array(w * h * 4);
+    gl.readPixels(x, y, w, h, gl.RGBA, gl.FLOAT, out);
+    return out;
+  }
+
+  // async readback through a pixel pack buffer + fence
+  readFloatAsync(t, cb) {
+    const gl = this.gl;
+    const bytes = t.w * t.h * 16;
+    if (gl.isContextLost()) return;
+    const pbo = gl.createBuffer();
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo);
+    gl.bufferData(gl.PIXEL_PACK_BUFFER, bytes, gl.STREAM_READ);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo([t]));
+    gl.readPixels(0, 0, t.w, t.h, gl.RGBA, gl.FLOAT, 0);
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+    const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+    gl.flush();
+    const poll = () => {
+      const st = gl.clientWaitSync(sync, 0, 0);
+      if (st === gl.TIMEOUT_EXPIRED) { setTimeout(poll, 4); return; }
+      gl.deleteSync(sync);
+      const out = new Float32Array(t.w * t.h * 4);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo);
+      gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, out);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+      gl.deleteBuffer(pbo);
+      cb(out);
+    };
+    setTimeout(poll, 4);
+  }
+}
+
+const GLSL_HEADER = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2D;
+`;
+
+
+// ---- js/shaders/sim.js
+// glsl for the bead simulation: 4-species thin-liquid shallow water on a staggered grid (after thaw),
+// with gather wells that pull clusters of dots into one bead, cursor pull/carry, bead injection and wiping.
+// units: si (m, s, kg). grid row 0 = bottom of the artboard.
+const FETCH = `
+uniform ivec2 uN;
+ivec2 clampN(ivec2 p) { return clamp(p, ivec2(0), uN - 1); }
+bool inside(ivec2 p) { return p.x >= 0 && p.y >= 0 && p.x < uN.x && p.y < uN.y; }
+float sum4(vec4 v) { return v.x + v.y + v.z + v.w; }
+float hash12s(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+`;
+
+// pressure per species: hydrostatic (normal gravity) + capillary (mean curvature) + wetting + inter-species repulsion
+const pressureFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform sampler2D uW;
+uniform float uDx, uSigma, uRhoL, uGperp, uCongeal, uWetAdv, uWetRec, uHc, uRepel, uWc, uHetero;
+out vec4 oP;
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  float cp = clamp(uCongeal, 0.0, 1.0);
+  vec4 e[9];
+  vec4 hc = vec4(0.0);
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec4 h = texelFetch(uL, clampN(c + ivec2(i, j)), 0);
+      e[(j + 1) * 3 + (i + 1)] = mix(h, vec4(sum4(h)), cp);
+      if (i == 0 && j == 0) hc = h;
+    }
+  }
+  float idx = 1.0 / uDx;
+  vec4 C = e[4], E = e[5], W = e[3], N = e[7], S = e[1], NE = e[8], NW = e[6], SE = e[2], SW = e[0];
+  vec4 gx, gy;
+  gx = (E - C) * idx; gy = ((N - S) + (NE - SE)) * 0.25 * idx;
+  vec4 nxR = gx * inversesqrt(1.0 + gx * gx + gy * gy);
+  gx = (C - W) * idx; gy = ((N - S) + (NW - SW)) * 0.25 * idx;
+  vec4 nxL = gx * inversesqrt(1.0 + gx * gx + gy * gy);
+  gy = (N - C) * idx; gx = ((E - W) + (NE - NW)) * 0.25 * idx;
+  vec4 nyU = gy * inversesqrt(1.0 + gx * gx + gy * gy);
+  gy = (C - S) * idx; gx = ((E - W) + (SE - SW)) * 0.25 * idx;
+  vec4 nyD = gy * inversesqrt(1.0 + gx * gx + gy * gy);
+  vec4 kf = (nxR - nxL + nyU - nyD) * idx;
+  vec4 inv;
+  gx = ((E + NE) - (C + N)) * 0.5 * idx; gy = ((N + NE) - (C + E)) * 0.5 * idx;
+  inv = inversesqrt(1.0 + gx * gx + gy * gy); vec4 nxNE = gx * inv, nyNE = gy * inv;
+  gx = ((C + N) - (W + NW)) * 0.5 * idx; gy = ((NW + N) - (W + C)) * 0.5 * idx;
+  inv = inversesqrt(1.0 + gx * gx + gy * gy); vec4 nxNW = gx * inv, nyNW = gy * inv;
+  gx = ((SE + E) - (S + C)) * 0.5 * idx; gy = ((C + E) - (S + SE)) * 0.5 * idx;
+  inv = inversesqrt(1.0 + gx * gx + gy * gy); vec4 nxSE = gx * inv, nySE = gy * inv;
+  gx = ((S + C) - (SW + W)) * 0.5 * idx; gy = ((W + C) - (SW + S)) * 0.5 * idx;
+  inv = inversesqrt(1.0 + gx * gx + gy * gy); vec4 nxSW = gx * inv, nySW = gy * inv;
+  vec4 kc = ((nxNE + nxSE) - (nxNW + nxSW)) * 0.5 * idx + ((nyNE + nyNW) - (nySE + nySW)) * 0.5 * idx;
+  vec4 kappa = mix(kf, kc, uWc);
+
+  float ht = sum4(hc);
+  vec4 heff = mix(hc, vec4(ht), cp);
+  // a static patchwork of wettability (skin and paper are not chemically uniform) makes runs meander
+  vec2 q = vec2(c) * 0.37;
+  vec2 qi = floor(q), qf = fract(q);
+  vec2 qu = qf * qf * (3.0 - 2.0 * qf);
+  float patchN = mix(mix(hash12s(qi), hash12s(qi + vec2(1, 0)), qu.x), mix(hash12s(qi + vec2(0, 1)), hash12s(qi + vec2(1, 1)), qu.x), qu.y);
+  float jit = hash12s(vec2(c) + 71.3);
+  float het = 1.0 + uHetero * ((patchN - 0.5) * 1.4 + (jit - 0.5) * 0.6);
+  // contact-angle hysteresis: dry surface resists at the advancing angle, surface that is already
+  // wet lets go at the receding angle, so beads cling until their weight beats the difference
+  float wet = texelFetch(uW, c, 0).r;
+  vec4 pw = mix(uWetAdv, uWetRec, smoothstep(0.3, 0.7, wet)) * het * exp(-heff / uHc);
+  vec4 others = max(vec4(ht) - hc, 0.0);
+  vec4 prep = max(-uCongeal, 0.0) * uRepel * (1.0 - exp(-others / uHc));
+  oP = uRhoL * uGperp * ht - uSigma * kappa + pw + prep;
+}`;
+
+// face velocities (x faces: between i and i+1; y faces: between j and j+1)
+const velocityFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uP;
+uniform sampler2D uL;
+uniform sampler2D uU;
+uniform sampler2D uV;
+uniform sampler2D uW;
+uniform sampler2D uGather;  // gather wells: target (cells), strength (m/s2), start time (s)
+uniform sampler2D uBulk;    // blurred liquid depth (px) from the previous frame, for size-dependent pinning
+uniform float uBulkLod, uPxToM, uHref;
+uniform float uDt, uDx, uRhoL, uNu, uSlip, uFric, uVmax, uCongeal, uVisc, uPin, uHdry;
+uniform float uTime, uLife, uGatherR;
+uniform vec4 uCur;          // cursor: x, y (cells), radius (cells), on
+uniform vec2 uCurVel;       // cursor velocity (m/s)
+uniform float uCurPull, uCurDrag;
+uniform vec2 uG;
+layout(location = 0) out vec4 oU;
+layout(location = 1) out vec4 oV;
+vec4 U_(ivec2 p) { return inside(p) ? texelFetch(uU, p, 0) : vec4(0.0); }
+vec4 V_(ivec2 p) { return inside(p) ? texelFetch(uV, p, 0) : vec4(0.0); }
+
+// external body force at a face position (cells), plus the cursor's drag coefficient there
+vec3 extForce(vec2 fp, ivec2 a, ivec2 b) {
+  vec2 F = vec2(0.0);
+  // gather wells: the stronger of the two cells sharing this face wins
+  vec4 ga = texelFetch(uGather, a, 0), gb = texelFetch(uGather, b, 0);
+  vec4 g = ga.z >= gb.z ? ga : gb;
+  if (g.z > 0.0) {
+    float age = uTime - g.w;
+    float on = smoothstep(0.0, 0.25, age) * (1.0 - smoothstep(uLife * 0.65, uLife, age));
+    vec2 d = g.xy - fp;
+    float dist = length(d);
+    // a dead zone round the target: the well only brings dots into contact, surface tension fuses them
+    if (dist > 1e-4) F += g.z * on * d / dist * smoothstep(uGatherR * 0.5, uGatherR * 1.5, dist);
+  }
+  float kd = 0.0;
+  if (uCur.w > 0.0) {
+    vec2 d = uCur.xy - fp;
+    float dist = length(d);
+    float r = dist / max(uCur.z, 1e-3);
+    float w = exp(-2.0 * r * r);
+    if (dist > 1e-4) F += uCurPull * w * d / dist * smoothstep(uGatherR * 0.5, uGatherR * 1.5, dist);
+    kd = uCurDrag * w;
+  }
+  return vec3(F, kd);
+}
+
+vec4 face(vec4 u, vec4 pa, vec4 pb, vec4 ha, vec4 hb, float g, float wetA, float wetB, vec4 lap, float fx, float kd, float vc, float pinScale) {
+  vec4 F = -(pb - pa) / (uDx * uRhoL) + g + fx;
+  // contact-angle hysteresis: advancing onto dry, unwetted substrate needs extra push.
+  // pinning acts along the contact line while weight grows with volume, so big beads break free first
+  float dryA = (sum4(ha) < uHdry && wetA < 0.5) ? 1.0 : 0.0;
+  float dryB = (sum4(hb) < uHdry && wetB < 0.5) ? 1.0 : 0.0;
+  vec4 downDry = mix(vec4(dryA), vec4(dryB), step(0.0, F));
+  vec4 Fp = sign(F) * max(abs(F) - uPin * pinScale, 0.0);
+  F = mix(F, Fp, downDry);
+  vec4 hf = 0.5 * (ha + hb);
+  vec4 gam = 3.0 * uNu / (hf * (hf + 3.0 * uSlip) + 1e-14) + uFric;
+  vec4 un = (u + uDt * F + uDt * kd * vc + uVisc * lap) / (1.0 + uDt * (gam + kd));
+  un *= step(1e-10, ha + hb);
+  float cp = clamp(uCongeal, 0.0, 1.0);
+  float hs = sum4(hf);
+  if (cp > 0.0 && hs > 1e-10) {
+    float um = dot(hf, un) / hs;
+    un = mix(un, vec4(um), cp * step(1e-10, hf));
+  }
+  return clamp(un, -uVmax, uVmax);
+}
+float pinScaleAt(vec2 fp) {
+  float hb = textureLod(uBulk, fp / vec2(uN), uBulkLod).r * uPxToM;
+  return clamp(uHref / max(hb, 1e-7), 0.2, 2.5);
+}
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec4 pc = texelFetch(uP, c, 0);
+  vec4 hc = texelFetch(uL, c, 0);
+  float wc = texelFetch(uW, c, 0).r;
+  ivec2 ex = ivec2(1, 0), ey = ivec2(0, 1);
+  if (c.x >= uN.x - 1) {
+    oU = vec4(0.0);
+  } else {
+    ivec2 e = c + ex;
+    vec2 fp = vec2(c) + vec2(1.0, 0.5);
+    vec3 ef = extForce(fp, c, e);
+    vec4 u = texelFetch(uU, c, 0);
+    vec4 lap = U_(c + ex) + U_(c - ex) + U_(c + ey) + U_(c - ey) - 4.0 * u;
+    oU = face(u, pc, texelFetch(uP, e, 0), hc, texelFetch(uL, e, 0), uG.x, wc, texelFetch(uW, e, 0).r, lap, ef.x, ef.z, uCurVel.x, pinScaleAt(fp));
+  }
+  if (c.y >= uN.y - 1) {
+    oV = vec4(0.0);
+  } else {
+    ivec2 n = c + ey;
+    vec2 fp = vec2(c) + vec2(0.5, 1.0);
+    vec3 ef = extForce(fp, c, n);
+    vec4 v = texelFetch(uV, c, 0);
+    vec4 lap = V_(c + ex) + V_(c - ex) + V_(c + ey) + V_(c - ey) - 4.0 * v;
+    oV = face(v, pc, texelFetch(uP, n, 0), hc, texelFetch(uL, n, 0), uG.y, wc, texelFetch(uW, n, 0).r, lap, ef.y, ef.z, uCurVel.y, pinScaleAt(fp));
+  }
+}`;
+
+// upwind transport of each species + wet trail memory
+const updateFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform sampler2D uU;
+uniform sampler2D uV;
+uniform sampler2D uW;
+uniform float uDt, uDx, uWetDecay, uHc;
+layout(location = 0) out vec4 oL;
+layout(location = 1) out vec4 oW;
+vec4 U_(ivec2 p) { return inside(p) ? texelFetch(uU, p, 0) : vec4(0.0); }
+vec4 V_(ivec2 p) { return inside(p) ? texelFetch(uV, p, 0) : vec4(0.0); }
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  ivec2 ex = ivec2(1, 0), ey = ivec2(0, 1);
+  vec4 h = texelFetch(uL, c, 0);
+  vec4 hE = texelFetch(uL, clampN(c + ex), 0), hW = texelFetch(uL, clampN(c - ex), 0);
+  vec4 hN = texelFetch(uL, clampN(c + ey), 0), hS = texelFetch(uL, clampN(c - ey), 0);
+  vec4 uR = U_(c), uLeft = U_(c - ex), vU = V_(c), vD = V_(c - ey);
+  float k = uDt / uDx;
+  vec4 fR = uR * mix(hE, h, step(0.0, uR));
+  vec4 fL = uLeft * mix(h, hW, step(0.0, uLeft));
+  vec4 fU = vU * mix(hN, h, step(0.0, vU));
+  vec4 fD = vD * mix(h, hS, step(0.0, vD));
+  vec4 hn = max(h - k * (fR - fL + fU - fD), 0.0);
+  if (any(isnan(hn))) hn = h;
+  float wet = max(texelFetch(uW, c, 0).r * uWetDecay, smoothstep(0.8 * uHc, 2.0 * uHc, sum4(hn)));
+  oL = hn;
+  oW = vec4(wet, 0.0, 0.0, 0.0);
+}`;
+
+// non-wetting films retract: a thin film cell drains into its thickest neighbour (gather form, mass conserving)
+const collectFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform float uCollect, uFilm;
+out vec4 oL;
+float T_(ivec2 p) { return sum4(texelFetch(uL, clampN(p), 0)); }
+bool film(ivec2 p) { float t = T_(p); return t > 0.0 && t < uFilm; }
+int pick(ivec2 p) {
+  float bv = T_(p) * 1.05 + 1e-7;
+  int best = -1;
+  ivec2 d[4] = ivec2[4](ivec2(1, 0), ivec2(-1, 0), ivec2(0, 1), ivec2(0, -1));
+  for (int i = 0; i < 4; i++) {
+    ivec2 q = p + d[i];
+    if (!inside(q)) continue;
+    float t = T_(q);
+    if (t > bv) { bv = t; best = i; }
+  }
+  return best;
+}
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec4 h = texelFetch(uL, c, 0);
+  ivec2 d[4] = ivec2[4](ivec2(1, 0), ivec2(-1, 0), ivec2(0, 1), ivec2(0, -1));
+  if (film(c) && pick(c) >= 0) h -= texelFetch(uL, c, 0) * uCollect;
+  for (int i = 0; i < 4; i++) {
+    ivec2 p = c + d[i];
+    if (!inside(p) || !film(p)) continue;
+    int t = pick(p);
+    if (t >= 0 && d[t] == -d[i]) h += texelFetch(uL, p, 0) * uCollect;
+  }
+  oL = max(h, 0.0);
+}`;
+
+// add liquid beads (spherical caps the size of a dot) for up to 64 dots per pass
+const injectFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform vec4 uDots[64];     // x, y, r (cells), species
+uniform int uCount;
+uniform float uCosT, uSinT, uCellM;
+out vec4 oL;
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec2 p = vec2(c) + 0.5;
+  vec4 h = texelFetch(uL, c, 0);
+  for (int i = 0; i < 64; i++) {
+    if (i >= uCount) break;
+    vec4 d = uDots[i];
+    float dist = length(p - d.xy);
+    if (dist >= d.z) continue;
+    float Rs = d.z / uSinT;
+    float cap = (sqrt(max(Rs * Rs - dist * dist, 0.0)) - Rs * uCosT) * uCellM;
+    float sp = d.w;
+    vec4 oh = vec4(sp < 0.5 ? 1.0 : 0.0, abs(sp - 1.0) < 0.5 ? 1.0 : 0.0, abs(sp - 2.0) < 0.5 ? 1.0 : 0.0, sp > 2.5 ? 1.0 : 0.0);
+    h += oh * max(cap, 0.0);
+  }
+  oL = h;
+}`;
+
+// soak liquid up under the cursor (a towel)
+const wipeFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform sampler2D uW;
+uniform vec4 uCur;    // x, y, r (cells), amount per step
+layout(location = 0) out vec4 oL;
+layout(location = 1) out vec4 oW;
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  float r = length(vec2(c) + 0.5 - uCur.xy) / max(uCur.z, 1e-3);
+  float w = 1.0 - smoothstep(0.75, 1.05, r);
+  oL = texelFetch(uL, c, 0) * (1.0 - w * uCur.w);
+  oW = texelFetch(uW, c, 0) * (1.0 - w * uCur.w * 0.5);
+}`;
+
+// does liquid sit on top of a static dot? one texel per static dot: max liquid depth near its centre (m)
+const probeFS = GLSL_HEADER + FETCH + `
+uniform sampler2D uL;
+uniform sampler2D uDots;   // x, y (artboard px, y up), r (px), flags
+uniform int uCount;
+uniform vec2 uCellPerPx;
+uniform float uSampleR;    // sampling ring, as a fraction of the dot radius
+out vec4 o;
+void main() {
+  ivec2 t = ivec2(gl_FragCoord.xy);
+  int i = t.y * 4096 + t.x;
+  if (i >= uCount) { o = vec4(0.0); return; }
+  vec4 d = texelFetch(uDots, t, 0);
+  vec2 cc = d.xy * uCellPerPx;
+  // the dot's body, not just its centre: liquid that runs into it from any side counts
+  float rc = d.z * uCellPerPx.x * uSampleR;
+  float m = 0.0;
+  for (int k = 0; k < 9; k++) {
+    float a = float(k) * 0.7854;
+    vec2 p = cc + (k == 0 ? vec2(0.0) : vec2(cos(a), sin(a)) * rc);
+    m = max(m, sum4(texelFetch(uL, clampN(ivec2(floor(p))), 0)));
+  }
+  o = vec4(m, 0.0, 0.0, 1.0);
+}`;
+
+// render-ready heights: r = liquid total (px), g = thickest species (px), b = wet
+const resolveFS = GLSL_HEADER + `
+uniform sampler2D uL;
+uniform sampler2D uW;
+uniform float uMToPx;
+out vec4 o;
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec4 l = texelFetch(uL, c, 0);
+  float lt = l.x + l.y + l.z + l.w;
+  float lm = max(max(l.x, l.y), max(l.z, l.w));
+  o = vec4(lt * uMToPx, lm * uMToPx, texelFetch(uW, c, 0).r, 1.0);
+}`;
+
+// reduction: r summed (volume), g max (depth), b count of wet cells
+const statsFS = GLSL_HEADER + `
+uniform sampler2D uSrc;
+uniform ivec2 uSrcSize;
+uniform int uFirst;
+out vec4 o;
+void main() {
+  ivec2 base = ivec2(gl_FragCoord.xy) * 8;
+  vec4 acc = vec4(0.0);
+  for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < 8; i++) {
+      ivec2 p = base + ivec2(i, j);
+      if (p.x >= uSrcSize.x || p.y >= uSrcSize.y) continue;
+      vec4 v = texelFetch(uSrc, p, 0);
+      if (uFirst == 1) { float lt = v.x + v.y + v.z + v.w; v = vec4(lt, lt, 0.0, 1.0); }
+      acc.r += v.r;
+      acc.g = max(acc.g, v.g);
+      acc.a += v.a;
+    }
+  }
+  o = acc;
+}`;
+
+const PI = `const float PI = 3.14159265359;`;
+
+const BICUBIC = `
+vec4 cubicW(float v) {
+  vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+  vec4 s = n * n * n;
+  float x = s.x, y = s.y - 4.0 * s.x, z = s.z - 4.0 * s.y + 6.0 * s.x;
+  return vec4(x, y, z, 6.0 - x - y - z) * (1.0 / 6.0);
+}
+vec4 bicubic(sampler2D tex, vec2 uv, vec2 size) {
+  vec2 tc = uv * size - 0.5;
+  vec2 f = fract(tc); tc -= f;
+  vec4 xc = cubicW(f.x), yc = cubicW(f.y);
+  vec4 c = tc.xxyy + vec2(-0.5, 1.5).xyxy;
+  vec4 s = vec4(xc.xz + xc.yw, yc.xz + yc.yw);
+  vec4 off = (c + vec4(xc.yw, yc.yw) / s) / size.xxyy;
+  vec4 s0 = texture(tex, off.xz), s1 = texture(tex, off.yz), s2 = texture(tex, off.xw), s3 = texture(tex, off.yw);
+  float sx = s.x / (s.x + s.y), sy = s.z / (s.z + s.w);
+  return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
+}
+`;
+
+const HASH = `
+float hash12(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+vec2 hash22(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973)); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.xx + p3.yz) * p3.zy); }
+vec4 hash42(vec2 p) { vec4 p4 = fract(vec4(p.xyxy) * vec4(0.1031, 0.1030, 0.0973, 0.1099)); p4 += dot(p4, p4.wzxy + 33.33); return fract((p4.xxyz + p4.yzzw) * p4.zywx); }
+float hash13(vec3 p3) { p3 = fract(p3 * 0.1031); p3 += dot(p3, p3.zyx + 31.32); return fract((p3.x + p3.y) * p3.z); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash12(i), hash12(i + vec2(1, 0)), u.x), mix(hash12(i + vec2(0, 1)), hash12(i + vec2(1, 1)), u.x), u.y);
+}
+float vnoise3(vec3 p) {
+  vec3 i = floor(p), f = fract(p);
+  vec3 u = f * f * (3.0 - 2.0 * f);
+  float a = mix(mix(hash13(i), hash13(i + vec3(1, 0, 0)), u.x), mix(hash13(i + vec3(0, 1, 0)), hash13(i + vec3(1, 1, 0)), u.x), u.y);
+  float b = mix(mix(hash13(i + vec3(0, 0, 1)), hash13(i + vec3(1, 0, 1)), u.x), mix(hash13(i + vec3(0, 1, 1)), hash13(i + vec3(1, 1, 1)), u.x), u.y);
+  return mix(a, b, u.z);
+}
+float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * vnoise(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
+`;
+
+// ---------------------------------------------------------------- environment
+const envFS = GLSL_HEADER + PI + `
+in vec2 vUv;
+uniform int uPreset;     // 0 studio, 1 soft box, 2 night, 3 window
+uniform float uAz, uEl;  // key light (radians)
+uniform vec3 uBg;        // background (linear)
+out vec4 o;
+vec3 dirFromUv(vec2 uv) {
+  float ph = (uv.x - 0.5) * 2.0 * PI;
+  float th = uv.y * PI;
+  return vec3(sin(th) * cos(ph), sin(th) * sin(ph), cos(th));
+}
+vec3 sph(float az, float el) { return vec3(cos(el) * cos(az), cos(el) * sin(az), sin(el)); }
+// soft-edged rectangle light in gnomonic coordinates around direction c
+float rect(vec3 d, vec3 c, float w, float h, float soft) {
+  float cd = dot(d, c);
+  if (cd <= 0.0) return 0.0;
+  vec3 up = abs(c.z) > 0.99 ? vec3(0, 1, 0) : vec3(0, 0, 1);
+  vec3 r = normalize(cross(up, c));
+  vec3 u = cross(c, r);
+  vec2 p = vec2(dot(d, r), dot(d, u)) / cd;
+  vec2 q = abs(p) - vec2(w, h);
+  float dd = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+  return 1.0 - smoothstep(-soft, soft, dd);
+}
+float spot(vec3 d, vec3 c, float size) { float a = acos(clamp(dot(d, c), -1.0, 1.0)); return exp(-a * a / (size * size)); }
+void main() {
+  vec3 d = dirFromUv(vUv);
+  vec3 col;
+  float z = d.z;
+  vec3 floorC = uBg * 0.85;
+  if (uPreset == 0) {
+    // studio, energy-normalised so the page under it reads as lit by ~1.0:
+    // dark ceiling and walls, seamless horizon line, key softbox, strip rim, fill, two tiny kickers
+    col = mix(vec3(0.075, 0.077, 0.082), vec3(0.02, 0.021, 0.024), smoothstep(0.05, 0.9, z));
+    col += vec3(1.0, 1.0, 1.02) * exp(-pow((z - 0.07) / 0.035, 2.0)) * 0.7;
+    col += vec3(1.0) * 9.0 * rect(d, sph(uAz, uEl), 0.36, 0.25, 0.035);
+    col += vec3(1.0, 0.98, 0.95) * 3.2 * rect(d, sph(uAz + PI * 0.93, 0.3), 0.07, 0.8, 0.02);
+    col += vec3(0.95, 0.97, 1.0) * 0.8 * rect(d, sph(uAz - PI * 0.45, 0.62), 0.42, 0.28, 0.1);
+    col += vec3(1.0) * 40.0 * spot(d, sph(uAz + 1.3, 0.95), 0.02);
+    col += vec3(1.0) * 25.0 * spot(d, sph(uAz - 2.2, 0.45), 0.018);
+    col += vec3(0.12) * spot(d, vec3(0, 0, 1), 0.25);
+  } else if (uPreset == 1) {
+    // light tent: bright, low contrast, soft key
+    col = mix(vec3(0.55, 0.56, 0.58), vec3(0.95, 0.96, 0.98), smoothstep(0.0, 0.9, z));
+    col += vec3(1.0) * 1.6 * rect(d, sph(uAz, uEl), 0.9, 0.7, 0.3);
+    col -= vec3(0.3) * rect(d, sph(uAz + PI, 0.25), 0.2, 0.6, 0.1);
+  } else if (uPreset == 2) {
+    // night: black room, sparse hard lights for glints
+    col = vec3(0.004, 0.005, 0.008) + vec3(0.02, 0.025, 0.04) * exp(-pow((z - 0.1) / 0.1, 2.0));
+    col += vec3(1.0, 0.97, 0.92) * 90.0 * spot(d, sph(uAz, uEl), 0.03);
+    col += vec3(0.9, 0.95, 1.0) * 45.0 * spot(d, sph(uAz + 2.3, 0.35), 0.022);
+    col += vec3(1.0) * 30.0 * spot(d, sph(uAz - 1.9, 0.7), 0.018);
+    col += vec3(1.0) * 2.5 * rect(d, sph(uAz + PI, 0.2), 0.03, 0.5, 0.01);
+    floorC = uBg * 0.6;
+  } else {
+    // window: tall daylight window with mullions, warm dim room
+    col = mix(vec3(0.16, 0.14, 0.12), vec3(0.05, 0.05, 0.05), smoothstep(0.1, 0.95, z));
+    vec3 wc = sph(uAz, uEl * 0.8);
+    float win = rect(d, wc, 0.6, 0.55, 0.02);
+    float bars = rect(d, wc, 0.012, 0.6, 0.004) + rect(d, wc, 0.62, 0.01, 0.004);
+    col += vec3(0.85, 0.92, 1.05) * 4.2 * win * (1.0 - clamp(bars, 0.0, 1.0));
+    col += vec3(1.0, 0.95, 0.85) * 0.4 * exp(-pow((z - 0.12) / 0.08, 2.0));
+  }
+  // lower hemisphere: the page the objects sit on
+  float g = smoothstep(0.03, -0.06, z);
+  col = mix(col, floorC, g);
+  o = vec4(col, 1.0);
+}`;
+
+
+// ---------------------------------------------------------------- static dots (instanced, render res)
+// r = anti-aliased coverage, g = bead height (px) of a spherical cap with the liquid's contact angle
+const dotsVS = `#version 300 es
+precision highp float;
+precision highp sampler2D;
+uniform sampler2D uDots;   // x, y (artboard px, y up), r (px), unused
+uniform vec2 uArt;
+uniform float uAa;         // artboard px per target px
+out vec2 vLocal;
+out float vR;
+const vec2 C[6] = vec2[6](vec2(-1, -1), vec2(1, -1), vec2(1, 1), vec2(-1, -1), vec2(1, 1), vec2(-1, 1));
+void main() {
+  vec4 d = texelFetch(uDots, ivec2(gl_InstanceID % 4096, gl_InstanceID / 4096), 0);
+  float R = d.z + 2.0 * uAa;
+  vec2 q = C[gl_VertexID] * R;
+  vLocal = q;
+  vR = d.z;
+  gl_Position = vec4((d.xy + q) / uArt * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const dotsFS = GLSL_HEADER + `
+in vec2 vLocal;
+in float vR;
+uniform float uAa, uCosT, uSinT;
+out vec4 o;
+void main() {
+  float dist = length(vLocal);
+  float cov = clamp((vR - dist) / uAa + 0.5, 0.0, 1.0);
+  float Rs = vR / uSinT;
+  float h = max(sqrt(max(Rs * Rs - dist * dist, 0.0)) - Rs * uCosT, 0.0);
+  // round the foot into a meniscus: a near-vertical contact line aliases into a dashed rim
+  float e = clamp((vR - dist) / max(2.5 * uAa, 0.2 * vR), 0.0, 1.0);
+  o = vec4(cov, h * e * (2.0 - e), 0.0, 1.0);
+}`;
+
+// ---------------------------------------------------------------- height prep (render res)
+const prepFS = GLSL_HEADER + BICUBIC + `
+in vec2 vUv;
+uniform sampler2D uRes;     // (liquid px, thickest species px, wet) sim res
+uniform vec2 uSimN;
+uniform sampler2D uDotTex;  // (coverage, bead px) render res
+uniform int uBeadStyle;
+uniform float uCongeal;
+uniform float uMeniscus;    // px
+uniform float uFilmPx;      // px, thinnest liquid that reads as a body
+out vec4 o;
+void main() {
+  vec2 uv = vUv;
+  vec4 rs = bicubic(uRes, uv, uSimN);
+  float liq = max(mix(rs.g, rs.r, clamp(uCongeal, 0.0, 1.0)), 0.0);
+  // round the contact line: the height field under-resolves the meniscus, so lift thin edges onto a
+  // circular-ish profile. films thinner than the visible threshold are dropped entirely
+  liq *= smoothstep(uFilmPx * 0.3, uFilmPx * 1.2, liq);
+  float lifted = sqrt(liq * liq + 2.0 * uMeniscus * liq);
+  liq = mix(liq, lifted, smoothstep(uFilmPx * 2.0, uFilmPx * 7.0, liq));
+  vec4 d = texture(uDotTex, uv);
+  float H = uBeadStyle == 1 ? max(liq, d.g) : liq;
+  // b: exact coverage of dry beads, so their silhouettes anti-alias cleanly
+  o = vec4(H, uBeadStyle == 1 ? 0.0 : d.r, uBeadStyle == 1 ? d.r : 0.0, rs.b);
+}`;
+
+// ---------------------------------------------------------------- caustics + shadows
+// pass 1 (grid resolution): where each light bundle lands (target px) and how much survives
+const causticPrepFS = GLSL_HEADER + `
+uniform sampler2D uPrep;
+uniform ivec2 uGrid;
+uniform vec2 uArt;
+uniform vec3 uL;
+uniform int uOpaque;
+uniform float uIor, uDensity, uPxMm;
+uniform float uHmax;
+uniform float uSoft;
+uniform vec2 uTarget;
+uniform float uOver;
+out vec4 o;
+float H(vec2 uv) { return textureLod(uPrep, uv, 0.0).r; }
+float fres(float c, float n) { float r0 = (n - 1.0) / (n + 1.0); r0 *= r0; return r0 + (1.0 - r0) * pow(1.0 - clamp(c, 0.0, 1.0), 5.0); }
+void main() {
+  vec2 ij = floor(gl_FragCoord.xy);
+  vec2 g = vec2(uGrid - 1);
+  vec2 uv = (ij / g) * (1.0 + 2.0 * uOver) - uOver;
+  vec2 P = uv * uArt;
+  vec2 cuv = clamp(uv, 0.0, 1.0);
+  float h = H(cuv);
+  // a two-cell stencil: the steep rim of a small bead otherwise scatters rays unevenly across the grid
+  vec2 du = 2.0 / g;
+  float hE = H(cuv + vec2(du.x, 0.0)), hW = H(cuv - vec2(du.x, 0.0));
+  float hN = H(cuv + vec2(0.0, du.y)), hS = H(cuv - vec2(0.0, du.y));
+  vec3 N = normalize(vec3(-(hE - hW) / (2.0 * du.x * uArt.x), -(hN - hS) / (2.0 * du.y * uArt.y), 1.0));
+  vec3 I = -uL;
+  float occ = 1.0;
+  vec2 dir = uL.xy / max(uL.z, 0.08);
+  float stepZ = max(uHmax, 1.0) / 16.0;
+  for (int k = 1; k <= 16; k++) {
+    float z = h + float(k) * stepZ;
+    vec2 q = P + dir * (z - h);
+    float hq = H(clamp(q / uArt, 0.0, 1.0));
+    float dist = length(dir) * (z - h);
+    occ = min(occ, clamp(1.0 - (hq - z) / (0.5 + uSoft * 0.2 * dist), 0.0, 1.0));
+  }
+  float T = 1.0;
+  vec2 Pd = P;
+  if (h > 0.05) {
+    if (uOpaque == 1) {
+      T = 0.0;
+      Pd = P + I.xy * (h / max(-I.z, 0.1));
+    } else {
+      vec3 t = refract(I, N, 1.0 / uIor);
+      float F = fres(dot(N, -I), uIor);
+      // light lands where the bead meets the surface: the lens depth is a viewing effect only, a
+      // focused caustic thrown far from its bead reads as a glow rather than water
+      Pd = P + t.xy * (h / max(-t.z, 0.12));
+      T = (1.0 - F) * exp(-uDensity * h * uPxMm / max(-t.z, 0.2));
+    }
+  }
+  o = vec4(Pd / uArt * uTarget, T * occ, 1.0);
+}`;
+
+const causticVS = `#version 300 es
+precision highp float;
+precision highp sampler2D;
+uniform sampler2D uCP;
+uniform ivec2 uGrid;
+uniform vec2 uTarget;
+uniform float uOver;
+out float vI;
+vec4 F(ivec2 p) { return texelFetch(uCP, clamp(p, ivec2(0), uGrid - 1), 0); }
+void main() {
+  ivec2 ij = ivec2(gl_VertexID % uGrid.x, gl_VertexID / uGrid.x);
+  vec4 c = F(ij);
+  int xe = min(ij.x + 1, uGrid.x - 1), xw = max(ij.x - 1, 0);
+  int yn = min(ij.y + 1, uGrid.y - 1), ys = max(ij.y - 1, 0);
+  vec2 ju = (F(ivec2(xe, ij.y)).xy - F(ivec2(xw, ij.y)).xy) / float(xe - xw);
+  vec2 jv = (F(ivec2(ij.x, yn)).xy - F(ivec2(ij.x, ys)).xy) / float(yn - ys);
+  float det = abs(ju.x * jv.y - ju.y * jv.x);
+  vec2 cell = uTarget * (1.0 + 2.0 * uOver) / vec2(uGrid - 1);
+  float det0 = cell.x * cell.y;
+  vI = c.z * min(det0 / max(det, 1e-6), 12.0);
+  gl_Position = vec4(c.xy / uTarget * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const causticFS = GLSL_HEADER + `
+in float vI;
+out vec4 o;
+void main() { o = vec4(vec3(vI), 1.0); }`;
+
+const blurFS = GLSL_HEADER + `
+in vec2 vUv;
+uniform sampler2D uSrc;
+uniform vec2 uDir;   // texel step
+out vec4 o;
+void main() {
+  vec4 s = texture(uSrc, vUv) * 0.2270270270;
+  s += texture(uSrc, vUv + uDir * 1.3846153846) * 0.3162162162;
+  s += texture(uSrc, vUv - uDir * 1.3846153846) * 0.3162162162;
+  s += texture(uSrc, vUv + uDir * 3.2307692308) * 0.0702702703;
+  s += texture(uSrc, vUv - uDir * 3.2307692308) * 0.0702702703;
+  o = s;
+}`;
+
+
+// ---------------------------------------------------------------- composite
+const compositeFS = GLSL_HEADER + PI + HASH + `
+in vec2 vUv;
+uniform sampler2D uPrep;    // (height px, print coverage, dry bead coverage, wet)
+uniform vec2 uPrepSize;
+uniform sampler2D uCaustic;
+uniform sampler2D uRes;
+uniform sampler2D uEnv;
+uniform vec2 uArt;
+uniform vec3 uCam;
+uniform vec3 uBg;
+uniform vec3 uL;
+uniform float uShadow, uCaustics, uExposure;
+uniform float uAoLiquid, uCellPx, uGrain2, uWetDarken, uLiqMinMm, uFilmAoPx;
+uniform int uMode;          // 0 liquid (water / ink), 1 mercury
+uniform float uPxMm;        // mm per artboard px
+// surface
+uniform int uSurface;       // 0 plain, 1 paper, 2 skin
+uniform float uSurfScale;   // artboard px per surface unit
+uniform sampler2D uImg;
+uniform int uHasImg;
+uniform vec4 uImgXf;        // image uv = (P / uArt - 0.5) * xy + 0.5 + zw
+uniform float uImgLod;      // explicit mip level: implicit derivatives are undefined in divergent branches
+uniform vec3 uDotCol;
+// liquid
+uniform vec3 uTint;
+uniform float uIor, uDensity, uTintStr, uRough, uLens;
+// mercury
+uniform float uFinish;
+uniform vec3 uMercTint;
+uniform int uFlat;           // flat colour: no relief, shading, shadows or highlights
+uniform vec3 uFlatCol;
+out vec4 o;
+
+vec4 prepAt(vec2 P) { return texture(uPrep, P / uArt); }
+vec3 envLookup(vec3 d, float rough) {
+  vec2 uv = vec2(atan(d.y, d.x) / (2.0 * PI) + 0.5, acos(clamp(d.z, -1.0, 1.0)) / PI);
+  return textureLod(uEnv, uv, clamp(rough, 0.0, 1.0) * 8.0).rgb;
+}
+float aoAt(vec2 uv, float hHere) {
+  float occ = 0.0;
+  for (int l = 0; l <= 3; l++) {
+    vec4 r = textureLod(uRes, uv, float(l));
+    float hb = max(r.r - uFilmAoPx, 0.0) * uAoLiquid;
+    float rad = uCellPx * pow(2.0, float(l)) * 1.3;
+    occ += max(hb - hHere, 0.0) / rad;
+  }
+  return exp(-occ * 0.5);
+}
+
+// ---- the surface the liquid sits on
+vec3 skinAt(vec2 Q, vec3 base) {
+  // broad mottling and blood-flow redness
+  float m1 = fbm(Q * 0.006), m2 = vnoise(Q * 0.035);
+  vec3 c = base * (1.0 + 0.16 * (m1 - 0.5) + 0.06 * (m2 - 0.5));
+  c *= mix(vec3(1.0), vec3(1.05, 0.95, 0.94), smoothstep(0.42, 0.72, fbm(Q * 0.0042 + 5.0)));
+  // pores on a jittered grid
+  float cs = 13.0;
+  vec2 cell = floor(Q / cs);
+  float pore = 0.0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    vec2 id = cell + vec2(i, j);
+    vec2 h = hash22(id);
+    if (hash12(id + 7.7) > 0.72) continue;
+    vec2 cp = (id + 0.15 + 0.7 * h) * cs;
+    float rr = 0.9 + 0.9 * hash12(id + 3.1);
+    pore = max(pore, (1.0 - smoothstep(rr * 0.4, rr * 1.4, length(Q - cp))) * (0.5 + 0.5 * h.x));
+  }
+  // two families of fine creases (the dermal grid)
+  float w1 = fbm(Q * 0.021) * 5.0, w2 = fbm(Q * 0.017 + 3.0) * 5.0;
+  float l1 = abs(sin(dot(Q, vec2(0.53, 0.85)) * 0.16 + w1));
+  float l2 = abs(sin(dot(Q, vec2(-0.83, 0.56)) * 0.13 + w2));
+  float crease = (1.0 - smoothstep(0.0, 0.09, l1)) * 0.6 + (1.0 - smoothstep(0.0, 0.07, l2)) * 0.45;
+  crease *= 0.4 + 0.6 * vnoise(Q * 0.04 + 9.0);
+  c *= 1.0 - 0.28 * pore - 0.09 * crease;
+  // fine vellus speckle
+  c *= 1.0 + 0.035 * (vnoise(Q * 0.9) - 0.5);
+  return c;
+}
+float paperAt(vec2 P) {
+  float n = (vnoise(P * 0.9) - 0.5) * 0.55 + (vnoise(P * 2.3 + 7.1) - 0.5) * 0.3 + (fbm(P * 0.05) - 0.5) * 0.7;
+  return 1.0 + n * 0.09;
+}
+vec3 surfaceAt(vec2 P) {
+  vec3 base = uBg;
+  if (uHasImg == 1) {
+    vec2 iuv = (P / uArt - 0.5) * uImgXf.xy + 0.5 + uImgXf.zw;
+    if (iuv.x >= 0.0 && iuv.y >= 0.0 && iuv.x <= 1.0 && iuv.y <= 1.0) {
+      vec3 s = textureLod(uImg, iuv, uImgLod).rgb;
+      base = pow(s, vec3(2.2));
+    }
+  }
+  vec2 Q = P / uSurfScale;
+  vec3 c = base;
+  // a photo carries its own texture: the procedural skin and paper are for plain colour only
+  if (uHasImg == 0 && uSurface == 2) c = skinAt(Q, base);
+  else if (uHasImg == 0 && uSurface == 1) c = base * paperAt(Q);
+  if (uGrain2 > 0.0) c *= 1.0 + uGrain2 * 0.12 * ((vnoise(P * 0.9) - 0.5) * 0.6 + (fbm(P * 0.05) - 0.5) * 0.7);
+  return c;
+}
+vec3 bgLit(vec2 P) {
+  vec2 uv = clamp(P / uArt, 0.0, 1.0);
+  vec3 caus = texture(uCaustic, uv).rgb;
+  caus = 1.0 + (caus - 1.0) * mix(1.0, uCaustics, step(1.0, caus.r));
+  vec4 pr = texture(uPrep, uv);
+  float ao = aoAt(uv, pr.r * uAoLiquid);
+  vec3 light = uFlat == 1 ? vec3(1.0) : (1.0 - uShadow) * vec3(ao) + uShadow * caus * mix(1.0, ao, 0.35);
+  vec3 s = surfaceAt(P);
+  // printed dots: ink sits on the surface, under any liquid
+  s = mix(s, uDotCol * (1.0 + 0.04 * (vnoise(P * 0.7) - 0.5)), pr.g);
+  // wet trails darken skin and paper
+  float wet = (textureLod(uRes, uv, 1.0).b * 0.6 + textureLod(uRes, uv, 2.0).b * 0.4) * uWetDarken;
+  return s * (1.0 - 0.2 * wet) * light;
+}
+float fresDiel(float c, float n) {
+  c = clamp(c, 0.0, 1.0);
+  float s = 1.0 - c * c;
+  float t2 = 1.0 - s / (n * n);
+  if (t2 <= 0.0) return 1.0;
+  float ct = sqrt(t2);
+  float rs = (c - n * ct) / (c + n * ct);
+  float rp = (n * c - ct) / (n * c + ct);
+  return 0.5 * (rs * rs + rp * rp);
+}
+// grazing rays at a bead's rim see the surface around it; blend continuously so the rim does not flicker
+vec3 reflectedScene(vec2 P, float H, vec3 R, float rough) {
+  float w = smoothstep(0.1, -0.12, R.z);
+  vec3 e = envLookup(normalize(vec3(R.xy, max(R.z, 0.02))), rough);
+  if (w <= 0.0) return e;
+  float t = H / max(-R.z, 0.2);
+  return mix(e, bgLit(P + R.xy * min(t, 60.0)), w);
+}
+float ggx(vec3 N, vec3 V, vec3 L, float a) {
+  vec3 Hh = normalize(V + L);
+  float nh = max(dot(N, Hh), 0.0);
+  float a2 = a * a;
+  float d = nh * nh * (a2 - 1.0) + 1.0;
+  return a2 / (PI * d * d);
+}
+vec3 diffuseIrr(vec3 n) {
+  float c = max(dot(n, uL), 0.0);
+  return vec3((1.0 - uShadow) * (0.6 + 0.4 * abs(n.z)) + uShadow * c / max(uL.z, 0.15));
+}
+vec3 crystalNormal(vec2 P, float amt) {
+  vec2 cs = vec2(22.0);
+  vec2 cell = floor(P / cs);
+  float bd = 1e9; vec2 bid = cell;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    vec2 id = cell + vec2(i, j);
+    vec2 c = (id + hash22(id)) * cs;
+    float d = length(P - c);
+    if (d < bd) { bd = d; bid = id; }
+  }
+  vec2 h = hash22(bid + 5.3) * 2.0 - 1.0;
+  float fine = vnoise(P * 0.9) - 0.5;
+  return vec3(h * 0.22 + fine * 0.08, 0.0) * amt;
+}
+
+void main() {
+  vec2 P = vUv * uArt;
+  vec2 ts = uArt / uPrepSize;
+  vec4 pr = prepAt(P);
+  float H = pr.r;
+  // normals from a 1.5 px stencil: smooth across the steep contact line of a bead
+  vec2 so = ts * 1.5;
+  vec2 grad = vec2(prepAt(P + vec2(so.x, 0.0)).r - prepAt(P - vec2(so.x, 0.0)).r, prepAt(P + vec2(0.0, so.y)).r - prepAt(P - vec2(0.0, so.y)).r) / (2.0 * so);
+  vec3 bg = bgLit(P);
+  vec3 col = bg;
+  float gl = length(grad);
+  float alpha = clamp(H / max(gl * length(ts), 1e-4) + 0.5, 0.0, 1.0) * smoothstep(uLiqMinMm * 0.2, uLiqMinMm * 1.5, H * uPxMm);
+  alpha = max(alpha * step(pr.b, 0.001), pr.b);
+  if (uFlat == 1) {
+    col = mix(bg, uFlatCol, alpha);
+  } else if (alpha > 0.001) {
+    vec3 N = normalize(vec3(-grad, 1.0));
+    vec3 X = vec3(P, H);
+    vec3 V = normalize(uCam - X);
+    vec3 shade;
+    if (uMode == 0) {
+      float n1 = uIor;
+      float cosI = max(dot(N, V), 1e-3);
+      float F = fresDiel(cosI, n1);
+      vec3 R = reflect(-V, N);
+      vec3 refl = reflectedScene(P, H, R, uRough);
+      vec3 Tr = refract(-V, N, 1.0 / n1);
+      // a grazing ray at the rim crosses only a sliver of liquid, not a slab of height H
+      float tz = max(-Tr.z, 0.35);
+      // each bead is a lens: the surface sits uLens px behind it (as if the liquid were on glass in
+      // front of it), so the refracted ray travels on and the image under a bead warps and inverts
+      float gap = uLens * smoothstep(0.3, 3.0, H);
+      vec2 exitP = P + Tr.xy * (H / tz + gap / max(-Tr.z, 0.2));
+      vec3 below = bgLit(exitP);
+      if (uRough > 0.05) {
+        vec2 j1 = vec2(3.0, 1.3) * uRough * 6.0, j2 = vec2(-1.2, 3.1) * uRough * 6.0;
+        below = mix(below, (bgLit(exitP + j1) + bgLit(exitP + j2) + bgLit(exitP - j1)) / 3.0, 0.6);
+      }
+      // beer-lambert: clear liquids tint gently with depth, dense ones (ink) scatter their own colour
+      float mm = H / max(-Tr.z, 0.6) * uPxMm;
+      float T = exp(-uDensity * mm);
+      vec3 absorb = pow(max(uTint, vec3(0.02)), vec3(mm * uTintStr));
+      vec3 scatter = uTint * diffuseIrr(N);
+      vec3 through = below * absorb * T + scatter * (1.0 - T);
+      shade = F * refl + (1.0 - F) * through;
+      // a sharp sun glint on top of the environment reflection
+      shade += F * ggx(N, V, uL, max(uRough, 0.015)) * envLookup(uL, 0.0) * 0.004;
+    } else {
+      vec3 Nm = normalize(N + crystalNormal(P, uFinish));
+      float rough = 0.01 + 0.4 * uFinish;
+      float cosI = max(dot(Nm, V), 1e-3);
+      vec3 F0 = uMercTint * 0.78;
+      vec3 F = F0 + (1.0 - F0) * pow(1.0 - cosI, 5.0);
+      vec3 R = reflect(-V, Nm);
+      shade = F * reflectedScene(P, H, R, rough);
+      shade += F * ggx(Nm, V, uL, max(rough, 0.02)) * envLookup(uL, 0.0) * 0.01;
+    }
+    col = mix(bg, shade, alpha);
+  }
+  o = vec4(col * uExposure, 1.0);
+}`;
+
+const brightFS = GLSL_HEADER + `
+in vec2 vUv;
+uniform sampler2D uSrc;
+uniform float uThreshold;
+out vec4 o;
+void main() {
+  vec3 c = texture(uSrc, vUv).rgb;
+  float l = max(max(c.r, c.g), c.b);
+  o = vec4(c * max(l - uThreshold, 0.0) / max(l, 1e-4), 1.0);
+}`;
+
+const downFS = GLSL_HEADER + `
+in vec2 vUv;
+uniform sampler2D uSrc;
+uniform vec2 uTexel;
+out vec4 o;
+void main() {
+  vec4 s = texture(uSrc, vUv + uTexel * vec2(-1.0, -1.0)) + texture(uSrc, vUv + uTexel * vec2(1.0, -1.0))
+         + texture(uSrc, vUv + uTexel * vec2(-1.0, 1.0)) + texture(uSrc, vUv + uTexel * vec2(1.0, 1.0));
+  o = s * 0.25;
+}`;
+
+const streakFS = GLSL_HEADER + `
+in vec2 vUv;
+uniform sampler2D uSrc;
+uniform vec2 uDir;
+uniform float uAtt;
+out vec4 o;
+void main() {
+  vec4 s = vec4(0.0);
+  float w = 1.0, tw = 0.0;
+  for (int i = 0; i < 4; i++) {
+    s += texture(uSrc, vUv + uDir * float(i)) * w;
+    s += i > 0 ? texture(uSrc, vUv - uDir * float(i)) * w : vec4(0.0);
+    tw += i > 0 ? 2.0 * w : w;
+    w *= uAtt;
+  }
+  o = s / tw * 1.6;
+}`;
+
+const finalFS = GLSL_HEADER + HASH + `
+in vec2 vUv;
+uniform sampler2D uHdr;
+uniform sampler2D uBloom;
+uniform sampler2D uStreakA;
+uniform sampler2D uStreakB;
+uniform float uBloomAmt, uGlints, uGrain, uTime;
+uniform int uHasBloom;
+out vec4 o;
+uniform float uKnee;   // roll-off starts above the background so its colour stays exact
+vec3 softClip(vec3 x) {
+  float a = uKnee;
+  if (a >= 0.999) return min(x, vec3(1.0));
+  vec3 over = max(x - a, 0.0);
+  return min(x, vec3(a)) + (1.0 - a) * (1.0 - exp(-over / (1.0 - a)));
+}
+vec3 toSrgb(vec3 c) {
+  c = clamp(c, 0.0, 1.0);
+  return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
+}
+void main() {
+  vec3 c = texture(uHdr, vUv).rgb;
+  if (uHasBloom == 1) {
+    c += texture(uBloom, vUv).rgb * uBloomAmt;
+    c += (texture(uStreakA, vUv).rgb + texture(uStreakB, vUv).rgb) * uGlints;
+  }
+  c = softClip(c);
+  vec3 s = toSrgb(c);
+  float n = hash12(gl_FragCoord.xy + fract(uTime * 7.13) * 431.0) - 0.5;
+  s += n * (uGrain * 0.06 + 1.0 / 255.0);
+  o = vec4(s, 1.0);
+}`;
+
+// ---- js/font.js
+// interdot: every weight is a union of circles on one shared grid. centres (font units, thin weight) per glyph;
+// a heavier weight grows each dot from the same lower-left corner, so its centre shifts by (r - base)
+const FONT = {"upm":1000,"asc":800,"desc":-205,"cap":738,"xh":543,"base":31,"radii":{"thin":31,"light":48,"regular":60.5,"bold":72.5},"glyphs":{"0":[684,[168,708,264,708,360,708,457,708,71,611,554,611,71,514,554,514,71,417,554,417,71,321,554,321,71,224,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"1":[419,[168,709,265,709,72,611,265,611,265,513,265,417,265,320,265,224,265,128,265,32]],"2":[637,[260,709,357,709,167,708,454,611,71,610,71,514,456,514,454,417,359,321,263,224,166,128,71,31,168,31,263,31,358,31,454,31]],"3":[684,[168,707,264,707,360,707,457,707,554,612,71,610,554,515,264,418,360,418,457,418,264,321,360,321,457,321,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"4":[682,[359,705,456,705,264,610,456,610,264,513,456,513,167,417,456,417,167,321,456,321,71,224,456,224,456,129,71,128,167,128,263,128,360,128,552,128,456,32]],"5":[587,[72,705,168,705,264,705,360,705,457,705,72,609,72,513,72,417,168,417,264,417,360,417,457,319,457,224,71,128,457,128,168,32,264,32,360,32]],"6":[682,[167,705,263,705,361,705,455,705,71,610,552,610,71,514,71,417,167,417,263,417,361,417,455,417,71,321,552,321,71,224,552,224,71,128,552,128,167,32,263,32,361,32,455,32]],"7":[681,[71,705,168,705,264,705,360,705,455,705,551,705,551,609,455,513,455,417,360,320,360,224,263,128,263,32]],"8":[681,[167,706,262,706,360,706,456,706,71,609,551,609,71,512,551,512,167,416,263,416,360,416,456,416,167,320,263,320,360,320,456,320,71,225,551,225,71,128,551,128,167,32,262,32,360,32,456,32]],"9":[683,[168,705,264,705,360,705,456,705,72,608,553,608,71,512,553,512,71,416,553,416,168,321,264,321,360,321,456,321,553,320,553,223,72,128,553,128,168,32,264,32,360,32,456,32]],"A":[800,[379,704,283,609,379,609,476,609,283,512,475,512,186,417,572,417,186,320,572,320,186,224,283,224,379,224,475,224,571,224,668,129,91,128,667,33,91,32]],"B":[684,[457,693,71,692,168,692,264,692,361,692,554,596,71,595,554,500,71,498,71,403,457,403,168,402,264,402,361,402,457,306,71,305,71,210,554,209,71,113,554,113,71,16,168,16,264,16,361,16,457,16]],"C":[781,[265,706,361,706,458,706,168,610,554,610,71,513,651,513,71,417,71,320,71,224,650,224,168,127,554,127,265,31,361,31,458,31]],"D":[748,[71,705,180,705,289,705,399,705,71,608,509,608,71,512,617,512,71,417,618,417,71,321,617,321,71,224,618,224,71,128,509,128,72,31,180,31,289,31,399,31]],"E":[586,[71,706,167,706,263,706,360,706,456,706,71,611,71,514,71,417,167,417,263,417,360,417,456,417,71,321,71,224,71,129,71,31,167,31,263,31,360,31,456,31]],"F":[591,[168,706,266,706,364,706,461,706,71,705,71,614,71,518,71,422,168,422,266,422,364,422,461,422,71,324,71,226,71,127,71,31]],"G":[800,[269,707,365,707,461,707,173,610,559,610,655,514,76,513,76,418,76,322,462,321,559,321,655,321,77,225,655,225,173,128,559,128,269,31,365,31,461,31]],"H":[781,[71,707,651,707,71,611,651,611,71,514,651,514,71,418,168,418,264,418,360,418,458,418,554,418,651,418,71,322,651,322,71,225,651,225,71,129,651,129,71,31,651,31]],"I":[241,[91,704,91,608,91,512,91,416,91,320,91,224,91,127,91,31]],"J":[530,[400,705,400,609,400,514,400,416,400,320,400,225,16,128,400,128,114,31,209,31,305,31]],"K":[684,[71,707,553,707,71,610,457,610,71,514,360,514,71,419,167,419,264,419,71,320,168,320,264,320,71,224,361,224,71,128,457,128,71,31,554,31]],"L":[594,[71,718,71,620,71,523,71,425,71,326,71,229,71,131,71,31,169,31,268,31,365,31,464,31]],"M":[966,[71,705,166,705,648,705,744,703,71,610,166,610,648,610,744,608,71,513,264,513,549,513,744,511,71,417,264,417,549,417,744,415,71,321,264,321,549,321,744,319,71,225,359,225,469,225,744,223,71,127,359,127,469,127,744,125,744,36,71,31,359,31,469,31]],"N":[780,[71,707,650,707,71,610,650,610,71,514,168,514,650,514,71,418,264,418,650,418,71,321,360,321,650,321,71,225,457,225,650,225,71,129,554,129,650,129,71,31,650,31]],"O":[747,[180,705,289,705,399,705,508,705,71,609,617,609,71,513,617,513,71,417,617,417,71,321,617,321,71,225,617,225,71,128,617,128,180,31,289,31,399,31,508,31]],"P":[638,[71,705,167,705,264,705,359,705,456,705,71,609,553,609,71,514,553,514,71,417,553,417,71,321,167,321,264,321,360,321,457,321,71,225,71,129,71,31]],"Q":[874,[263,704,360,704,456,704,551,704,167,608,648,608,71,512,744,512,71,415,744,415,71,320,744,320,71,223,456,223,744,223,167,128,551,128,648,128,263,31,360,31,456,31,647,31,744,-65]],"R":[693,[71,707,169,707,268,707,365,707,464,707,71,610,563,610,71,514,563,514,71,418,563,418,71,320,169,320,268,320,365,320,464,320,71,225,365,225,71,129,464,129,71,29,563,29]],"S":[684,[168,707,264,707,360,707,457,707,71,611,553,611,71,514,168,417,264,417,360,321,457,321,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"T":[781,[71,707,168,707,265,707,362,707,458,707,554,707,651,707,362,610,362,513,362,418,362,322,362,224,362,129,362,31]],"U":[778,[71,705,648,705,71,609,648,609,71,514,648,514,71,416,648,416,71,321,648,321,71,224,648,224,551,129,167,128,262,33,359,33,456,33]],"V":[778,[71,705,648,705,71,609,648,609,167,513,552,513,167,417,552,417,167,320,552,320,263,224,456,224,263,128,456,128,360,32]],"W":[1173,[71,708,557,708,1043,708,71,613,557,613,1043,613,71,516,557,516,1043,516,168,420,460,420,654,420,947,420,168,322,460,322,654,322,947,322,168,226,460,226,654,226,947,226,265,129,363,129,751,129,849,129,265,31,363,31,751,31,849,31]],"X":[639,[71,705,509,705,71,608,509,608,180,513,399,513,289,418,289,320,180,225,399,225,71,129,509,129,71,31,509,31]],"Y":[777,[71,705,648,705,71,609,648,609,167,512,552,512,167,416,552,416,264,320,456,320,360,224,360,129,360,32]],"Z":[682,[71,705,168,705,263,705,360,705,456,705,552,705,552,609,456,513,359,417,263,320,167,224,71,128,71,32,168,32,263,32,360,32,456,32,552,32]],"a":[588,[168,513,265,513,361,513,71,417,458,417,168,321,265,321,361,321,458,321,71,225,458,225,71,128,458,128,168,31,265,31,361,31,458,31]],"b":[684,[71,708,71,610,71,515,264,515,361,515,71,418,168,418,457,418,71,322,554,322,71,226,554,226,71,127,167,127,457,127,71,31,264,31,360,31]],"c":[588,[167,515,264,515,360,515,71,418,457,418,71,321,71,225,71,128,458,128,167,32,264,32,360,32]],"d":[684,[554,705,554,609,264,513,361,512,554,512,168,417,458,417,554,416,71,320,554,320,71,224,554,224,168,128,458,127,554,127,264,31,361,31,554,31]],"e":[587,[168,514,264,514,361,514,71,418,457,418,71,321,168,321,264,321,361,321,457,321,71,224,71,128,457,128,167,31,264,31,361,31]],"f":[488,[268,800,361,800,169,705,169,609,71,513,169,513,268,513,169,417,169,321,169,225,169,129,169,31]],"g":[696,[566,528,171,526,270,526,369,526,71,427,467,427,566,427,566,329,71,327,71,230,566,229,71,130,468,130,566,130,566,32,171,31,270,31,369,31,566,-67,71,-166,566,-166,171,-264,270,-264,369,-264,467,-264]],"h":[586,[71,707,71,611,71,514,263,514,359,514,71,419,168,419,456,419,71,320,456,320,71,225,456,225,71,129,456,129,71,31,456,31]],"i":[201,[71,707,71,514,71,418,71,321,71,225,71,129,71,31]],"j":[311,[181,706,181,514,181,417,181,322,181,225,181,130,181,31,181,-63,71,-159]],"k":[588,[71,707,71,611,71,515,362,515,71,418,265,418,71,321,168,321,71,225,265,225,71,128,361,128,71,31,458,31]],"l":[201,[71,707,71,611,71,515,71,418,71,321,71,224,71,128,71,31]],"m":[876,[71,515,264,515,361,515,553,515,650,515,71,418,168,418,457,418,746,418,71,321,457,321,746,321,71,224,457,224,746,224,71,128,457,128,746,128,71,31,457,31,746,31]],"n":[587,[71,513,264,513,361,513,71,418,168,418,457,418,71,321,457,321,71,224,457,224,71,127,457,127,71,32,457,32]],"o":[586,[166,514,263,514,360,514,71,418,456,418,71,321,456,321,71,224,456,224,71,129,456,129,166,32,263,32,360,32]],"p":[686,[71,514,265,514,361,514,71,417,167,417,459,417,71,320,556,319,71,222,556,222,71,125,167,125,459,125,71,29,265,29,360,29,71,-70,71,-167]],"q":[688,[265,514,363,514,558,513,168,417,460,417,558,417,71,320,557,320,71,223,557,223,168,125,460,125,557,125,557,29,265,28,363,28,557,-68,557,-166]],"r":[490,[71,514,264,514,360,514,71,418,168,418,71,321,71,225,71,128,71,31]],"s":[588,[169,515,265,515,362,515,72,418,168,418,457,418,168,321,264,321,264,225,362,225,71,128,362,128,458,128,169,31,265,31,362,31]],"t":[489,[167,708,167,610,71,514,167,514,263,514,167,417,167,321,167,225,167,129,359,129,167,31,263,31]],"u":[587,[71,515,457,515,71,418,457,418,71,321,457,321,71,224,457,224,71,128,360,128,457,128,168,31,264,31,457,31]],"v":[587,[71,514,457,514,71,417,457,417,167,321,360,321,167,225,360,225,167,128,360,128,264,32]],"w":[973,[71,514,457,514,843,514,361,418,457,418,553,418,71,417,843,417,168,321,361,321,553,321,746,321,361,225,553,225,746,225,168,224,264,128,361,128,553,128,650,128,264,31,650,31]],"x":[637,[71,512,180,512,398,512,507,512,180,416,398,416,289,319,289,223,180,127,398,127,71,31,180,31,398,31,507,31]],"y":[587,[71,515,457,515,71,418,457,418,168,321,360,321,168,225,360,225,168,128,360,128,264,31,264,-65,71,-161,168,-161]],"z":[637,[71,511,181,511,290,511,399,511,507,511,507,415,290,319,398,319,181,222,290,222,71,126,71,31,181,31,290,31,399,31,507,31]],".":[201,[71,31]],",":[147,[31,31,31,-63]],"-":[600,[]]," ":[400,[]]}};
+
+
+// ---- js/params.js
+// settings model: defaults, artboard presets, control definitions
+
+const ARTBOARDS = {
+  '16:9': [1920, 1080],
+  '3:2': [1800, 1200],
+  '4:3': [1600, 1200],
+  '1:1': [1440, 1440],
+  '4:5': [1280, 1600],
+  '2:3': [1200, 1800],
+  '9:16': [1080, 1920],
+  '21:9': [2520, 1080],
+  'A4 portrait': [1414, 2000],
+  'A4 landscape': [2000, 1414],
+};
+
+const WEIGHTS = [['thin', 'Thin'], ['light', 'Light'], ['regular', 'Regular'], ['bold', 'Bold']];
+
+// densities for the hydrostatic terms
+const MATERIALS = {
+  sweat: { name: 'Sweat', rhoL: 997 },
+  ink: { name: 'Ink', rhoL: 1050 },
+  mercury: { name: 'Mercury', rhoL: 13595 },
+};
+
+// everything that defines a material's look and feel; kept separately per material
+const PER_MATERIAL = {
+  sweat: {
+    background: '#c48c6c', surface: 'skin', dots: '#3b2418', dotStyle: 'bead',
+    surfaceTension: 70, viscosity: 1.1, contactAngle: 78, pinning: 0.45,
+    tint: '#f4eee6', clarity: 0.97, ior: 1.333, gloss: 0.97,
+  },
+  ink: {
+    background: '#ff2a98', surface: 'plain', dots: '#16161b', dotStyle: 'print',
+    surfaceTension: 12.1, viscosity: 200, contactAngle: 62, pinning: 0,
+    tint: '#000000', clarity: 0, ior: 1.45, gloss: 0.92,
+  },
+  mercury: {
+    background: '#e9eaeb', surface: 'plain', dots: '#2b2d31', dotStyle: 'bead',
+    surfaceTension: 485, viscosity: 1.55, contactAngle: 140, pinning: 0.02,
+    tint: '#dfe3e8', finish: 0.08, glints: 0.22,
+  },
+};
+
+const OSC_LIGHT = ['azimuth', 'elevation', 'exposure', 'shadow', 'softness', 'caustics', 'bloom', 'grain'];
+const OSC_PATHS = OSC_LIGHT.map(k => 'light.' + k);
+const OSC_PERIOD = 10;
+
+function defaultSettings() {
+  return {
+    material: 'ink',
+    weight: 'light',
+    fontSize: 320,
+    leading: 1.05,
+    tracking: 0,
+    align: 'center',
+    valign: 'middle',
+    marginTop: 96, marginRight: 96, marginBottom: 96, marginLeft: 96,
+    aspect: '16:9', customW: 1920, customH: 1080,
+    scale: 30,
+    // congeal
+    amount: 0,
+    beadSize: 1,
+    variation: 0.6,
+    seed: 7,
+    flat: false,
+    // cursor
+    tool: 'congeal',
+    liquefy: 'hover',
+    cursorRadius: 60,
+    pull: 0.17,
+    carry: 0.09,
+    // liquid
+    gravity: 0,
+    gravityAngle: 0,
+    coalesce: 1.0,
+    timeScale: 1.0,
+    // surface
+    surfScale: 1.0,
+    grain: 0.15,
+    wetTrails: 0.35,
+    lens: 80,
+    image: { fit: 'cover', zoom: 1, x: 0, y: 0 },
+    placed: [],
+    mat: JSON.parse(JSON.stringify(PER_MATERIAL)),
+    light: {
+      env: 'studio', azimuth: 135, elevation: 52, exposure: 1.0,
+      shadow: 0.7, softness: 0.4, caustics: 1.0, bloom: 0.08, grain: 0.08,
+    },
+    osc: { light: Object.fromEntries(OSC_LIGHT.map(k => [k, { on: false, speed: 1 }])) },
+    perf: { simRes: 512, renderScale: 1.0, maxSubsteps: 128 },
+  };
+}
+
+function artboardSize(s) {
+  if (s.aspect === 'custom') return [Math.max(200, s.customW | 0), Math.max(200, s.customH | 0)];
+  return ARTBOARDS[s.aspect] || ARTBOARDS['16:9'];
+}
+
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+// get/set by dotted path, with "mat." resolving to the current material block
+function getPath(s, path) {
+  const parts = resolvePath(s, path);
+  let o = s;
+  for (const p of parts) o = o?.[p];
+  return o;
+}
+function setPath(s, path, v) {
+  const parts = resolvePath(s, path);
+  let o = s;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = v;
+}
+function resolvePath(s, path) {
+  const parts = path.split('.');
+  if (parts[0] === 'mat') return ['mat', s.material, ...parts.slice(1)];
+  return parts;
+}
+
+// one-click physics setups; d = the current material's defaults
+const physicsBase = (d) => ({
+  gravity: 0.35, gravityAngle: 0, coalesce: 1.0, timeScale: 1.0, pull: 0.5, carry: 0.6,
+  'mat.surfaceTension': d.surfaceTension, 'mat.viscosity': d.viscosity,
+  'mat.contactAngle': d.contactAngle, 'mat.pinning': d.pinning,
+});
+const PRESETS = [
+  { id: 'beads', name: 'Sweat beads', hint: 'Default physics: small beads cling, merged ones get heavy and run', patch: (d) => physicsBase(d) },
+  { id: 'run', name: 'Running sweat', hint: 'Steep and slippery: beads run and collect the dots below them', patch: (d) => ({ ...physicsBase(d), gravity: 0.8, 'mat.pinning': d.pinning * 0.55 }) },
+  { id: 'cond', name: 'Condensation', hint: 'A cold pane lying almost flat: beads hold their place and only merge when pushed', patch: (d) => ({ ...physicsBase(d), gravity: 0.2, 'mat.pinning': Math.min(1, d.pinning + 0.3), 'mat.contactAngle': Math.min(110, d.contactAngle + 10) }) },
+  { id: 'ooze', name: 'Slow ooze', hint: 'Thick, syrupy liquid that creeps together', patch: (d) => ({ ...physicsBase(d), gravity: 0.55, timeScale: 0.7, 'mat.viscosity': d.viscosity * 12 }) },
+  { id: 'zerog', name: 'Zero-g', hint: 'No gravity: beads only gather where they are pulled', patch: (d) => ({ ...physicsBase(d), gravity: 0, pull: 0.8 }) },
+  { id: 'apart', name: 'Keep apart', hint: 'Beads from different dots repel instead of merging', patch: (d) => ({ ...physicsBase(d), coalesce: -1, gravity: 0.3 }) },
+  { id: 'sideways', name: 'Sideways drift', hint: 'Gravity pulls to the right', patch: (d) => ({ ...physicsBase(d), gravity: 0.6, gravityAngle: 90 }) },
+  { id: 'finger', name: 'Finger drag', hint: 'A strong, wide pull: press and drag to sweep dots into one big bead', patch: (d) => ({ ...physicsBase(d), pull: 1, carry: 1, gravity: 0.2 }) },
+];
+
+// what a setting change requires downstream
+const EFFECTS = {
+  layout: new Set(['weight', 'fontSize', 'leading', 'tracking', 'align', 'valign', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft']),
+  reset: new Set(['aspect', 'customW', 'customH', 'scale', 'perf.simRes']),
+  env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
+  congeal: new Set(['amount', 'beadSize', 'variation', 'seed']),
+  dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
+};
+
+// ---- js/history.js
+// undo/redo of settings + text snapshots, with merge windows for typing bursts and slider drags
+
+class History {
+  constructor(limit = 200) {
+    this.undoStack = [];
+    this.redoStack = [];
+    this.limit = limit;
+    this.lastKey = null;
+    this.lastTime = 0;
+    this.onChange = null;
+  }
+
+  // push the state as it was *before* a change. mergeKey groups rapid edits (e.g. a typing burst)
+  push(state, mergeKey = null, mergeMs = 900) {
+    const now = performance.now();
+    if (mergeKey && mergeKey === this.lastKey && now - this.lastTime < mergeMs) {
+      this.lastTime = now;
+      return;
+    }
+    this.undoStack.push(state);
+    if (this.undoStack.length > this.limit) this.undoStack.shift();
+    this.redoStack.length = 0;
+    this.lastKey = mergeKey;
+    this.lastTime = now;
+    this.onChange?.();
+  }
+
+  breakMerge() { this.lastKey = null; }
+
+  undo(current) {
+    if (!this.undoStack.length) return null;
+    this.redoStack.push(current);
+    this.lastKey = null;
+    const s = this.undoStack.pop();
+    this.onChange?.();
+    return s;
+  }
+
+  redo(current) {
+    if (!this.redoStack.length) return null;
+    this.undoStack.push(current);
+    this.lastKey = null;
+    const s = this.redoStack.pop();
+    this.onChange?.();
+    return s;
+  }
+
+  get canUndo() { return this.undoStack.length > 0; }
+  get canRedo() { return this.redoStack.length > 0; }
+}
+
+// ---- js/textmodel.js
+// text with a stable id per character so glyphs keep their melt state across edits
+
+class TextModel {
+  constructor(text = '') {
+    this.nextId = 1;
+    this.text = '';
+    this.ids = [];
+    this.replaceAll(text);
+  }
+
+  replaceAll(text) {
+    this.text = text;
+    this.ids = Array.from({ length: text.length }, () => this.nextId++);
+  }
+
+  // diff by common prefix/suffix; unchanged characters keep their ids
+  update(next) {
+    const a = this.text, b = next;
+    if (a === b) return false;
+    let p = 0;
+    const max = Math.min(a.length, b.length);
+    while (p < max && a[p] === b[p]) p++;
+    let s = 0;
+    while (s < max - p && a[a.length - 1 - s] === b[b.length - 1 - s]) s++;
+    const mid = b.length - p - s;
+    const ids = this.ids.slice(0, p);
+    for (let i = 0; i < mid; i++) ids.push(this.nextId++);
+    ids.push(...this.ids.slice(a.length - s));
+    this.text = b;
+    this.ids = ids;
+    return true;
+  }
+
+  snapshot() { return { text: this.text, ids: this.ids.slice() }; }
+
+  restore(snap) {
+    this.text = snap.text;
+    this.ids = snap.ids.slice();
+    const m = this.ids.reduce((x, y) => Math.max(x, y), 0);
+    this.nextId = Math.max(this.nextId, m + 1);
+  }
+}
+
+
+// ---- js/dotsetter.js
+// typesetting straight from the dot data: word wrap, tracking, alignment, caret map, and dot positions
+class DotSetter {
+  glyph(ch) {
+    const G = FONT.glyphs;
+    return G[ch] || G[ch.toLowerCase()] || G[ch.toUpperCase()] || null;
+  }
+
+  advance(ch) {
+    const g = this.glyph(ch);
+    return g ? g[0] : FONT.glyphs[' '][0];
+  }
+
+  radius(weight) { return FONT.radii[weight] ?? FONT.radii.light; }
+
+  // text: string; ids: stable per-character ids; s: typography settings; art: {w, h}
+  layout(text, ids, s, art) {
+    const size = s.fontSize;
+    const k = size / FONT.upm;
+    const R = this.radius(s.weight);
+    const off = R - FONT.base;
+    const track = (s.tracking / 1000) * size;
+    const capHeight = (FONT.cap - FONT.base + off + R) * k;
+    const descent = -FONT.desc * k;
+    const lineH = s.leading * size;
+    const maxW = Math.max(10, art.w - s.marginLeft - s.marginRight);
+    const measure = (str) => {
+      let w = 0;
+      for (const ch of str) w += this.advance(ch) * k + track;
+      return str.length ? w : 0;
+    };
+
+    // split into paragraphs, then greedy word wrap
+    const lines = [];
+    let pStart = 0;
+    const paras = text.split('\n');
+    for (let pi = 0; pi < paras.length; pi++) {
+      const para = paras[pi];
+      const base = pStart;
+      if (para.length === 0) {
+        lines.push({ start: base, end: base });
+      } else {
+        const tokens = para.match(/\S+\s*|\s+/g) || [];
+        let lineStart = base, lineText = '', cursor = base;
+        for (const tok of tokens) {
+          const trial = lineText + tok;
+          if (lineText.length && measure(trial.trimEnd()) > maxW) {
+            lines.push({ start: lineStart, end: cursor });
+            lineStart = cursor; lineText = '';
+          }
+          if (!lineText.length && measure(tok.trimEnd()) > maxW) {
+            let chunk = '';
+            for (let ci = 0; ci < tok.length; ci++) {
+              const ch = tok[ci];
+              if (chunk.length && measure((chunk + ch).trimEnd()) > maxW) {
+                lines.push({ start: lineStart, end: cursor + ci });
+                lineStart = cursor + ci; chunk = '';
+              }
+              chunk += ch;
+            }
+            lineText = chunk;
+          } else {
+            lineText += tok;
+          }
+          cursor += tok.length;
+        }
+        lines.push({ start: lineStart, end: cursor });
+      }
+      pStart += para.length + 1;
+    }
+
+    const n = lines.length;
+    const blockH = capHeight + (n - 1) * lineH + descent * 0.35;
+    const availH = art.h - s.marginTop - s.marginBottom;
+    let top;
+    if (s.valign === 'top') top = s.marginTop;
+    else if (s.valign === 'bottom') top = s.marginTop + availH - blockH;
+    else top = s.marginTop + (availH - blockH) / 2;
+    const firstBaseline = top + capHeight;
+
+    const glyphs = [];
+    const carets = new Array(text.length + 1);
+    const lineInfo = [];
+    for (let li = 0; li < n; li++) {
+      const L = lines[li];
+      const str = text.slice(L.start, L.end);
+      const vis = str.replace(/\s+$/, '');
+      const width = vis.length ? measure(vis) - track : 0;
+      let x0;
+      if (s.align === 'left') x0 = s.marginLeft;
+      else if (s.align === 'right') x0 = s.marginLeft + maxW - width;
+      else x0 = s.marginLeft + (maxW - width) / 2;
+      const y = firstBaseline + li * lineH;
+      const xs = [x0];
+      for (let i = 0; i < str.length; i++) xs.push(xs[i] + this.advance(str[i]) * k + track);
+      for (let i = 0; i < str.length; i++) {
+        const gi = L.start + i;
+        carets[gi] = { x: xs[i], y, line: li };
+        const ch = str[i];
+        const gd = this.glyph(ch);
+        if (!/\s/.test(ch) && gd && gd[1].length) {
+          const c = gd[1];
+          const dots = [];
+          for (let j = 0; j < c.length; j += 2) dots.push([xs[i] + (c[j] + off) * k, y - (c[j + 1] + off) * k]);
+          glyphs.push({ ch, id: ids[gi], charIndex: gi, x: xs[i], y, line: li, adv: xs[i + 1] - xs[i], dots });
+        }
+      }
+      const endIdx = L.end;
+      if (carets[endIdx] === undefined || li === n - 1 || text[endIdx] === '\n') {
+        carets[endIdx] = { x: xs[str.length], y, line: li };
+      }
+      lineInfo.push({ start: L.start, end: L.end, y, x0, width });
+    }
+    for (let i = 0; i <= text.length; i++) {
+      if (!carets[i]) carets[i] = { x: s.marginLeft, y: firstBaseline, line: 0 };
+    }
+    glyphs.forEach((g, i) => { g.index = i; });
+    return { glyphs, carets, lines: lineInfo, descent, capHeight, lineH, size, track, r: R * k, pitch: 96 * k };
+  }
+
+  hitTest(lay, x, y) {
+    if (!lay) return 0;
+    let bestLine = 0, bd = Infinity;
+    lay.lines.forEach((L, i) => {
+      const d = Math.abs(y - (L.y - lay.capHeight * 0.5));
+      if (d < bd) { bd = d; bestLine = i; }
+    });
+    const L = lay.lines[bestLine];
+    let best = L.start, bx = Infinity;
+    for (let i = L.start; i <= L.end; i++) {
+      const c = lay.carets[i];
+      if (!c || c.line !== bestLine) continue;
+      const d = Math.abs(c.x - x);
+      if (d < bx) { bx = d; best = i; }
+    }
+    return best;
+  }
+}
+
+// small deterministic prng so a seed always congeals the same dots
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hash2(a, b) { return (Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b + 0x632be5ab, 0xc2b2ae35)) >>> 0; }
+
+// ---- js/sim.js
+// gpu simulation driver: textures, parameters, adaptive substepping, gather wells, injection, probing, stats
+function smooth01(x) { x = Math.min(Math.max(x, 0), 1); return x * x * (3 - 2 * x); }
+
+class Simulation {
+  constructor(kit) {
+    this.kit = kit;
+    this.p = {
+      pressure: kit.program(pressureFS, undefined, 'pressure'),
+      velocity: kit.program(velocityFS, undefined, 'velocity'),
+      update: kit.program(updateFS, undefined, 'update'),
+      collect: kit.program(collectFS, undefined, 'collect'),
+      inject: kit.program(injectFS, undefined, 'inject'),
+      wipe: kit.program(wipeFS, undefined, 'wipe'),
+      probe: kit.program(probeFS, undefined, 'probe'),
+      resolve: kit.program(resolveFS, undefined, 'resolve'),
+      stats: kit.program(statsFS, undefined, 'stats'),
+    };
+    this.nx = 0; this.ny = 0;
+    this.t = null;
+    this.stats = { volume: 0, maxDepth: 0, wetCells: 0 };
+    this.hmaxEst = 0.003;
+    this.simTime = 0;
+    this.lastSubsteps = 0;
+    this.slowdown = 1;
+    this.statsPending = false;
+    this.probePending = false;
+  }
+
+  allocate(nx, ny) {
+    const k = this.kit;
+    if (this.t) for (const key in this.t) { const v = this.t[key]; (Array.isArray(v) ? v : [v]).forEach(x => k.deleteTexture(x)); }
+    this.nx = nx; this.ny = ny;
+    const f = () => k.texture(nx, ny, 'rgba32f');
+    this.t = {
+      L: [f(), f()], U: [f(), f()], V: [f(), f()], W: [f(), f()],
+      P: f(),
+      G: f(),
+      res: k.texture(nx, ny, 'rgba16f', { filter: 'linear', mipmap: true }),
+    };
+    this.gData = new Float32Array(nx * ny * 4);
+    this.cur = { L: 0, U: 0, V: 0, W: 0 };
+    this.clear();
+  }
+
+  get L() { return this.t.L[this.cur.L]; }
+  get U() { return this.t.U[this.cur.U]; }
+  get V() { return this.t.V[this.cur.V]; }
+  get W() { return this.t.W[this.cur.W]; }
+  next(n) { return this.t[n][1 - this.cur[n]]; }
+  flip(n) { this.cur[n] = 1 - this.cur[n]; }
+
+  clear() {
+    const k = this.kit;
+    ['L', 'U', 'V', 'W'].forEach(n => this.t[n].forEach(x => k.clear(x)));
+    k.clear(this.t.res);
+    k.genMips(this.t.res);
+    this.gData.fill(0);
+    this.uploadGather();
+    this.hmaxEst = 0.003;
+  }
+
+  uploadGather() {
+    const gl = this.kit.gl;
+    gl.bindTexture(gl.TEXTURE_2D, this.t.G.tex);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.nx, this.ny, gl.RGBA, gl.FLOAT, this.gData);
+  }
+
+  // paint a gather well: liquid inside the capsule a -> b (cells) is pulled toward b
+  paintGather(ax, ay, bx, by, rad, strength, start) {
+    const { nx, ny, gData: g } = this;
+    const x0 = Math.max(0, Math.floor(Math.min(ax, bx) - rad)), x1 = Math.min(nx - 1, Math.ceil(Math.max(ax, bx) + rad));
+    const y0 = Math.max(0, Math.floor(Math.min(ay, by) - rad)), y1 = Math.min(ny - 1, Math.ceil(Math.max(ay, by) + rad));
+    const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        const px = x + 0.5, py = y + 0.5;
+        const t = l2 > 0 ? Math.min(Math.max(((px - ax) * dx + (py - ay) * dy) / l2, 0), 1) : 0;
+        const ex = px - (ax + dx * t), ey = py - (ay + dy * t);
+        if (ex * ex + ey * ey > rad * rad) continue;
+        const i = (y * nx + x) * 4;
+        g[i] = bx; g[i + 1] = by; g[i + 2] = strength; g[i + 3] = start;
+      }
+    }
+  }
+
+  physics(ph) {
+    const dx = ph.dx;
+    const sigma = ph.sigma;
+    const hc = 1.1 * dx;
+    const wetAt = (deg) => {
+      const afac = 1 + 0.7 * Math.min(Math.max((100 - deg) / 50, 0), 1.4);
+      return sigma * (1 - Math.cos(deg * Math.PI / 180)) / hc * afac;
+    };
+    const wetPage = wetAt(ph.theta);
+    // pinning sets the hysteresis window between advancing and receding contact angles
+    const hyst = ph.pinning * 50;
+    const wetAdv = wetAt(Math.min(ph.theta + hyst, 175)), wetRec = wetAt(Math.max(ph.theta - hyst * 0.5, 3));
+    const G = Math.min(Math.max(ph.gravity, 0), 1);
+    // the grid resolves beads far larger than real sweat; scaling gravity by the bond number of a
+    // reference bead keeps dots behaving like millimetre beads at any weight or type size
+    const gPar = 9.81 * ph.gravity * ph.bond;
+    const gPerp = 9.81 * Math.max(Math.sqrt(Math.max(1 - G * G, 0)), 0.25) * ph.bond;
+    const ang = ph.gravityAngle * Math.PI / 180;
+    const g = [Math.sin(ang) * gPar, -Math.cos(ang) * gPar];
+    return {
+      dx, sigma, hc, wetPage, wetAdv, wetRec, gPerp, g,
+      nu: ph.viscosity / ph.rhoL, rhoL: ph.rhoL,
+      pin: ph.pinning * 30.0,
+      repel: 2.0 * sigma / hc,
+    };
+  }
+
+  chooseDt(d) {
+    const h = Math.min(Math.max(this.hmaxEst, 0.0015), 0.03);
+    const dtc = 0.3 * d.dx * d.dx / Math.sqrt(Math.max(d.sigma, 1e-4) * h / d.rhoL);
+    const dtw = 0.5 * d.dx / Math.sqrt(h * Math.max(d.wetAdv, d.wetPage) / (d.hc * d.rhoL) + d.gPerp * h + 1e-9);
+    return Math.min(dtc, dtw, 1 / 120);
+  }
+
+  // add bead-shaped liquid. dots: [[x, y, r (cells), species], ...]; thetaDeg: bead contact angle
+  inject(dots, thetaDeg) {
+    const k = this.kit;
+    const th = Math.min(Math.max(thetaDeg, 12), 88) * Math.PI / 180;
+    for (let i = 0; i < dots.length; i += 64) {
+      const batch = dots.slice(i, i + 64);
+      const arr = new Float32Array(64 * 4);
+      batch.forEach((d, j) => arr.set(d, j * 4));
+      k.run(this.p.inject, {
+        uN: [this.nx, this.ny], uL: this.L, uDots: arr, uCount: batch.length,
+        uCosT: Math.cos(th), uSinT: Math.sin(th), uCellM: this.dx,
+      }, this.next('L'));
+      this.flip('L');
+    }
+  }
+
+  // advance by wall-clock frame time. forces: { cur: [x, y, r, on] cells, curVel: [m/s], pull, drag, wipe, life, gatherR, bulkLod, href, pxToM }
+  step(frameDt, ph, f, maxSub) {
+    const k = this.kit;
+    const d = this.physics(ph);
+    const dt = this.chooseDt(d);
+    const want = Math.min(frameDt, 1 / 20) * ph.timeScale;
+    let n = Math.ceil(want / dt);
+    if (want <= 0) n = 0;
+    this.slowdown = 1;
+    if (n > maxSub) { this.slowdown = maxSub / n; n = maxSub; }
+    this.lastSubsteps = n;
+    if (n === 0) return;
+    const N = [this.nx, this.ny];
+    const vmax = 0.24 * d.dx / dt;
+    const common = { uN: N, uDx: d.dx };
+    const pU = {
+      ...common, uSigma: d.sigma, uRhoL: d.rhoL, uGperp: d.gPerp, uCongeal: ph.coalesce,
+      uWetAdv: d.wetAdv, uWetRec: d.wetRec, uHc: d.hc, uRepel: d.repel, uWc: 0.5, uHetero: 0.35,
+    };
+    const vU = {
+      ...common, uDt: dt, uRhoL: d.rhoL, uNu: d.nu, uSlip: 5e-5 * (1 + 8 * smooth01((ph.theta - 90) / 40)), uFric: 0.0, uVmax: vmax,
+      uCongeal: ph.coalesce, uVisc: 0.02, uPin: d.pin, uHdry: 0.3 * d.hc, uG: d.g,
+      uBulk: this.t.res, uBulkLod: f.bulkLod, uPxToM: f.pxToM, uHref: f.href,
+      uLife: f.life, uGatherR: f.gatherR,
+      uCur: f.cur, uCurVel: f.curVel, uCurPull: f.pull, uCurDrag: f.drag,
+    };
+    const uU = { ...common, uDt: dt, uWetDecay: Math.exp(-dt / 25), uHc: d.hc };
+    const collect = Math.min(1, dt * 60) * Math.max(smooth01((ph.theta - 95) / 30), 0.25);
+    const wipeAmt = f.wipe ? 1 - Math.exp(-14 * dt) : 0;
+    for (let i = 0; i < n; i++) {
+      k.run(this.p.pressure, { ...pU, uL: this.L, uW: this.W }, this.t.P);
+      k.run(this.p.velocity, { ...vU, uTime: this.simTime, uP: this.t.P, uL: this.L, uU: this.U, uV: this.V, uW: this.W, uGather: this.t.G }, [this.next('U'), this.next('V')]);
+      this.flip('U'); this.flip('V');
+      k.run(this.p.update, { ...uU, uL: this.L, uU: this.U, uV: this.V, uW: this.W }, [this.next('L'), this.next('W')]);
+      this.flip('L'); this.flip('W');
+      if (collect > 0) {
+        k.run(this.p.collect, { uN: N, uL: this.L, uCollect: collect, uFilm: 0.35 * d.hc }, this.next('L'));
+        this.flip('L');
+      }
+      if (wipeAmt > 0) {
+        k.run(this.p.wipe, { uN: N, uL: this.L, uW: this.W, uCur: [f.cur[0], f.cur[1], f.cur[2], wipeAmt] }, [this.next('L'), this.next('W')]);
+        this.flip('L'); this.flip('W');
+      }
+      this.simTime += dt;
+    }
+  }
+
+  resolve(mToPx) {
+    this.kit.run(this.p.resolve, { uL: this.L, uW: this.W, uMToPx: mToPx }, this.t.res);
+    this.kit.genMips(this.t.res);
+    return this.t.res;
+  }
+
+  // liquid depth (m) over each static dot, read back asynchronously
+  probe(dotTex, count, cellPerPx, sampleR, cb) {
+    if (this.probePending || count <= 0) return;
+    const k = this.kit;
+    const rows = Math.ceil(count / 4096);
+    if (!this.t.probe || this.t.probe.h !== rows) {
+      if (this.t.probe) k.deleteTexture(this.t.probe);
+      this.t.probe = k.texture(4096, rows, 'rgba32f');
+    }
+    k.run(this.p.probe, { uN: [this.nx, this.ny], uL: this.L, uDots: dotTex, uCount: count, uCellPerPx: cellPerPx, uSampleR: sampleR }, this.t.probe);
+    this.probePending = true;
+    k.readFloatAsync(this.t.probe, (data) => { this.probePending = false; cb(data); });
+  }
+
+  requestStats() {
+    if (this.statsPending) return;
+    const k = this.kit;
+    let sw = this.nx, sh = this.ny, first = true, src = this.L;
+    const temps = [];
+    while (first || sw * sh > 1) {
+      const nw = Math.ceil(sw / 8), nh = Math.ceil(sh / 8);
+      const dst = k.texture(nw, nh, 'rgba32f');
+      temps.push(dst);
+      k.run(this.p.stats, { uSrc: src, uSrcSize: [sw, sh], uFirst: first ? 1 : 0 }, dst);
+      src = dst; sw = nw; sh = nh; first = false;
+    }
+    this.statsPending = true;
+    k.readFloatAsync(src, (data) => {
+      this.stats.volume = data[0] * this.dx * this.dx;
+      this.stats.maxDepth = data[1];
+      this.hmaxEst = Math.max(0.0015, data[1] * 1.3);
+      this.statsPending = false;
+      temps.forEach(x => k.deleteTexture(x));
+    });
+  }
+}
+
+// ---- js/renderer.js
+// renderer: environment map, static dots, height prep, caustics/shadows, liquid composite, bloom/glints, tonemap
+const ENV_PRESETS = { studio: 0, soft: 1, night: 2, window: 3 };
+const SURFACES = { plain: 0, paper: 1, skin: 2 };
+
+function srgbToLinear(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255].map(x => {
+    x /= 255;
+    return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  });
+}
+
+class Renderer {
+  constructor(kit) {
+    this.kit = kit;
+    this.p = {
+      env: kit.program(envFS, undefined, 'env'),
+      dots: kit.program(dotsFS, dotsVS, 'dots'),
+      prep: kit.program(prepFS, undefined, 'prep'),
+      causticPrep: kit.program(causticPrepFS, undefined, 'causticPrep'),
+      caustic: kit.program(causticFS, causticVS, 'caustic'),
+      blur: kit.program(blurFS, undefined, 'blur'),
+      comp: kit.program(compositeFS, undefined, 'composite'),
+      bright: kit.program(brightFS, undefined, 'bright'),
+      down: kit.program(downFS, undefined, 'down'),
+      streak: kit.program(streakFS, undefined, 'streak'),
+      final: kit.program(finalFS, undefined, 'final'),
+    };
+    this.env = kit.texture(1024, 512, 'rgba16f', { filter: 'linear', mipmap: true, wrapS: 'repeat' });
+    this.dotData = kit.texture(4096, 1, 'rgba32f');
+    this.dotCount = 0;
+    this.blank = kit.texture(1, 1, 'rgba8');
+    this.img = null;
+    this.w = 0; this.h = 0;
+    this.t = null;
+    this.meshKey = '';
+    this.time = 0;
+  }
+
+  resize(w, h) {
+    if (w === this.w && h === this.h) return;
+    const k = this.kit;
+    if (this.t) for (const key in this.t) k.deleteTexture(this.t[key]);
+    this.w = w; this.h = h;
+    const hw = Math.max(2, Math.round(w / 2)), hh = Math.max(2, Math.round(h / 2));
+    const q = (d) => [Math.max(2, Math.round(w / d)), Math.max(2, Math.round(h / d))];
+    this.t = {
+      dot: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
+      prep: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
+      caus: k.texture(hw, hh, 'rgba16f', { filter: 'linear' }),
+      caus2: k.texture(hw, hh, 'rgba16f', { filter: 'linear' }),
+      causRaw: k.texture(hw, hh, 'rgba16f', { filter: 'linear' }),
+      hdr: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
+      b2: k.texture(...q(2), 'rgba16f', { filter: 'linear' }),
+      b4: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+      b8: k.texture(...q(8), 'rgba16f', { filter: 'linear' }),
+      b8b: k.texture(...q(8), 'rgba16f', { filter: 'linear' }),
+      sA: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+      sB: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+      sT: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+      b4g: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+    };
+    this.dotsDirty = true;
+  }
+
+  ensureMesh(gx, gy) {
+    const key = gx + 'x' + gy;
+    if (key === this.meshKey) return;
+    const idx = new Uint32Array((gx - 1) * (gy - 1) * 6);
+    let o = 0;
+    for (let j = 0; j < gy - 1; j++) {
+      for (let i = 0; i < gx - 1; i++) {
+        const a = j * gx + i, b = a + 1, c = a + gx, d = c + 1;
+        idx[o++] = a; idx[o++] = b; idx[o++] = d;
+        idx[o++] = a; idx[o++] = d; idx[o++] = c;
+      }
+    }
+    if (this.mesh) this.kit.gl.deleteBuffer(this.mesh.buffer);
+    this.mesh = this.kit.indexBuffer(idx);
+    this.meshKey = key;
+    this.grid = [gx, gy];
+  }
+
+  // floor: the surface's average colour (the background image's when there is one)
+  buildEnv(s, floorHex) {
+    const L = s.light;
+    this.kit.run(this.p.env, {
+      uPreset: ENV_PRESETS[L.env] ?? 0,
+      uAz: L.azimuth * Math.PI / 180,
+      uEl: L.elevation * Math.PI / 180,
+      uBg: srgbToLinear(floorHex || s.mat[s.material].background),
+    }, this.env);
+    this.kit.genMips(this.env);
+  }
+
+  // static dots: Float32Array of (x, y up, r, 0) in artboard px
+  setDots(data, count) {
+    const k = this.kit, gl = k.gl;
+    const rows = Math.max(1, Math.ceil(count / 4096));
+    if (this.dotData.h !== rows) { k.deleteTexture(this.dotData); this.dotData = k.texture(4096, rows, 'rgba32f'); }
+    const full = new Float32Array(4096 * rows * 4);
+    full.set(data.subarray(0, count * 4));
+    gl.bindTexture(gl.TEXTURE_2D, this.dotData.tex);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 4096, rows, gl.RGBA, gl.FLOAT, full);
+    this.dotCount = count;
+    this.dotsDirty = true;
+  }
+
+  drawDots(art, thetaDeg) {
+    const k = this.kit, gl = k.gl;
+    const th = Math.min(Math.max(thetaDeg, 12), 88) * Math.PI / 180;
+    k.clear(this.t.dot);
+    k.run(this.p.dots, {
+      uDots: this.dotData, uArt: art, uAa: art[0] / this.w, uCosT: Math.cos(th), uSinT: Math.sin(th),
+    }, this.t.dot, { blend: [gl.ONE, gl.ONE], blendEq: gl.MAX, instances: this.dotCount });
+    this.dotsDirty = false;
+  }
+
+  setImage(source) {
+    if (this.img) this.kit.deleteTexture(this.img);
+    this.img = source ? this.kit.textureFromSource(source, { flipY: true, filter: 'linear', mipmap: true }) : null;
+  }
+
+  // scene: { art, sim, mToPx, pxMm, settings, dotTheta, hmaxPx, imgXf }
+  render(scene, dt) {
+    const k = this.kit, s = scene.settings, L = s.light, m = s.mat[s.material];
+    const merc = s.material === 'mercury';
+    this.time += dt;
+    const [aw, ah] = scene.art;
+    const sim = scene.sim;
+    if (this.dotsDirty) this.drawDots(scene.art, scene.dotTheta);
+    const res = sim.resolve(scene.mToPx);
+    // 1) heights at render resolution
+    k.run(this.p.prep, {
+      uRes: res, uSimN: [sim.nx, sim.ny], uDotTex: this.t.dot, uBeadStyle: m.dotStyle === 'bead' ? 1 : 0,
+      uCongeal: s.coalesce, uMeniscus: (merc ? 1.2 : 0.35) / scene.pxMm, uFilmPx: (merc ? 0.12 : 0.08) / scene.pxMm,
+    }, this.t.prep);
+
+    // 2) caustics + cast shadows
+    const clarity = merc ? 0 : m.clarity;
+    const density = merc ? 50 : Math.pow(1 - clarity, 2) * 6;
+    const az = L.azimuth * Math.PI / 180, el = L.elevation * Math.PI / 180;
+    const Ld = [Math.cos(el) * Math.cos(az), Math.cos(el) * Math.sin(az), Math.sin(el)];
+    const gx = Math.min(1024, Math.round(this.w / 2)), gy = Math.max(2, Math.round(gx * ah / aw));
+    this.ensureMesh(gx, gy);
+    if (!this.t.cp || this.t.cp.w !== gx || this.t.cp.h !== gy) {
+      if (this.t.cp) k.deleteTexture(this.t.cp);
+      this.t.cp = k.texture(gx, gy, 'rgba32f');
+    }
+    const over = 0.02;
+    k.run(this.p.causticPrep, {
+      uPrep: this.t.prep, uGrid: this.grid, uArt: [aw, ah], uL: Ld,
+      uOpaque: merc ? 1 : 0, uIor: m.ior ?? 1.33, uDensity: density, uPxMm: scene.pxMm,
+      uHmax: scene.hmaxPx + 25, uSoft: L.softness * 4.0, uTarget: [this.t.caus.w, this.t.caus.h], uOver: over,
+    }, this.t.cp);
+    k.run(this.p.caustic, {
+      uCP: this.t.cp, uGrid: this.grid, uTarget: [this.t.caus.w, this.t.caus.h], uOver: over,
+    }, this.t.causRaw, { clear: [0, 0, 0, 1], blend: [k.gl.ONE, k.gl.ONE], elements: this.mesh });
+    const blurR = 1.0 + L.softness * 2.2;
+    k.run(this.p.blur, { uSrc: this.t.causRaw, uDir: [blurR / this.t.caus.w, 0] }, this.t.caus2);
+    k.run(this.p.blur, { uSrc: this.t.caus2, uDir: [0, blurR / this.t.caus.h] }, this.t.caus);
+
+    // 3) composite
+    const bg = srgbToLinear(m.background);
+    k.run(this.p.comp, {
+      uPrep: this.t.prep, uPrepSize: [this.w, this.h], uCaustic: this.t.caus, uRes: res, uEnv: this.env,
+      uArt: [aw, ah], uCam: [aw * 0.5, ah * 0.5, Math.max(aw, ah) * 1.5], uBg: bg, uL: Ld,
+      uShadow: L.shadow, uCaustics: L.caustics, uExposure: L.exposure,
+      uAoLiquid: merc ? 1.0 : 0.25 + 0.75 * (1 - clarity),
+      uCellPx: aw / sim.nx, uGrain2: s.grain, uWetDarken: merc ? 0 : s.wetTrails,
+      uLiqMinMm: merc ? 0.2 : 0.1, uFilmAoPx: (merc ? 0.2 : 0.1) / scene.pxMm,
+      uMode: merc ? 1 : 0, uPxMm: scene.pxMm,
+      uSurface: SURFACES[m.surface] ?? 0, uSurfScale: s.surfScale * 0.13 / scene.pxMm,
+      uImg: this.img || this.blank, uHasImg: this.img ? 1 : 0, uImgXf: scene.imgXf,
+      uImgLod: this.img ? Math.max(0, Math.log2(this.img.w * scene.imgXf[0] / this.w)) : 0,
+      uDotCol: srgbToLinear(m.dots),
+      uTint: srgbToLinear(m.tint), uIor: m.ior ?? 1.33, uDensity: density, uTintStr: 0.35,
+      uLens: s.lens, uRough: merc ? 0.01 : (1 - (m.gloss ?? 1)) * 0.35 + 0.006,
+      uFinish: m.finish ?? 0, uMercTint: srgbToLinear(m.tint),
+      uFlat: s.flat ? 1 : 0, uFlatCol: srgbToLinear(m.tint),
+    }, this.t.hdr);
+
+    // 4) bloom + glints
+    const glints = merc ? (m.glints ?? 0) : 0;
+    const doBloom = !s.flat && (L.bloom > 0.001 || glints > 0.001);
+    if (doBloom) {
+      k.run(this.p.bright, { uSrc: this.t.hdr, uThreshold: 1.0 }, this.t.b2);
+      k.run(this.p.down, { uSrc: this.t.b2, uTexel: [0.5 / this.t.b2.w, 0.5 / this.t.b2.h] }, this.t.b4);
+      if (glints > 0.001) k.run(this.p.bright, { uSrc: this.t.b4, uThreshold: 2.2 }, this.t.sB);
+      k.run(this.p.down, { uSrc: this.t.b4, uTexel: [0.5 / this.t.b4.w, 0.5 / this.t.b4.h] }, this.t.b8);
+      k.run(this.p.blur, { uSrc: this.t.b8, uDir: [1.5 / this.t.b8.w, 0] }, this.t.b8b);
+      k.run(this.p.blur, { uSrc: this.t.b8b, uDir: [0, 1.5 / this.t.b8.h] }, this.t.b8);
+      const st = (dx, dy, dst, srcTex) => {
+        let src = srcTex;
+        const outs = [dst, this.t.sT, dst];
+        for (let it = 0; it < 3; it++) {
+          const scale = Math.pow(4, it);
+          k.run(this.p.streak, { uSrc: src, uDir: [dx * scale / this.t.b4.w, dy * scale / this.t.b4.h], uAtt: Math.pow(0.9, scale) }, outs[it]);
+          src = outs[it];
+        }
+      };
+      if (glints > 0.001) {
+        k.run(this.p.down, { uSrc: this.t.sB, uTexel: [0.25 / this.t.sB.w, 0.25 / this.t.sB.h] }, this.t.b4g);
+        st(0.7071, 0.7071, this.t.sA, this.t.b4g);
+        st(0.7071, -0.7071, this.t.sB, this.t.b4g);
+      }
+    }
+    k.run(this.p.final, {
+      uHdr: this.t.hdr, uBloom: this.t.b8, uStreakA: this.t.sA, uStreakB: this.t.sB,
+      uBloomAmt: L.bloom, uGlints: glints, uGrain: L.grain, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: doBloom ? 1 : 0,
+      uKnee: Math.min(1, Math.max(0.8, Math.max(...bg) * L.exposure * 1.02 + 0.005)),
+    }, null);
+  }
+}
+
+
+// ---- js/ui.js
+// controls in the Amigues system: two columns of grouped sections floating in glass over the
+// canvas, live edits with one undo step per gesture
+const fmtNum = (v, d = 0) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(d);
+const WAVE = '<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1 5C3.2-.5 5.8-.5 8 5s4.8 5.5 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const secs = (t) => (t < 10 ? t.toFixed(1) : Math.round(t)) + ' s';
+const TIGHT_UNITS = new Set(['%', '°', '‰', '×']);
+
+// item kinds: range (mult, unit, digits, log, osc, note, show, hint), seg, popup, color, switch, text,
+// margins, pair, presets, congealBtns, dotBtns, image, actions, settingsBtns, note
+function sections(app) {
+  const isMerc = () => app.settings.material === 'mercury';
+  const notMerc = () => !isMerc();
+  const hasImg = () => !!app.image;
+  const tool = (t) => () => app.settings.tool === t;
+  return [
+    {
+      col: 'left', badge: '1', title: 'Text', items: [
+        { kind: 'text' },
+        { kind: 'seg', path: 'weight', options: WEIGHTS, hint: 'Interdot weight: every weight is the same dots, grown' },
+        { kind: 'range', path: 'fontSize', label: 'Size', min: 24, max: 1600, step: 1, unit: 'px' },
+        { kind: 'range', path: 'leading', label: 'Leading', min: 0.5, max: 2.5, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', path: 'tracking', label: 'Tracking', min: -200, max: 800, step: 1, unit: '‰' },
+        { kind: 'seg', path: 'align', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
+        { kind: 'seg', path: 'valign', options: [['top', 'Top'], ['middle', 'Middle'], ['bottom', 'Bottom']] },
+        { kind: 'margins' },
+      ],
+    },
+    {
+      col: 'left', badge: '2', title: 'Congeal', items: [
+        { kind: 'congealBtns' },
+        { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots turn to liquid and congeal' },
+        { kind: 'range', path: 'beadSize', label: 'Bead size', min: 1, max: 16, step: 1, unit: 'dots', hint: 'Most dots that gather into one bead' },
+        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster is the same size and fully merged, 100 = sizes and degrees of congealing vary widely' },
+        { kind: 'note', html: 'Every dry dot is live: liquid that reaches one fuses with it.' },
+      ],
+    },
+    {
+      col: 'left', badge: '3', title: 'Cursor', items: [
+        { kind: 'seg', path: 'tool', options: [['congeal', 'Congeal'], ['dots', 'Place dots'], ['wipe', 'Wipe']] },
+        { kind: 'popup', path: 'liquefy', label: 'Liquefy on', options: [['hover', 'Hover'], ['press', 'Press']], show: tool('congeal') },
+        { kind: 'note', html: 'Click to place a dot the size of the type’s dots; drag to draw a row; Alt-click removes one.', show: tool('dots') },
+        { kind: 'note', html: 'Press and drag to soak up liquid.', show: tool('wipe') },
+        { kind: 'range', path: 'cursorRadius', label: 'Radius', min: 6, max: 400, step: 1, unit: 'px' },
+        { kind: 'range', path: 'pull', label: 'Pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How strongly the cursor gathers liquid toward its centre, where surface tension fuses it into one bead', show: tool('congeal') },
+        { kind: 'range', path: 'carry', label: 'Carry', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'While pressed, beads under the cursor travel with it', show: tool('congeal') },
+        { kind: 'dotBtns' },
+      ],
+    },
+    {
+      col: 'left', badge: '4', title: 'Liquid', items: [
+        { kind: 'presets' },
+        { kind: 'range', path: 'gravity', label: 'Gravity', min: 0, max: 1, step: 0.01, digits: 2, unit: 'g', hint: '0 = surface lying flat, 1 = surface upright (heavy beads run down)' },
+        { kind: 'range', path: 'gravityAngle', label: 'Direction', min: -180, max: 180, step: 1, unit: '°' },
+        { kind: 'range', path: 'mat.surfaceTension', label: 'Surface tension', min: 5, max: 1000, step: 0.1, digits: 1, unit: 'mN/m', log: true },
+        { kind: 'range', path: 'mat.viscosity', label: 'Viscosity', min: 0.3, max: 200, step: 0.01, digits: 2, unit: 'mPa·s', log: true },
+        { kind: 'range', path: 'mat.contactAngle', label: 'Contact angle', min: 10, max: 170, step: 1, unit: '°', hint: 'Low = wets and spreads, high = beads up' },
+        { kind: 'range', path: 'mat.pinning', label: 'Pinning', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'Contact-line friction: how readily beads stick before sliding. Bigger beads break free first' },
+        { kind: 'range', path: 'coalesce', label: 'Coalesce', min: -1, max: 1, step: 0.01, mult: 100, unit: '%', hint: '+100 = beads from different dots merge into one body, 0 = they pass through each other, negative = they push apart' },
+        { kind: 'range', path: 'timeScale', label: 'Time', min: 0.05, max: 3, step: 0.01, digits: 2, unit: '×', log: true },
+      ],
+    },
+    {
+      col: 'right', badge: '◐', title: 'Material', items: [
+        { kind: 'seg', path: 'material', big: true, options: [['sweat', 'Sweat'], ['ink', 'Ink'], ['mercury', 'Mercury']] },
+        { kind: 'switch', path: 'flat', label: 'Flat', sub: 'No relief, shading, shadows or highlights: dots and liquid in flat colour' },
+        { kind: 'popup', path: 'mat.dotStyle', label: 'Dry dots', options: [['print', 'Printed'], ['bead', 'Beads']], hint: 'Dots that have not congealed: printed ink, or droplets that sit still' },
+        { kind: 'color', path: 'mat.dots', label: 'Dots', show: () => app.matSettings.dotStyle === 'print', swatches: ['#16161b', '#ffffff', '#b3262b', '#1f4fd1'] },
+        { kind: 'color', path: 'mat.tint', label: 'Liquid', show: notMerc, swatches: ['#f4eee6', '#cfe8f2', '#000000', '#b3262b'] },
+        { kind: 'color', path: 'mat.tint', label: 'Metal tint', show: isMerc, swatches: ['#dfe3e8', '#f1d48a', '#e8b9a8'] },
+        { kind: 'range', path: 'mat.clarity', label: 'Clarity', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: notMerc, hint: '100 = clear water or sweat, 0 = opaque ink' },
+        { kind: 'range', path: 'mat.ior', label: 'Refraction', min: 1.0, max: 1.9, step: 0.001, digits: 3, unit: 'n', show: notMerc, hint: 'Index of refraction: how strongly beads bend and magnify what is under them (water 1.333)' },
+        { kind: 'range', path: 'mat.gloss', label: 'Gloss', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: notMerc },
+        { kind: 'range', path: 'mat.finish', label: 'Finish', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: isMerc, hint: '0 = mirror chrome, 100 = crystalline satin' },
+        { kind: 'range', path: 'mat.glints', label: 'Glints', min: 0, max: 1.5, step: 0.01, mult: 100, unit: '%', show: isMerc },
+      ],
+    },
+    {
+      col: 'right', badge: '▦', title: 'Surface', items: [
+        { kind: 'popup', path: 'mat.surface', label: 'Surface', options: [['plain', 'Plain'], ['paper', 'Paper'], ['skin', 'Skin']] },
+        { kind: 'color', path: 'mat.background', label: 'Colour', hint: 'Kept separately for each material', swatches: ['#ff2a98', '#c48c6c', '#eeeae2', '#1d2024'] },
+        { kind: 'range', path: 'surfScale', label: 'Texture scale', min: 0.2, max: 4, step: 0.01, digits: 2, unit: '×', log: true },
+        { kind: 'range', path: 'grain', label: 'Grain', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', path: 'lens', label: 'Lens depth', min: 0, max: 400, step: 1, unit: 'px', hint: 'How far the surface sits behind the liquid, as if the beads were on glass in front of it. Deeper = beads warp, magnify and invert what is under them, like real water' },
+        { kind: 'range', path: 'wetTrails', label: 'Wet trails', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much the surface darkens where liquid has run' },
+        { kind: 'image' },
+        { kind: 'popup', path: 'image.fit', label: 'Fit', options: [['cover', 'Fill the artboard'], ['contain', 'Fit inside']], show: hasImg },
+        { kind: 'range', path: 'image.zoom', label: 'Zoom', min: 0.2, max: 6, step: 0.01, digits: 2, unit: '×', log: true, show: hasImg },
+        { kind: 'range', path: 'image.x', label: 'Offset X', min: -1, max: 1, step: 0.001, mult: 100, unit: '%', show: hasImg },
+        { kind: 'range', path: 'image.y', label: 'Offset Y', min: -1, max: 1, step: 0.001, mult: 100, unit: '%', show: hasImg },
+      ],
+    },
+    {
+      col: 'right', badge: '☀', title: 'Light', collapsible: true, items: [
+        { kind: 'popup', path: 'light.env', label: 'Environment', options: [['studio', 'Studio softbox'], ['soft', 'Light tent'], ['window', 'Window'], ['night', 'Night']] },
+        { kind: 'note', html: `Press ${WAVE} beside a slider to sweep it end to end and back.` },
+        { kind: 'range', osc: true, path: 'light.azimuth', label: 'Direction', min: -180, max: 180, step: 1, unit: '°' },
+        { kind: 'range', osc: true, path: 'light.elevation', label: 'Height', min: 12, max: 85, step: 1, unit: '°' },
+        { kind: 'range', osc: true, path: 'light.exposure', label: 'Exposure', min: 0.3, max: 2.5, step: 0.01, digits: 2, unit: '×' },
+        { kind: 'range', osc: true, path: 'light.shadow', label: 'Shadow', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', osc: true, path: 'light.softness', label: 'Softness', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', osc: true, path: 'light.caustics', label: 'Caustics', min: 0, max: 3, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', osc: true, path: 'light.bloom', label: 'Bloom', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'range', osc: true, path: 'light.grain', label: 'Grain', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+      ],
+    },
+    {
+      col: 'right', badge: '↑', title: 'Canvas & output', collapsible: true, items: [
+        { kind: 'popup', path: 'aspect', label: 'Artboard', options: [...Object.keys(ARTBOARDS).map(k => [k, `${k} · ${ARTBOARDS[k][0]}×${ARTBOARDS[k][1]}`]), ['custom', 'Custom…']] },
+        { kind: 'pair', paths: ['customW', 'customH'], label: 'Size', show: () => app.settings.aspect === 'custom', min: 200, max: 4000 },
+        { kind: 'range', path: 'scale', label: 'Physical width', min: 8, max: 150, step: 1, unit: 'cm', hint: 'Real-world width of the artboard. Smaller = surface tension dominates and beads stay round' },
+        { kind: 'popup', path: 'perf.simRes', label: 'Simulation', number: true, options: [[256, 'Draft · 256'], [384, 'Medium · 384'], [512, 'High · 512'], [640, 'Ultra · 640'], [768, 'Extreme · 768']] },
+        { kind: 'range', path: 'perf.renderScale', label: 'Render scale', min: 0.35, max: 1, step: 0.05, mult: 100, unit: '%' },
+        { kind: 'range', path: 'perf.maxSubsteps', label: 'Max substeps', min: 4, max: 160, step: 1, unit: '/frame' },
+        { kind: 'actions' },
+      ],
+    },
+    {
+      col: 'right', badge: '↺', title: 'Settings', items: [
+        { kind: 'settingsBtns' },
+        { kind: 'note', html: 'Undo with Ctrl or Cmd + Z, redo with Shift as well. Space pauses, R restarts, G congeals at random, H hides the controls, F goes full screen.' },
+      ],
+    },
+  ];
+}
+
+function buildUI(app) {
+  const refreshers = [];
+  const tickers = [];
+  let pending = null, bUndo = null, bRedo = null;
+  const begin = () => { if (!pending) { pending = app.snapshot(); app.dragging = true; } };
+  const commit = () => { if (pending) { app.history.push(pending); pending = null; } app.endDrag(); };
+
+  const $ = (id) => document.getElementById(id);
+  const defaultOf = (path) => (path.startsWith('mat.')
+    ? app.defaults.mat[app.settings.material]?.[path.slice(4)]
+    : getPath(app.defaults, path));
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const btn = (cls, label, title) => { const b = el('button', cls, label); b.type = 'button'; if (title) b.title = title; return b; };
+  const val = (x) => (typeof x === 'function' ? x() : x);
+  const showable = (node, it) => { if (it.show) refreshers.push(() => { node.hidden = !it.show(); }); return node; };
+  const cols = { left: $('colLeft'), right: $('colRight') };
+
+  // the wordmark, set in the face itself
+  const brand = el('div', 'brand');
+  const mark = el('span', 'mark');
+  mark.setAttribute('aria-label', 'sweat');
+  brand.append(mark, el('span', 'note', 'Type specimen · Interdot'));
+  cols.left.append(brand);
+  drawMark(mark);
+
+  for (const sec of sections(app)) {
+    const box = el('section', 'panel' + (sec.collapsible ? '' : ' open'));
+    const head = el('div', 'phead', `<span class="badge">${sec.badge}</span><span>${sec.title}</span>`);
+    let body = box;
+    if (sec.collapsible) {
+      const d = btn('disclose', null);
+      d.append(head, el('span', 'caret', '›'));
+      d.setAttribute('aria-expanded', 'false');
+      d.addEventListener('click', () => {
+        const open = !box.classList.contains('open');
+        box.classList.toggle('open', open); d.classList.toggle('open', open); d.setAttribute('aria-expanded', String(open));
+      });
+      body = el('div', 'advbody');
+      box.append(d, body);
+    } else box.append(head);
+    cols[sec.col].append(box);
+    // menus and colours sit together in rows split by hairlines
+    let rows = null;
+    for (const it of sec.items) {
+      const node = build(it);
+      if (!node) continue;
+      if (it.kind === 'popup' || it.kind === 'color') {
+        if (!rows) { rows = el('div', 'rows'); body.append(rows); }
+        rows.append(node);
+      } else { rows = null; body.append(node); }
+    }
+  }
+
+  function build(it) {
+    switch (it.kind) {
+      case 'range': return rangeCtl(it);
+      case 'seg': return showable(segCtl(it), it);
+      case 'popup': return showable(popupCtl(it), it);
+      case 'color': return showable(colorCtl(it), it);
+      case 'switch': return switchCtl(it);
+      case 'text': return textCtl();
+      case 'margins': return rangeCtl({
+        label: 'Margins', min: 0, max: 600, step: 1, unit: 'px', hint: 'All four margins together',
+        get: () => app.settings.marginTop,
+        set: (v) => ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(k => app.set(k, v, { history: false })),
+        dflt: () => app.defaults.marginTop,
+      });
+      case 'pair': return pairCtl(it);
+      case 'presets': return presetsCtl();
+      case 'congealBtns': return congealCtl();
+      case 'dotBtns': return dotBtnsCtl();
+      case 'image': return imageCtl();
+      case 'actions': return actionsCtl();
+      case 'settingsBtns': return settingsCtl();
+      case 'note': return showable(el('div', 'note', it.html), it);
+      default: return null;
+    }
+  }
+
+  // a value beside its label that can be clicked and typed into
+  function typeable(v, onCommit) {
+    v.classList.add('typein');
+    v.title = 'Click to type a value';
+    let editing = false, cancelled = false;
+    const finish = () => {
+      if (!editing) return;
+      editing = false;
+      v.contentEditable = 'false';
+      v.classList.remove('editing');
+      const n = parseFloat(String(v.textContent).replace(',', '.').replace(/[^0-9.eE+-]/g, ''));
+      if (!cancelled && Number.isFinite(n)) onCommit(n);
+      else onCommit(null);
+      cancelled = false;
+    };
+    v.addEventListener('mousedown', (e) => {
+      if (editing) return;
+      e.preventDefault();
+      editing = true; cancelled = false;
+      v.contentEditable = 'true';
+      v.classList.add('editing');
+      v.focus();
+      const r = document.createRange(); r.selectNodeContents(v);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    });
+    v.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); v.blur(); }
+      else if (e.key === 'Escape') { e.preventDefault(); cancelled = true; v.blur(); }
+    });
+    v.addEventListener('blur', finish);
+  }
+
+  function rangeCtl(it) {
+    const row = el('div', 'row' + (it.nested ? ' nested' : ''));
+    if (it.hint) row.title = it.hint;
+    const head = el('div', 'rowhead'), lab = el('span', 'lab'), v = el('span', 'val');
+    lab.append(el('span', null, it.label));
+    head.append(lab, v);
+    const r = el('input'); r.type = 'range'; r.setAttribute('aria-label', it.label);
+    row.append(head, r);
+    const extra = it.note ? el('div', 'note') : null;
+    if (extra) row.append(extra);
+    const get = it.get || (() => getPath(app.settings, it.path));
+    const put = it.set || ((x) => app.set(it.path, x, { history: false }));
+    const oscPath = it.osc ? 'osc.' + it.path : null;
+    const oscOn = () => !!(oscPath && getPath(app.settings, oscPath)?.on);
+    let oscBtn = null;
+    if (it.osc) {
+      oscBtn = btn('osc', WAVE, 'Sweep back and forth');
+      oscBtn.setAttribute('aria-label', `Oscillate ${it.label.toLowerCase()}`);
+      oscBtn.addEventListener('click', () => { app.set(oscPath + '.on', !oscOn()); refreshAll(); });
+      lab.append(oscBtn);
+    }
+    const mult = it.mult || 1;
+    const digits = it.digits ?? (it.step < 1 && !it.mult ? 2 : 0);
+    const unitOf = (x) => {
+      if (!it.unit) return '';
+      if (it.unit === 'dots') return Math.round(x) === 1 ? ' dot' : ' dots';
+      return TIGHT_UNITS.has(it.unit) ? it.unit : ' ' + it.unit;
+    };
+    const toSlider = (x) => it.log ? 1000 * Math.log(x / val(it.min)) / Math.log(val(it.max) / val(it.min)) : x;
+    const fromSlider = (x) => it.log ? val(it.min) * Math.pow(val(it.max) / val(it.min), x / 1000) : x;
+    const setBounds = () => {
+      if (it.log) { r.min = 0; r.max = 1000; r.step = 1; }
+      else { r.min = val(it.min); r.max = val(it.max); r.step = it.step; }
+    };
+    const fill = () => {
+      const lo = parseFloat(r.min), hi = parseFloat(r.max);
+      r.style.setProperty('--p', (clamp((parseFloat(r.value) - lo) / (hi - lo || 1), 0, 1) * 100).toFixed(2) + '%');
+    };
+    const show = (x) => {
+      if (!(typeof x === 'number' && Number.isFinite(x))) return;
+      v.textContent = fmtNum(x * mult, digits) + unitOf(x);
+      if (it.note) extra.textContent = it.note(x);
+    };
+    const refresh = () => {
+      setBounds();
+      const x = get();
+      r.value = toSlider(x);
+      fill();
+      if (!v.classList.contains('editing')) show(x);
+      if (it.show) row.hidden = !it.show();
+      if (oscBtn) { const on = oscOn(); oscBtn.classList.toggle('on', on); oscBtn.setAttribute('aria-pressed', String(on)); }
+    };
+    const quant = (x) => {
+      const s = it.log ? Math.pow(10, Math.floor(Math.log10(Math.abs(x) || 1)) - 2) : it.step;
+      return Math.round(x / s) * s;
+    };
+    // a sweeping slider can still be grabbed or typed into, but its value is transient so it skips undo
+    const apply = (x) => {
+      if (oscOn()) put(x);
+      else { begin(); put(x); commit(); }
+    };
+    r.addEventListener('input', () => {
+      const x = quant(fromSlider(parseFloat(r.value)));
+      if (!oscOn()) begin();
+      put(x);
+      show(x); fill();
+    });
+    r.addEventListener('change', commit);
+    r.addEventListener('dblclick', () => {
+      const d = it.dflt ? it.dflt() : defaultOf(it.path);
+      if (d == null) return;
+      apply(d); refresh();
+    });
+    typeable(v, (n) => {
+      if (n != null) apply(clamp(n / mult, val(it.min), val(it.max)));
+      refresh();
+    });
+    refreshers.push(refresh);
+    if (!it.osc) return row;
+
+    // cosine sweep across the slider's full travel. phase 0..0.5 runs left to right, 0.5..1 back
+    let phase = null, wrote = null, held = false;
+    r.addEventListener('pointerdown', () => { held = true; });
+    const release = () => { held = false; };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', release, true);
+    tickers.push((dt) => {
+      const o = getPath(app.settings, oscPath);
+      if (!o?.on) { phase = null; return; }
+      if (held) return;
+      const lo = parseFloat(r.min), hi = parseFloat(r.max);
+      const cur = get();
+      if (phase === null || cur !== wrote) {
+        const a = Math.acos(1 - 2 * clamp((toSlider(cur) - lo) / (hi - lo), 0, 1)) / (2 * Math.PI);
+        phase = phase !== null && phase > 0.5 ? 1 - a : a;
+      }
+      phase = (phase + dt * o.speed / OSC_PERIOD) % 1;
+      const x = fromSlider(lo + (hi - lo) * (0.5 - 0.5 * Math.cos(2 * Math.PI * phase)));
+      put(x);
+      wrote = x;
+      r.value = toSlider(x);
+      fill();
+      if (!v.classList.contains('editing')) show(x);
+    });
+    const speed = rangeCtl({
+      path: oscPath + '.speed', label: 'Speed', min: 0.1, max: 10, step: 0.01, digits: 2, unit: '×', log: true, nested: true,
+      show: oscOn, hint: `1× = one sweep there and back every ${OSC_PERIOD} s`, note: (x) => `${secs(OSC_PERIOD / x)} per cycle`,
+    });
+    const group = el('div', 'group');
+    group.append(row, speed);
+    return group;
+  }
+
+  function segCtl(it) {
+    const seg = el('div', it.big ? 'seg' : 'seg small');
+    seg.setAttribute('role', 'radiogroup');
+    if (it.hint) seg.title = it.hint;
+    const btns = it.options.map(([v, t]) => {
+      const b = btn(null, t);
+      b.setAttribute('role', 'radio');
+      b.addEventListener('click', () => { app.set(it.path, v); refreshAll(); });
+      seg.append(b);
+      return [v, b];
+    });
+    refreshers.push(() => btns.forEach(([v, b]) => {
+      const on = getPath(app.settings, it.path) === v;
+      b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on));
+    }));
+    return seg;
+  }
+
+  function popupCtl(it) {
+    const node = el('div', 'popup');
+    if (it.hint) node.title = it.hint;
+    const sel = document.createElement('select');
+    sel.setAttribute('aria-label', it.label);
+    it.options.forEach(([v, t]) => { const o = el('option', null, t); o.value = String(v); sel.append(o); });
+    const shown = el('span', 'pvalue');
+    const wrap = el('span', 'pwrap');
+    wrap.append(shown, sel);
+    node.append(el('span', 'plabel', it.label), wrap);
+    sel.addEventListener('change', () => { app.set(it.path, it.number ? Number(sel.value) : sel.value); refreshAll(); });
+    refreshers.push(() => {
+      const cur = String(getPath(app.settings, it.path));
+      sel.value = cur;
+      shown.textContent = it.options.find(([v]) => String(v) === cur)?.[1] ?? '—';
+    });
+    return node;
+  }
+
+  function colorCtl(it) {
+    const node = el('div', 'colorrow');
+    if (it.hint) node.title = it.hint;
+    const wrapC = el('div', 'cwrap');
+    const sw = (it.swatches || []).map(hex => {
+      const b = btn('swatch', null, hex);
+      b.style.background = hex;
+      b.setAttribute('aria-label', `${it.label} ${hex}`);
+      b.addEventListener('click', () => { app.set(it.path, hex); refresh(); });
+      wrapC.append(b);
+      return [hex, b];
+    });
+    const well = el('label', 'well');
+    const chip = el('span');
+    const c = el('input'); c.type = 'color'; c.setAttribute('aria-label', it.label);
+    well.append(chip, c);
+    const v = el('span', 'val');
+    wrapC.append(well, v);
+    node.append(el('span', 'plabel', it.label), wrapC);
+    c.addEventListener('input', () => { begin(); app.set(it.path, c.value, { history: false }); refresh(); });
+    c.addEventListener('change', commit);
+    typeable(v, () => {
+      let s = v.textContent.trim();
+      if (!s.startsWith('#')) s = '#' + s;
+      if (/^#[0-9a-f]{6}$/i.test(s)) app.set(it.path, s.toLowerCase());
+      refresh();
+    });
+    const refresh = () => {
+      const x = getPath(app.settings, it.path);
+      if (typeof x !== 'string') return;
+      c.value = x; chip.style.background = x;
+      if (!v.classList.contains('editing')) v.textContent = x;
+      sw.forEach(([hex, b]) => b.classList.toggle('on', hex.toLowerCase() === x.toLowerCase()));
+    };
+    refreshers.push(refresh);
+    return node;
+  }
+
+  function switchCtl(it) {
+    const c = el('label', 'check');
+    c.append(el('span', 'box'));
+    const t = el('span');
+    t.append(document.createTextNode(it.label));
+    if (it.sub) t.append(el('span', 'sub', it.sub));
+    c.append(t);
+    c.setAttribute('role', 'switch');
+    c.tabIndex = 0;
+    const toggle = (e) => { e.preventDefault(); app.set(it.path, !getPath(app.settings, it.path)); refresh(); };
+    c.addEventListener('click', toggle);
+    c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') toggle(e); });
+    const refresh = () => { const on = !!getPath(app.settings, it.path); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); };
+    refreshers.push(refresh);
+    return c;
+  }
+
+  function textCtl() {
+    const ta = el('textarea', 'field textbox');
+    ta.spellcheck = false;
+    ta.setAttribute('aria-label', 'Text');
+    ta.placeholder = 'Type here';
+    ta.addEventListener('input', () => app.setText(ta.value));
+    const wrap = el('div', 'group');
+    wrap.append(ta, el('div', 'note', 'Or click the artboard and type. Interdot has A–Z, a–z, 0–9 and . , -'));
+    refreshers.push(() => { if (document.activeElement !== ta && ta.value !== app.text.text) ta.value = app.text.text; });
+    return wrap;
+  }
+
+  function pairCtl(it) {
+    const row = el('div', 'pair');
+    row.append(el('span', 'plabel', it.label));
+    const fields = el('div', 'fields');
+    const ins = it.paths.map((p) => {
+      const i = el('input', 'field'); i.type = 'text'; i.inputMode = 'numeric';
+      i.setAttribute('aria-label', p === 'customW' ? 'Artboard width' : 'Artboard height');
+      i.addEventListener('change', () => { app.set(p, clamp(parseInt(i.value, 10) || 0, it.min, it.max)); refresh(); });
+      return i;
+    });
+    fields.append(ins[0], el('span', 'x', '×'), ins[1]);
+    row.append(fields);
+    const refresh = () => { ins.forEach((i, k) => { if (document.activeElement !== i) i.value = getPath(app.settings, it.paths[k]); }); row.hidden = it.show && !it.show(); };
+    refreshers.push(refresh);
+    return row;
+  }
+
+  // each preset is one undo step
+  function presetsCtl() {
+    const chips = el('div', 'chips small');
+    for (const p of PRESETS) {
+      const b = btn('chip', p.name, p.hint);
+      b.addEventListener('click', () => {
+        const before = app.snapshot();
+        const patch = p.patch(app.defaults.mat[app.settings.material]);
+        for (const k in patch) app.set(k, patch[k], { history: false });
+        app.history.push(before);
+        app.toast(p.name);
+        refreshAll();
+      });
+      chips.append(b);
+    }
+    return chips;
+  }
+
+  function congealCtl() {
+    const row = el('div', 'btnrow');
+    const rnd = btn('btn primary wide', 'Random', 'Congeal a new random selection of dots (G)');
+    const again = btn('btn wide', 'Restart', 'Dry everything and congeal the same selection again (R)');
+    rnd.addEventListener('click', () => app.randomize());
+    again.addEventListener('click', () => app.restart(true));
+    row.append(rnd, again);
+    return row;
+  }
+
+  function dotBtnsCtl() {
+    const row = el('div', 'btnrow');
+    const clr = btn('btn wide', 'Clear placed dots');
+    const dry = btn('btn wide', 'Dry all', 'Remove all liquid and return every dot to its place');
+    clr.addEventListener('click', () => {
+      if (!app.settings.placed.length) { app.toast('No placed dots'); return; }
+      app.set('placed', []);
+      refreshAll();
+    });
+    dry.addEventListener('click', () => app.dryAll());
+    row.append(clr, dry);
+    refreshers.push(() => { clr.disabled = !app.settings.placed.length; });
+    return row;
+  }
+
+  function imageCtl() {
+    const wrap = el('div', 'group');
+    const file = $('imgFile');
+    const drop = el('div', 'drop');
+    drop.tabIndex = 0;
+    drop.setAttribute('role', 'button');
+    drop.append(el('span', null, 'Background image'), el('span', 'note', 'Drop an image anywhere, or click to choose. Liquid refracts and magnifies what is under it.'));
+    drop.addEventListener('click', () => file.click());
+    drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } });
+    const has = el('div', 'imgrow');
+    const thumb = el('span', 'thumb'), name = el('span', 'name');
+    const swap = btn('btn', 'Replace'), rm = btn('btn', 'Remove');
+    has.append(thumb, name, swap, rm);
+    swap.addEventListener('click', () => file.click());
+    rm.addEventListener('click', () => app.setImage(null));
+    file.addEventListener('change', () => { if (file.files[0]) app.loadImage(file.files[0]); file.value = ''; });
+    wrap.append(drop, has);
+    refreshers.push(() => {
+      drop.hidden = !!app.image; has.hidden = !app.image;
+      if (app.image) { name.textContent = app.image.name; thumb.style.backgroundImage = `url(${app.image.thumb})`; }
+    });
+    return wrap;
+  }
+
+  function actionsCtl() {
+    const row = el('div', 'btnrow');
+    const png = btn('btn primary', 'Export PNG');
+    const rec = btn('btn', 'Record video');
+    png.addEventListener('click', () => app.exportPNG());
+    rec.addEventListener('click', () => app.toggleRecord());
+    row.append(png, rec);
+    refreshers.push(() => { rec.textContent = app.recorder ? 'Stop recording' : 'Record video'; rec.classList.toggle('on', !!app.recorder); });
+    return row;
+  }
+
+  function settingsCtl() {
+    const row = el('div', 'btnrow');
+    bUndo = btn('btn', 'Undo', 'Undo (Ctrl or Cmd + Z)');
+    bRedo = btn('btn', 'Redo', 'Redo (Shift + Ctrl or Cmd + Z)');
+    const reset = btn('btn', 'Defaults', 'Start again with the settings as they came');
+    bUndo.addEventListener('click', () => app.undo());
+    bRedo.addEventListener('click', () => app.redo());
+    reset.addEventListener('click', () => {
+      app.history.push(app.snapshot());
+      const d = clone(app.defaults);
+      d.placed = clone(app.settings.placed);
+      app.applySnapshot({ settings: d, text: app.text.snapshot(), caret: app.caret });
+    });
+    row.append(bUndo, bRedo, reset);
+    return row;
+  }
+  app.history.onChange = () => { bUndo.disabled = !app.history.canUndo; bRedo.disabled = !app.history.canRedo; };
+  app.history.onChange();
+
+  // the stage bar
+  const bPause = $('pause');
+  bPause.addEventListener('click', () => app.togglePause());
+  $('hideui').addEventListener('click', () => app.setUiHidden(true));
+  $('fullscreen').addEventListener('click', () => app.toggleFullscreen());
+  $('showui').addEventListener('click', () => app.setUiHidden(false));
+
+  // drag & drop background images
+  window.addEventListener('dragover', (e) => { e.preventDefault(); document.body.classList.add('dragging'); });
+  window.addEventListener('dragleave', (e) => { if (e.target === document.body || e.clientX <= 0) document.body.classList.remove('dragging'); });
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    document.body.classList.remove('dragging');
+    const f = [...(e.dataTransfer?.files || [])].find(x => /^image\//.test(x.type) || /\.(png|jpe?g|webp|gif|avif|bmp)$/i.test(x.name));
+    if (f) app.loadImage(f); else app.toast('Drop an image file to use it as the surface');
+  });
+
+  const hudEl = $('hud');
+  function refreshAll() {
+    refreshers.forEach(f => f());
+    bPause.textContent = app.paused ? 'Resume' : 'Pause';
+    bPause.classList.toggle('on', app.paused);
+    app.board.classList.toggle('tool-dots', app.settings.tool === 'dots');
+    app.board.classList.toggle('tool-wipe', app.settings.tool === 'wipe');
+    app.updateLetterbox();
+  }
+  refreshAll();
+
+  return {
+    refresh: refreshAll,
+    tick(dt) { tickers.forEach(f => f(dt)); },
+    hud() {
+      const total = app.dots?.length || 0;
+      const wet = app.dots ? app.dots.reduce((n, d) => n + (d.liquid ? 1 : 0), 0) : 0;
+      const name = MATERIALS[app.settings.material].name;
+      const vol = app.sim.stats.volume * 1e9;
+      const slow = app.sim.slowdown < 0.98 ? ` · sim ${(app.sim.slowdown * app.settings.timeScale).toFixed(2)}×` : '';
+      hudEl.innerHTML = `<b>${name}</b> · ${total} dots · ${wet} congealed · ${vol < 1000 ? vol.toFixed(0) + ' mm³' : (vol / 1000).toFixed(2) + ' ml'} · ${Math.round(app.fps)} fps${slow}${app.paused ? ' · <b>paused</b>' : ''}`;
+    },
+  };
+}
+
+function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
+
+
+// ---- js/main.js
+// sweat: dot type whose dots turn to liquid and congeal into beads
+class App {
+  constructor() {
+    this.settings = defaultSettings();
+    this.defaults = defaultSettings();
+    this.text = new TextModel('Ready\nSet\nSweat');
+    this.history = new History();
+    this.frameCount = 0;
+    this.paused = false;
+    this.pointer = { inside: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, down: null, seen: false };
+    this.caret = 15;
+    this.focused = false;
+    this.dirty = { layout: false, alloc: false, env: false, congeal: false };
+    this.lastTime = performance.now();
+    this.fps = 60;
+    this.exportRequest = null;
+    this.liquid = new Set();     // keys of dots that have turned to liquid
+    this.seen = new Set();       // glyph ids that have already had their share congealed
+    this.injectQueue = [];
+    this.dots = [];
+    this.staticGen = 0;
+    this.image = null;
+  }
+
+  async init() {
+    const q = new URLSearchParams(location.search);
+    if (q.has('sim')) { this.settings.perf.simRes = Number(q.get('sim')); this.noAuto = true; }
+    if (q.has('rs')) this.settings.perf.renderScale = Number(q.get('rs'));
+    if (q.has('mat') && PER_MATERIAL[q.get('mat')]) this.settings.material = q.get('mat');
+    if (q.has('text')) this.text.replaceAll(q.get('text'));
+    this.reducedMotion = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    this.canvas = document.getElementById('gl');
+    this.overlay = document.getElementById('overlay');
+    this.board = document.getElementById('board');
+    this.stage = document.getElementById('stage');
+    this.colL = document.getElementById('colLeft');
+    this.colR = document.getElementById('colRight');
+    this.stagebar = document.querySelector('.stagebar');
+    this.ta = document.getElementById('typing');
+    try {
+      this.kit = new GLKit(this.canvas);
+    } catch (e) {
+      this.fatal(e.message);
+      return;
+    }
+    this.setter = new DotSetter();
+    this.sim = new Simulation(this.kit);
+    this.renderer = new Renderer(this.kit);
+    this.ui = buildUI(this);
+    this.bindInput();
+    this.fitBoard();
+    this.allocSim();
+    this.rebuildLayout();
+    this.restart(false);
+    this.renderer.buildEnv(this.settings);
+    this.ta.value = this.text.text;
+    this.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.fatal('The GPU context was lost. Reload the page to continue.'); });
+    new ResizeObserver(() => this.fitBoard()).observe(this.stage);
+    window.addEventListener('resize', () => this.fitBoard());
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && this.fsHid) { this.fsHid = false; this.setUiHidden(false); }
+      this.fitBoard();
+    });
+    // with the controls hidden, a way back appears whenever the pointer moves
+    window.addEventListener('pointermove', () => { if (this.uiHidden) this.peekUi(); });
+    requestAnimationFrame((t) => this.loop(t));
+    window.sweat = this; // console / test access
+  }
+
+  fatal(msg) {
+    const el = document.getElementById('fatal');
+    if (el) { el.textContent = msg; el.hidden = false; }
+    console.error(msg);
+  }
+
+  get art() { return artboardSize(this.settings); }
+  get mat() { return MATERIALS[this.settings.material]; }
+  get matSettings() { return this.settings.mat[this.settings.material]; }
+
+  // ------------------------------------------------------------ state + history
+  snapshot() { return { settings: clone(this.settings), text: this.text.snapshot(), caret: this.caret }; }
+
+  applySnapshot(snap) {
+    const prev = this.settings;
+    this.settings = clone(snap.settings);
+    for (const p of OSC_PATHS) {
+      if (getPath(prev, 'osc.' + p)?.on && getPath(this.settings, 'osc.' + p)?.on) setPath(this.settings, p, getPath(prev, p));
+    }
+    const changed = diffPaths(prev, this.settings);
+    const textChanged = snap.text.text !== this.text.text || snap.text.ids.join() !== this.text.ids.join();
+    this.text.restore(snap.text);
+    this.ta.value = this.text.text;
+    this.caret = Math.min(snap.caret ?? this.text.text.length, this.text.text.length);
+    try { this.ta.setSelectionRange(this.caret, this.caret); } catch (_) { /* hidden */ }
+    this.markEffects(changed, textChanged);
+    this.ui?.refresh();
+  }
+
+  undo() {
+    const s = this.history.undo(this.snapshot());
+    if (s) this.applySnapshot(s);
+  }
+
+  redo() {
+    const s = this.history.redo(this.snapshot());
+    if (s) this.applySnapshot(s);
+  }
+
+  set(path, value, opts = {}) {
+    const before = opts.history !== false ? this.snapshot() : null;
+    const old = getPath(this.settings, path);
+    if (old === value) return;
+    setPath(this.settings, path, value);
+    if (path === 'cursorRadius') this.ringUntil = performance.now() + 1200;
+    if (before) this.history.push(before, opts.mergeKey || null);
+    this.markEffects([path]);
+  }
+
+  markEffects(paths, textChanged = false) {
+    for (const p of paths) {
+      if (EFFECTS.reset.has(p)) { this.dirty.alloc = true; }
+      if (EFFECTS.layout.has(p) || p.startsWith('placed')) this.dirty.layout = true;
+      if (EFFECTS.env.has(p)) this.dirty.env = true;
+      if (EFFECTS.congeal.has(p)) this.dirty.congeal = true;
+      if (EFFECTS.dots.has(p)) this.renderer.dotsDirty = true;
+      if (p === 'aspect' || p === 'customW' || p === 'customH') this.fitBoard();
+      if (p === 'perf.renderScale') this.fitBoard();
+      if (p === 'tool') this.ui?.refresh();
+    }
+    if (textChanged) this.dirty.layout = true;
+  }
+
+  // ------------------------------------------------------------ geometry
+  fitBoard() {
+    if (!this.stage) return;
+    const [aw, ah] = this.art;
+    const r = this.stage.getBoundingClientRect();
+    // the open canvas: clear of the floating columns and the stage bar, or the whole window when hidden
+    let L = 0, T = 0, R = r.width, B = r.height;
+    if (!this.uiHidden) {
+      const floating = getComputedStyle(this.colL).position === 'absolute';
+      const gap = 24;
+      if (floating) {
+        for (const c of [this.colL, this.colR]) {
+          const q = c.getBoundingClientRect();
+          if (!q.width) continue;
+          if (q.left + q.width / 2 - r.left < r.width / 2) L = Math.max(L, q.right - r.left + gap);
+          else R = Math.min(R, q.left - r.left - gap);
+        }
+      } else { L += 16; R -= 16; }
+      const sb = this.stagebar.getBoundingClientRect();
+      T = Math.max(T, sb.bottom - r.top + 16);
+      B -= floating ? 36 : 16;
+    }
+    const availW = Math.max(100, R - L), availH = Math.max(100, B - T);
+    const sc = Math.min(availW / aw, availH / ah);
+    const cw = Math.floor(aw * sc), ch = Math.floor(ah * sc);
+    this.board.style.width = cw + 'px';
+    this.board.style.height = ch + 'px';
+    this.board.style.left = Math.round(L + (availW - cw) / 2) + 'px';
+    this.board.style.top = Math.round(T + (availH - ch) / 2) + 'px';
+    const dpr = Math.min(window.devicePixelRatio || 1, 2) * this.settings.perf.renderScale;
+    const pw = Math.max(64, Math.min(3840, Math.round(cw * dpr)));
+    const ph = Math.max(64, Math.round(pw * ah / aw));
+    if (this.canvas.width !== pw || this.canvas.height !== ph) {
+      this.canvas.width = pw; this.canvas.height = ph;
+    }
+    const odpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.overlay.width = Math.round(cw * odpr); this.overlay.height = Math.round(ch * odpr);
+    this.overlayScale = odpr;
+    this.renderer?.resize(pw, ph);
+  }
+
+  simDims() {
+    const [aw, ah] = this.art;
+    const n = this.settings.perf.simRes;
+    if (aw >= ah) return [n, Math.max(8, Math.round(n * ah / aw))];
+    return [Math.max(8, Math.round(n * aw / ah)), n];
+  }
+
+  get physWidth() { return this.settings.scale / 100; }
+
+  allocSim() {
+    const [nx, ny] = this.simDims();
+    this.sim.allocate(nx, ny);
+    this.dx = this.physWidth / nx;
+    this.sim.dx = this.dx;
+    const [aw] = this.art;
+    this.mToPx = aw / this.physWidth;
+    this.pxMm = this.physWidth * 1000 / aw;
+  }
+
+  // ------------------------------------------------------------ layout + dots
+  rebuildLayout() {
+    const s = this.settings;
+    const [aw, ah] = this.art;
+    const lay = this.setter.layout(this.text.text, this.text.ids, s, { w: aw, h: ah });
+    this.layout = lay;
+    this.buildDots();
+    // newly typed letters sweat their share straight away
+    const fresh = lay.glyphs.filter(g => !this.seen.has(g.id));
+    if (fresh.length) {
+      for (const g of fresh) { this.seen.add(g.id); this.congealGroup(this.dots.filter(d => d.gid === g.id), hash2(s.seed, g.id)); }
+      this.sim.uploadGather();
+    }
+  }
+
+  // every dot on the artboard: glyph dots (keyed by glyph id + index) then placed dots (keyed by -id)
+  buildDots() {
+    const lay = this.layout;
+    const r = lay.r;
+    const dots = [];
+    for (const g of lay.glyphs) {
+      g.dots.forEach(([x, y], j) => {
+        const key = g.id * 1024 + j;
+        dots.push({ key, gid: g.id, x, y, r, sp: hash2(key, 99) & 3, liquid: this.liquid.has(key) });
+      });
+    }
+    for (const p of this.settings.placed) {
+      const key = -p.id;
+      dots.push({ key, gid: -1, x: p.x, y: p.y, r, sp: hash2(p.id, 7) & 3, liquid: this.liquid.has(key) });
+    }
+    this.dots = dots;
+    this.dotByKey = new Map(dots.map(d => [d.key, d]));
+    this.staticDirty = true;
+  }
+
+  uploadStatic() {
+    const [, ah] = this.art;
+    const list = this.dots.filter(d => !d.liquid);
+    const data = new Float32Array(Math.max(1, list.length) * 4);
+    list.forEach((d, i) => data.set([d.x, ah - d.y, d.r, 0], i * 4));
+    this.renderer.setDots(data, list.length);
+    this.staticList = list;
+    this.staticGen++;
+    this.staticDirty = false;
+  }
+
+  toCells(x, y) {
+    const [aw, ah] = this.art;
+    return [x / aw * this.sim.nx, (1 - y / ah) * this.sim.ny];
+  }
+
+  liquefy(d) {
+    if (d.liquid) return;
+    d.liquid = true;
+    this.liquid.add(d.key);
+    const [cx, cy] = this.toCells(d.x, d.y);
+    this.injectQueue.push([cx, cy, d.r / this.art[0] * this.sim.nx, d.sp]);
+    this.staticDirty = true;
+  }
+
+  // turn a share of one letterform's dots to liquid, in random clusters that gather into beads
+  congealGroup(dots, seed) {
+    const s = this.settings;
+    const rng = mulberry32(seed);
+    const N = dots.length;
+    if (!N || s.amount <= 0) return;
+    const want = Math.min(N, Math.floor(s.amount * N + rng()));
+    if (!want) return;
+    const pitch = this.layout.pitch;
+    const near = dots.map((a) => dots.map((b, j) => (a !== b && Math.hypot(a.x - b.x, a.y - b.y) < pitch * 1.5 ? j : -1)).filter(j => j >= 0));
+    const taken = new Uint8Array(N);
+    const cellPerPx = this.sim.nx / this.art[0];
+    let count = 0, guard = 0;
+    while (count < want && guard++ < N * 4) {
+      const free = [];
+      for (let i = 0; i < N; i++) if (!taken[i]) free.push(i);
+      if (!free.length) break;
+      const seedI = free[Math.floor(rng() * free.length)];
+      const size = Math.min(want - count, Math.max(1, Math.round(s.beadSize * (1 - s.variation * rng()))));
+      const cluster = [seedI];
+      taken[seedI] = 1;
+      const frontier = new Set(near[seedI].filter(j => !taken[j]));
+      while (cluster.length < size && frontier.size) {
+        const arr = [...frontier];
+        const j = arr[Math.floor(rng() * arr.length)];
+        frontier.delete(j);
+        if (taken[j]) continue;
+        taken[j] = 1;
+        cluster.push(j);
+        near[j].forEach(q => { if (!taken[q]) frontier.add(q); });
+      }
+      count += cluster.length;
+      // degree 1 pulls the whole cluster into a single bead, lower degrees only partway
+      const degree = 1 - s.variation * rng() * 0.75;
+      const delay = rng() * s.variation * 0.9;
+      if (cluster.length > 1) {
+        let mx = 0, my = 0;
+        cluster.forEach(i => { mx += dots[i].x; my += dots[i].y; });
+        mx /= cluster.length; my /= cluster.length;
+        const strength = 55 * (0.55 + 0.45 * degree);
+        for (const i of cluster) {
+          const d = dots[i];
+          const [ax, ay] = this.toCells(d.x, d.y);
+          const [bx, by] = this.toCells(d.x + (mx - d.x) * degree, d.y + (my - d.y) * degree);
+          this.sim.paintGather(ax, ay, bx, by, d.r * cellPerPx * 1.35 + 1.5, strength, this.sim.simTime + delay);
+        }
+      }
+      cluster.forEach(i => this.liquefy(dots[i]));
+    }
+  }
+
+  // dry everything, then congeal every letterform (and the placed dots) from the current seed
+  restart(toast) {
+    this.sim.clear();
+    this.liquid.clear();
+    this.injectQueue.length = 0;
+    this.seen.clear();
+    this.buildDots();
+    const s = this.settings;
+    for (const g of this.layout.glyphs) {
+      this.seen.add(g.id);
+      this.congealGroup(this.dots.filter(d => d.gid === g.id), hash2(s.seed, g.id));
+    }
+    const placed = this.dots.filter(d => d.gid === -1);
+    if (placed.length) this.congealGroup(placed, hash2(s.seed, 0x5eed));
+    this.sim.uploadGather();
+    this.dirty.congeal = false;
+    if (toast) this.toast('Restarted');
+  }
+
+  randomize() {
+    this.set('seed', (Math.random() * 1e9) | 0);
+    this.restart(false);
+    this.toast('Random congeal');
+    this.ui?.refresh();
+  }
+
+  dryAll() {
+    this.sim.clear();
+    this.liquid.clear();
+    this.injectQueue.length = 0;
+    this.buildDots();
+    this.toast('Dried');
+  }
+
+  // ------------------------------------------------------------ background image
+  async loadImage(file) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const max = Math.min(4096, this.kit.gl.getParameter(this.kit.gl.MAX_TEXTURE_SIZE));
+      const sc = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(bmp.width * sc)); cv.height = Math.max(1, Math.round(bmp.height * sc));
+      cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+      const th = document.createElement('canvas');
+      th.width = 80; th.height = Math.max(1, Math.round(80 * cv.height / cv.width));
+      th.getContext('2d').drawImage(cv, 0, 0, th.width, th.height);
+      const px = th.getContext('2d').getImageData(0, 0, th.width, th.height).data;
+      const sum = [0, 0, 0];
+      for (let i = 0; i < px.length; i += 4) for (let c = 0; c < 3; c++) sum[c] += px[i + c];
+      const avg = '#' + sum.map(v => Math.round(v / (px.length / 4)).toString(16).padStart(2, '0')).join('');
+      this.setImage({ canvas: cv, name: file.name || 'image', thumb: th.toDataURL('image/jpeg', 0.7), w: cv.width, h: cv.height, avg });
+    } catch (e) {
+      this.toast('Could not read that image');
+    }
+  }
+
+  setImage(img) {
+    this.image = img;
+    this.renderer.setImage(img ? img.canvas : null);
+    this.dirty.env = true;
+    this.ui?.refresh();
+    if (img) this.toast('Surface image loaded');
+  }
+
+  imageXf() {
+    if (!this.image) return [1, 1, 0, 0];
+    const [aw, ah] = this.art;
+    const a = aw / ah, b = this.image.w / this.image.h;
+    const im = this.settings.image;
+    let sx, sy;
+    if ((im.fit === 'contain') === (b > a)) { sx = 1; sy = b / a; } else { sx = a / b; sy = 1; }
+    const z = Math.max(im.zoom, 0.01);
+    return [sx / z, sy / z, -im.x * 0.5, im.y * 0.5];
+  }
+
+  // ------------------------------------------------------------ input
+  bindInput() {
+    const b = this.board;
+    const toArt = (e) => {
+      const r = b.getBoundingClientRect();
+      const [aw, ah] = this.art;
+      return [(e.clientX - r.left) / r.width * aw, (e.clientY - r.top) / r.height * ah];
+    };
+    const hint = document.getElementById('hint');
+    let hintArmed = false;
+    const dismissHint = () => { if (hintArmed || !hint) return; hintArmed = true; setTimeout(() => hint.classList.add('gone'), 2500); };
+    const enter = (e) => {
+      this.pointer.inside = true;
+      [this.pointer.x, this.pointer.y] = toArt(e);
+      if (!this.pointer.seen) { this.pointer.px = this.pointer.x; this.pointer.py = this.pointer.y; this.pointer.seen = true; }
+    };
+    b.addEventListener('pointerenter', enter);
+    b.addEventListener('pointerleave', () => { this.pointer.inside = false; });
+    b.addEventListener('pointermove', (e) => {
+      dismissHint();
+      enter(e);
+      if (this.pointer.down && this.settings.tool === 'dots') this.dragDots(e.altKey);
+    });
+    b.addEventListener('pointerdown', (e) => {
+      const [x, y] = toArt(e);
+      this.pointer.x = x; this.pointer.y = y; this.pointer.inside = true;
+      if (e.pointerType === 'touch') { this.pointer.px = x; this.pointer.py = y; }
+      this.pointer.down = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId };
+      b.setPointerCapture?.(e.pointerId);
+      if (this.settings.tool === 'dots') {
+        this.dotGesture = this.snapshot();
+        this.lastDot = null;
+        this.dragDots(e.altKey);
+      }
+      e.preventDefault();
+    });
+    const up = (e) => {
+      const d = this.pointer.down;
+      this.pointer.down = null;
+      if (e.pointerType === 'touch') this.pointer.inside = false;
+      if (this.dotGesture) {
+        if (JSON.stringify(this.dotGesture.settings.placed) !== JSON.stringify(this.settings.placed)) this.history.push(this.dotGesture);
+        this.dotGesture = null;
+        this.ui?.refresh();
+        return;
+      }
+      if (!d || this.settings.tool !== 'congeal') return;
+      // a click or tap (not a drag) places the text caret
+      const moved = Math.hypot(e.clientX - d.x, e.clientY - d.y);
+      if (moved > 8 || (e.pointerType !== 'mouse' && performance.now() - d.t > 350)) return;
+      const [x, y] = toArt(e);
+      this.caret = this.setter.hitTest(this.layout, x, y);
+      this.ta.focus({ preventScroll: true });
+      this.ta.setSelectionRange(this.caret, this.caret);
+      this.history.breakMerge();
+    };
+    b.addEventListener('pointerup', up);
+    b.addEventListener('pointercancel', () => { this.pointer.down = null; this.pointer.inside = false; this.dotGesture = null; });
+    this.ta.addEventListener('focus', () => { this.focused = true; this.board.classList.add('typing'); });
+    this.ta.addEventListener('blur', () => { this.focused = false; this.board.classList.remove('typing'); });
+    this.ta.addEventListener('beforeinput', () => { this._preEdit = this.snapshot(); });
+    this.ta.addEventListener('input', () => {
+      const before = this._preEdit || this.snapshot();
+      this._preEdit = null;
+      if (this.text.update(this.ta.value)) {
+        this.history.push(before, 'typing', 1200);
+        this.dirty.layout = true;
+        this.ui?.refresh();
+      }
+      this.caret = this.ta.selectionStart;
+    });
+    const syncCaret = () => { if (this.focused) this.caret = this.ta.selectionStart; };
+    this.ta.addEventListener('keyup', syncCaret);
+    this.ta.addEventListener('select', syncCaret);
+    document.addEventListener('selectionchange', syncCaret);
+    window.addEventListener('keydown', (e) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        if (e.shiftKey) this.redo(); else this.undo();
+        return;
+      }
+      if (mod && (e.key === 'y' || e.key === 'Y')) { e.preventDefault(); this.redo(); return; }
+      if (e.key === 'Escape' && this.focused) { this.ta.blur(); return; }
+      if (e.key === 'Escape' && this.uiHidden && !document.fullscreenElement) { this.setUiHidden(false); return; }
+      const a = document.activeElement;
+      const editing = this.focused || a?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(a?.tagName);
+      if (!editing && !mod && !e.altKey) {
+        const k = e.key.toLowerCase();
+        if (e.key === ' ' && (a === document.body || !a)) { e.preventDefault(); this.togglePause(); }
+        else if (k === 'r') this.restart(true);
+        else if (k === 'g') this.randomize();
+        else if (k === 'h') this.setUiHidden(!this.uiHidden);
+        else if (k === 'f') this.toggleFullscreen();
+      }
+    }, true);
+  }
+
+  // place dots along the drag at the type's dot pitch; alt removes placed dots instead
+  dragDots(remove) {
+    const p = this.pointer;
+    const r = this.layout.r, pitch = this.layout.pitch;
+    if (remove) {
+      const keep = this.settings.placed.filter(d => Math.hypot(d.x - p.x, d.y - p.y) > Math.max(r * 1.2, 6));
+      if (keep.length !== this.settings.placed.length) this.set('placed', keep, { history: false });
+      return;
+    }
+    if (this.lastDot && Math.hypot(p.x - this.lastDot[0], p.y - this.lastDot[1]) < pitch) return;
+    const id = this.settings.placed.reduce((m, d) => Math.max(m, d.id), 0) + 1;
+    this.set('placed', [...this.settings.placed, { id, x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }], { history: false });
+    this.lastDot = [p.x, p.y];
+  }
+
+  togglePause() { this.paused = !this.paused; this.ui?.refresh(); }
+
+  // text typed into the panel's field: one undo step per burst of typing
+  setText(v) {
+    const before = this.snapshot();
+    if (!this.text.update(v)) return;
+    this.history.push(before, 'typing', 1200);
+    this.dirty.layout = true;
+    this.ta.value = this.text.text;
+    this.caret = Math.min(this.caret, this.text.text.length);
+  }
+
+  // the artwork alone: controls hidden, the artboard fitted to the whole window
+  setUiHidden(off) {
+    this.uiHidden = !!off;
+    document.documentElement.classList.toggle('ui-off', this.uiHidden);
+    if (this.uiHidden) { this.ta.blur(); this.peekUi(); this.toast('Press H or Esc to show the controls'); }
+    else document.documentElement.classList.remove('peek', 'idle');
+    this.fitBoard();
+  }
+
+  peekUi() {
+    const h = document.documentElement;
+    h.classList.add('peek'); h.classList.remove('idle');
+    clearTimeout(this._peekT);
+    this._peekT = setTimeout(() => { h.classList.remove('peek'); h.classList.add('idle'); }, 1800);
+  }
+
+  toggleFullscreen() {
+    if (document.fullscreenElement) { document.exitFullscreen?.(); return; }
+    const el = document.documentElement;
+    if (!el.requestFullscreen) { this.setUiHidden(true); return; }
+    this.fsHid = !this.uiHidden;
+    this.setUiHidden(true);
+    el.requestFullscreen().catch(() => { this.fsHid = false; });
+  }
+
+  // the margin round a fitted artboard, coloured like its surface so the artwork reads edge to edge
+  updateLetterbox() {
+    const c = this.image ? '#000000' : this.matSettings.background;
+    document.documentElement.style.setProperty('--letter', c);
+  }
+
+  endDrag() { this.dragging = false; }
+
+  toast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => el.classList.remove('show'), 1600);
+  }
+
+  // ------------------------------------------------------------ frame
+  loop(now) {
+    requestAnimationFrame((t) => this.loop(t));
+    let dt = (now - this.lastTime) / 1000;
+    this.lastTime = now;
+    if (!(dt > 0)) dt = 1 / 60;
+    dt = Math.min(dt, 0.1);
+    this.fps = this.fps * 0.95 + (1 / Math.max(dt, 1e-3)) * 0.05;
+    this.frame(dt);
+  }
+
+  // spherical-cap height of a dot bead (artboard px)
+  capPx(r) {
+    const th = Math.min(Math.max(this.matSettings.contactAngle, 12), 88) * Math.PI / 180;
+    return r / Math.sin(th) * (1 - Math.cos(th));
+  }
+
+  frame(dt) {
+    if (!this.paused) this.ui?.tick(dt);
+    const s = this.settings;
+    if (this.dirty.alloc) { this.allocSim(); this.dirty.alloc = false; this.dirty.layout = true; this.dirty.congeal = true; }
+    if (this.dirty.layout) { this.rebuildLayout(); this.dirty.layout = false; }
+    if (this.dirty.congeal) this.restart(false);
+    if (this.dirty.env) { this.renderer.buildEnv(s, this.image?.avg); this.dirty.env = false; this.updateLetterbox(); }
+
+    const [aw, ah] = this.art;
+    const nx = this.sim.nx, ny = this.sim.ny;
+    const p = this.pointer;
+    const ms = this.matSettings;
+    const tool = s.tool;
+    const active = p.inside && !this.focused && (tool !== 'congeal' || s.liquefy === 'hover' || !!p.down);
+
+    // cursor turns the dots it touches to liquid (sweeping the segment travelled this frame)
+    if (tool === 'congeal' && active && !this.paused) {
+      const R = s.cursorRadius;
+      const ax = p.px, ay = p.py, bx = p.x, by = p.y;
+      const sx = bx - ax, sy = by - ay, l2 = sx * sx + sy * sy;
+      for (const d of this.dots) {
+        if (d.liquid) continue;
+        const t = l2 > 0 ? clamp(((d.x - ax) * sx + (d.y - ay) * sy) / l2, 0, 1) : 1;
+        if (Math.hypot(d.x - (ax + sx * t), d.y - (ay + sy * t)) < R * 0.85 + d.r * 0.3) this.liquefy(d);
+      }
+    }
+    if (this.staticDirty) this.uploadStatic();
+    if (this.injectQueue.length) {
+      this.sim.inject(this.injectQueue, ms.contactAngle);
+      this.injectQueue.length = 0;
+    }
+
+    // cursor velocity (m/s, sim axes), smoothed
+    const vx = (p.x - p.px) / Math.max(dt, 1e-3) / this.mToPx, vy = -(p.y - p.py) / Math.max(dt, 1e-3) / this.mToPx;
+    p.vx = p.vx * 0.6 + vx * 0.4; p.vy = p.vy * 0.6 + vy * 0.4;
+    const cellPerPx = nx / aw;
+    const r0 = this.layout.r;
+    if (!this.paused) {
+      const ph = {
+        dx: this.dx, rhoL: this.mat.rhoL,
+        sigma: ms.surfaceTension / 1000, viscosity: ms.viscosity / 1000, theta: ms.contactAngle,
+        gravity: s.gravity, gravityAngle: s.gravityAngle, pinning: ms.pinning, coalesce: s.coalesce,
+        timeScale: s.timeScale,
+        bond: clamp(Math.pow(2.5 / (r0 * this.pxMm), 2), 0.08, 1),
+      };
+      const pressed = !!p.down;
+      const congealOn = tool === 'congeal' && active;
+      const forces = {
+        cur: [p.x * cellPerPx, (1 - p.y / ah) * ny, s.cursorRadius * cellPerPx, (congealOn || (tool === 'wipe' && pressed && p.inside)) ? 1 : 0],
+        curVel: [p.vx, p.vy],
+        pull: congealOn ? s.pull * s.pull * 90 * (pressed ? 1.6 : 1) : 0,
+        drag: congealOn && pressed ? s.carry * 45 : 0,
+        wipe: tool === 'wipe' && pressed && p.inside,
+        life: 2.6, gatherR: Math.max(r0 * cellPerPx * 1.2, 1.5),
+        bulkLod: clamp(Math.log2(Math.max(r0 * cellPerPx, 1)), 0, 5),
+        href: 0.42 * this.capPx(r0) / this.mToPx, pxToM: 1 / this.mToPx,
+      };
+      this.sim.step(dt, ph, forces, s.perf.maxSubsteps);
+    }
+    p.px = p.x; p.py = p.y;
+    if (this.frameCount % 12 === 0) this.sim.requestStats();
+
+    // beads that run over a dry dot pick it up
+    // every dry dot is live: liquid that reaches one fuses with it
+    if (!this.paused && this.frameCount % 3 === 0 && this.staticList?.length) {
+      const gen = this.staticGen, list = this.staticList;
+      const thr = 0.15 * this.capPx(r0) / this.mToPx;
+      // in the heavier weights neighbouring dots overlap, so the ring stays inside the gap they leave
+      const lay = this.layout;
+      const ring = clamp(Math.min(0.45, 0.85 * (lay.pitch - lay.r) / lay.r), 0.1, 0.45);
+      this.sim.probe(this.renderer.dotData, list.length, [cellPerPx, ny / ah], ring, (data) => {
+        if (gen !== this.staticGen) return;
+        for (let i = 0; i < list.length; i++) {
+          if (data[i * 4] <= thr) continue;
+          const d = this.dotByKey.get(list[i].key);
+          if (d) this.liquefy(d);
+        }
+      });
+    }
+
+    this.renderer.render({
+      art: [aw, ah], sim: this.sim, mToPx: this.mToPx, pxMm: this.pxMm, settings: s,
+      dotTheta: ms.contactAngle, hmaxPx: Math.max(this.capPx(r0), this.sim.hmaxEst * this.mToPx),
+      imgXf: this.imageXf(), staticGrain: this.reducedMotion,
+    }, this.paused ? 0 : dt);
+
+    if (this.exportRequest) { const r = this.exportRequest; this.exportRequest = null; r(); }
+    this.drawOverlay();
+    if (this.frameCount % 15 === 0) this.ui?.hud();
+    this.autoQuality(dt);
+    this.frameCount++;
+  }
+
+  autoQuality(dt) {
+    if (this.autoDone || this.noAuto || document.hidden) return;
+    this.aqFrames = (this.aqFrames || 0) + 1;
+    this.aqTime = (this.aqTime || 0) + dt;
+    if (this.aqFrames < 150) return;
+    const fps = this.aqFrames / this.aqTime;
+    this.aqFrames = 0; this.aqTime = 0;
+    const perf = this.settings.perf;
+    if (fps < 36 && perf.simRes > 384) {
+      perf.simRes = 384; this.dirty.alloc = true;
+      this.defaults.perf.simRes = 384;
+      this.toast('Using medium simulation quality for a smoother frame rate');
+      this.ui?.refresh();
+    } else if (fps < 30 && perf.renderScale > 0.7) {
+      perf.renderScale = 0.7; this.fitBoard(); this.autoDone = true;
+      this.toast('Lowered render scale for a smoother frame rate');
+      this.ui?.refresh();
+    } else {
+      this.autoDone = true;
+    }
+  }
+
+  drawOverlay() {
+    const o = this.overlay, ctx = o.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, o.width, o.height);
+    const [aw] = this.art;
+    const k = o.width / aw;
+    const s = this.settings;
+    const bgDark = luminance(this.matSettings.background) < 0.35;
+    const ink = bgDark ? 'rgba(255,255,255,0.85)' : 'rgba(20,24,28,0.85)';
+    if (this.focused && this.layout) {
+      const c = this.layout.carets[Math.min(this.caret, this.layout.carets.length - 1)];
+      if (c && (this.reducedMotion || Math.floor(performance.now() / 530) % 2 === 0)) {
+        const top = c.y - this.layout.capHeight * 1.08, bot = c.y + this.layout.capHeight * 0.14;
+        ctx.fillStyle = ink;
+        ctx.fillRect(Math.round(c.x * k) - 1, top * k, Math.max(1.5, 2 * this.overlayScale), (bot - top) * k);
+      }
+    }
+    const p = this.pointer;
+    ctx.lineWidth = 1 * this.overlayScale;
+    ctx.strokeStyle = bgDark ? 'rgba(255,255,255,0.55)' : 'rgba(30,30,34,0.5)';
+    // dot tool: preview of the dot about to be placed
+    if (s.tool === 'dots' && p.inside && this.layout) {
+      ctx.setLineDash([2 * this.overlayScale, 3 * this.overlayScale]);
+      ctx.beginPath(); ctx.arc(p.x * k, p.y * k, this.layout.r * k, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      return;
+    }
+    if (performance.now() < (this.ringUntil || 0) || (s.tool === 'wipe' && p.inside)) {
+      const [, ah] = this.art;
+      const cx = p.inside ? p.x : aw / 2, cy = p.inside ? p.y : ah / 2;
+      ctx.setLineDash([3 * this.overlayScale, 4 * this.overlayScale]);
+      ctx.beginPath(); ctx.arc(cx * k, cy * k, s.cursorRadius * k, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  async saveFile(blob, filename) {
+    if (window.claude && typeof window.claude.use === 'function') {
+      let dl = null;
+      try { dl = await window.claude.use('downloads'); } catch (_) { dl = null; }
+      if (dl) {
+        try {
+          await dl.save({ filename, data: blob });
+          this.toast('Saved ' + filename);
+        } catch (e) {
+          const code = e && e.code;
+          if (code === 'declined') return;
+          if (code === 'rate_limited') this.toast('A save prompt is already open');
+          else if (code === 'too_large') this.toast('That file is too large to save here');
+          else this.toast('Saving files is not available in this view');
+        }
+        return;
+      }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  exportPNG() {
+    this.exportRequest = () => {
+      this.canvas.toBlob((blob) => {
+        if (blob) this.saveFile(blob, `sweat-${stamp()}.png`);
+      }, 'image/png');
+    };
+  }
+
+  toggleRecord() {
+    if (this.recorder) {
+      this.recorder.stop();
+      return;
+    }
+    if (!this.canvas.captureStream || !window.MediaRecorder) { this.toast('Recording is not supported in this browser'); return; }
+    const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'].find(m => MediaRecorder.isTypeSupported(m));
+    if (!mime) { this.toast('Recording is not supported in this browser'); return; }
+    const stream = this.canvas.captureStream(60);
+    const chunks = [];
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 16e6 });
+    rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      this.recorder = null;
+      this.ui?.refresh();
+      this.saveFile(blob, `sweat-${stamp()}.${mime.includes('mp4') ? 'mp4' : 'webm'}`);
+    };
+    rec.start();
+    this.recorder = rec;
+    this.toast('Recording… press Stop recording to save');
+    this.ui?.refresh();
+  }
+}
+
+// the wordmark, set in Interdot from the same dot data
+function drawMark(el) {
+  if (!el) return;
+  const setter = new DotSetter();
+  const r = FONT.radii.regular, off = r - FONT.base;
+  let x = 0, circles = '';
+  for (const ch of 'sweat') {
+    const g = setter.glyph(ch);
+    for (let j = 0; j < g[1].length; j += 2) circles += `<circle cx="${(x + g[1][j] + off).toFixed(1)}" cy="${(FONT.xh - g[1][j + 1] - off).toFixed(1)}" r="${r}"/>`;
+    x += g[0];
+  }
+  el.innerHTML = `<svg viewBox="20 -40 ${x + 10} ${FONT.xh + 100}" fill="currentColor" aria-hidden="true">${circles}</svg>`;
+}
+
+function stamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+
+function luminance(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return (0.2126 * ((v >> 16) & 255) + 0.7152 * ((v >> 8) & 255) + 0.0722 * (v & 255)) / 255;
+}
+
+function diffPaths(a, b, prefix = '') {
+  const out = [];
+  const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+  for (const k of keys) {
+    const pa = a?.[k], pb = b?.[k];
+    const path = prefix ? prefix + '.' + k : k;
+    if (pa && pb && typeof pa === 'object' && typeof pb === 'object') out.push(...diffPaths(pa, pb, path));
+    else if (pa !== pb) out.push(path);
+  }
+  return out.map(p => p.replace(/^mat\.(sweat|ink|mercury)\./, 'mat.'));
+}
+
+const app = new App();
+app.init();
+
+</script>
+</body>
+</html>
