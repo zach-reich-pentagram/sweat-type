@@ -2944,7 +2944,7 @@ function sections(app) {
         { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots congeal' },
         { kind: 'range', path: 'beadSize', label: 'Cluster size', min: 1, max: 16, step: 1, unit: 'dots', show: clusters, hint: 'Most dots that congeal together' },
         { kind: 'range', path: 'runLength', label: 'Run length', min: 2, max: 16, step: 1, unit: 'dots', show: runs, hint: 'How many dots each run follows along the stroke' },
-        { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 0.6, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run' },
+        { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run, compounding: at 40% a dot two steps in is nearly twice the size' },
         { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle'], ['both', 'Grow and swell']] },
         { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes vary widely' },
       ],
@@ -3963,11 +3963,11 @@ class App {
       const n = path.length;
       path.forEach((idx, i) => {
         const d = dots[idx];
-        // ramp: bigger dot by dot; swell: biggest in the middle; both: the ramp with a swell on top
+        // exponential: each step multiplies the size by (1 + rate), so the peak stands well clear of
+        // its neighbours. ramp: bigger dot by dot; swell: biggest in the middle; both: the two together
         const sw = Math.min(i, n - 1 - i);
-        const k = s.runShape === 'swell' ? 1 + rate * sw
-          : s.runShape === 'both' ? (1 + rate * i) * (1 + rate * sw)
-          : 1 + rate * i;
+        const steps = s.runShape === 'swell' ? sw : s.runShape === 'both' ? i + sw : i;
+        const k = Math.pow(1 + rate, steps);
         this.liquefy(d);
         this.geo.set(d.key, { s: k, base: k, ox: 0, oy: 0, w: 0, px: d.x, py: d.y });
       });
