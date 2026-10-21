@@ -1989,13 +1989,12 @@ const WEIGHTS = [['thin', 'Thin'], ['light', 'Light'], ['regular', 'Regular'], [
 const MATERIALS = {
   sweat: { name: 'Sweat', rhoL: 997 },
   ink: { name: 'Ink', rhoL: 1050 },
-  mercury: { name: 'Mercury', rhoL: 13595 },
 };
 
 // everything that defines a material's look and feel; kept separately per material
 const PER_MATERIAL = {
   sweat: {
-    background: '#c48c6c', surface: 'skin', dots: '#3b2418', dotStyle: 'bead',
+    background: '#c48c6c', surface: 'plain', dots: '#3b2418', dotStyle: 'print',
     surfaceTension: 70, viscosity: 1.1, contactAngle: 78, pinning: 0.45,
     tint: '#f4eee6', clarity: 0.97, ior: 1.333, gloss: 0.97,
   },
@@ -2003,11 +2002,6 @@ const PER_MATERIAL = {
     background: '#000000', surface: 'plain', dots: '#ffffff', dotStyle: 'print',
     surfaceTension: 12.1, viscosity: 200, contactAngle: 62, pinning: 0,
     tint: '#ffffff', clarity: 0, ior: 1.45, gloss: 0.92,
-  },
-  mercury: {
-    background: '#e9eaeb', surface: 'plain', dots: '#2b2d31', dotStyle: 'bead',
-    surfaceTension: 485, viscosity: 1.55, contactAngle: 140, pinning: 0.02,
-    tint: '#dfe3e8', finish: 0.08, glints: 0.22,
   },
 };
 
@@ -2050,6 +2044,10 @@ function defaultSettings() {
     wetTrails: 0.35,
     lens: 80,
     congealStyle: 'geometric',
+    pattern: 'clusters',
+    runLength: 5,
+    growth: 0.14,
+    runShape: 'swell',
     hideCursor: false,
     reach: 1.5,
     bridge: 0.9,
@@ -2094,21 +2092,14 @@ function resolvePath(s, path) {
   return parts;
 }
 
-// one-click physics setups; d = the current material's defaults
-const physicsBase = (d) => ({
-  gravity: 0.35, gravityAngle: 0, coalesce: 1.0, timeScale: 1.0, pull: 0.5, carry: 0.6,
-  'mat.surfaceTension': d.surfaceTension, 'mat.viscosity': d.viscosity,
-  'mat.contactAngle': d.contactAngle, 'mat.pinning': d.pinning,
-});
+// one-click congeal setups
 const PRESETS = [
-  { id: 'beads', name: 'Sweat beads', hint: 'Default physics: small beads cling, merged ones get heavy and run', patch: (d) => physicsBase(d) },
-  { id: 'run', name: 'Running sweat', hint: 'Steep and slippery: beads run and collect the dots below them', patch: (d) => ({ ...physicsBase(d), gravity: 0.8, 'mat.pinning': d.pinning * 0.55 }) },
-  { id: 'cond', name: 'Condensation', hint: 'A cold pane lying almost flat: beads hold their place and only merge when pushed', patch: (d) => ({ ...physicsBase(d), gravity: 0.2, 'mat.pinning': Math.min(1, d.pinning + 0.3), 'mat.contactAngle': Math.min(110, d.contactAngle + 10) }) },
-  { id: 'ooze', name: 'Slow ooze', hint: 'Thick, syrupy liquid that creeps together', patch: (d) => ({ ...physicsBase(d), gravity: 0.55, timeScale: 0.7, 'mat.viscosity': d.viscosity * 12 }) },
-  { id: 'zerog', name: 'Zero-g', hint: 'No gravity: beads only gather where they are pulled', patch: (d) => ({ ...physicsBase(d), gravity: 0, pull: 0.8 }) },
-  { id: 'apart', name: 'Keep apart', hint: 'Beads from different dots repel instead of merging', patch: (d) => ({ ...physicsBase(d), coalesce: -1, gravity: 0.3 }) },
-  { id: 'sideways', name: 'Sideways drift', hint: 'Gravity pulls to the right', patch: (d) => ({ ...physicsBase(d), gravity: 0.6, gravityAngle: 90 }) },
-  { id: 'finger', name: 'Finger drag', hint: 'A strong, wide pull: press and drag to sweep dots into one big bead', patch: (d) => ({ ...physicsBase(d), pull: 1, carry: 1, gravity: 0.2 }) },
+  { id: 'tight', name: 'Tight bridges', hint: 'Only side-by-side dots join, in near-straight bridges; the cursor swells them a little', patch: () => ({
+    pattern: 'clusters', reach: 1.05, bridge: 0.89, hoverGrow: 0.45, hoverPull: 0.12, amount: 0, beadSize: 1, variation: 0.6,
+  }) },
+  { id: 'runs', name: 'Swelling runs', hint: 'Dots congeal along the strokes, each a little bigger than the last, and bridge into swelling chains', patch: () => ({
+    pattern: 'runs', reach: 0.95, bridge: 0.5, hoverGrow: 0.45, hoverPull: 0.12, amount: 0.35, runLength: 5, growth: 0.3, runShape: 'swell', variation: 0.5,
+  }) },
 ];
 
 // what a setting change requires downstream
@@ -2116,7 +2107,7 @@ const EFFECTS = {
   layout: new Set(['weight', 'fontSize', 'leading', 'tracking', 'align', 'valign', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft']),
   reset: new Set(['aspect', 'customW', 'customH', 'scale', 'perf.simRes']),
   env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
-  congeal: new Set(['amount', 'beadSize', 'variation', 'seed', 'congealStyle']),
+  congeal: new Set(['amount', 'beadSize', 'variation', 'seed', 'congealStyle', 'pattern', 'runLength', 'growth', 'runShape']),
   union: new Set(['reach', 'bridge']),
   dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
 };
@@ -2812,7 +2803,7 @@ class Renderer {
     }, this.t.hdr);
     k.run(this.p.final, {
       uHdr: this.t.hdr, uBloom: this.t.b8, uStreakA: this.t.sA, uStreakB: this.t.sB,
-      uBloomAmt: 0, uGlints: 0, uGrain: s.light.grain, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: 0, uKnee: 1,
+      uBloomAmt: 0, uGlints: 0, uGrain: 0, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: 0, uKnee: 1,
     }, null);
   }
 
@@ -2828,7 +2819,7 @@ class Renderer {
     if (scene.heatMode === 'all') { this.renderHeat(scene, res); return; }
     // 1) heights at render resolution
     k.run(this.p.prep, {
-      uRes: res, uSimN: [sim.nx, sim.ny], uDotTex: this.t.dot, uBeadStyle: m.dotStyle === 'bead' ? 1 : 0,
+      uRes: res, uSimN: [sim.nx, sim.ny], uDotTex: this.t.dot, uBeadStyle: 0,
       uCongeal: s.coalesce, uMeniscus: (merc ? 1.2 : 0.35) / scene.pxMm, uFilmPx: (merc ? 0.12 : 0.08) / scene.pxMm,
     }, this.t.prep);
 
@@ -2863,22 +2854,22 @@ class Renderer {
       uArt: [aw, ah], uCam: [aw * 0.5, ah * 0.5, Math.max(aw, ah) * 1.5], uBg: bg, uL: Ld,
       uShadow: L.shadow, uCaustics: L.caustics, uExposure: L.exposure,
       uAoLiquid: merc ? 1.0 : 0.25 + 0.75 * (1 - clarity),
-      uCellPx: aw / sim.nx, uGrain2: s.grain, uWetDarken: merc ? 0 : s.wetTrails,
+      uCellPx: aw / sim.nx, uGrain2: 0, uWetDarken: merc ? 0 : s.wetTrails,
       uLiqMinMm: merc ? 0.2 : 0.1, uFilmAoPx: (merc ? 0.2 : 0.1) / scene.pxMm,
       uMode: merc ? 1 : 0, uPxMm: scene.pxMm,
-      uSurface: SURFACES[m.surface] ?? 0, uSurfScale: s.surfScale * 0.13 / scene.pxMm,
+      uSurface: 0, uSurfScale: s.surfScale * 0.13 / scene.pxMm,
       uImg: this.img || this.blank, uHasImg: this.img ? 1 : 0, uImgXf: scene.imgXf,
       uImgLod: this.img ? Math.max(0, Math.log2(this.img.w * scene.imgXf[0] / this.w)) : 0,
       uDotCol: srgbToLinear(m.dots),
       uTint: srgbToLinear(m.tint), uIor: m.ior ?? 1.33, uDensity: density, uTintStr: 0.35,
       uLens: s.lens, uRough: merc ? 0.01 : (1 - (m.gloss ?? 1)) * 0.35 + 0.006,
       uFinish: m.finish ?? 0, uMercTint: srgbToLinear(m.tint),
-      uFlat: s.flat ? 1 : 0, uFlatCol: srgbToLinear(m.tint),
+      uFlat: 1, uFlatCol: srgbToLinear(m.tint),
     }, this.t.hdr);
 
     // 4) bloom + glints
     const glints = merc ? (m.glints ?? 0) : 0;
-    const doBloom = !s.flat && (L.bloom > 0.001 || glints > 0.001);
+    const doBloom = false;
     if (doBloom) {
       k.run(this.p.bright, { uSrc: this.t.hdr, uThreshold: 1.0 }, this.t.b2);
       k.run(this.p.down, { uSrc: this.t.b2, uTexel: [0.5 / this.t.b2.w, 0.5 / this.t.b2.h] }, this.t.b4);
@@ -2903,8 +2894,8 @@ class Renderer {
     }
     k.run(this.p.final, {
       uHdr: this.t.hdr, uBloom: this.t.b8, uStreakA: this.t.sA, uStreakB: this.t.sB,
-      uBloomAmt: L.bloom, uGlints: glints, uGrain: L.grain, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: doBloom ? 1 : 0,
-      uKnee: Math.min(1, Math.max(0.8, Math.max(...bg) * L.exposure * 1.02 + 0.005)),
+      uBloomAmt: 0, uGlints: 0, uGrain: 0, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: doBloom ? 1 : 0,
+      uKnee: 1,   // flat colour: picked colours come out exactly, no highlight roll-off
     }, null);
   }
 }
@@ -2921,10 +2912,11 @@ const TIGHT_UNITS = new Set(['%', '°', '‰', '×']);
 // item kinds: range (mult, unit, digits, log, osc, note, show, hint), seg, popup, color, switch, text,
 // margins, pair, presets, congealBtns, dotBtns, image, actions, settingsBtns, note
 function sections(app) {
-  const isMerc = () => app.settings.material === 'mercury';
-  const notMerc = () => !isMerc();
-  const hasImg = () => !!app.image;
   const tool = (t) => () => app.settings.tool === t;
+  const heat = () => !!app.settings.heat.on;
+  const notHeat = () => !heat();
+  const runs = () => app.settings.pattern === 'runs';
+  const clusters = () => !runs();
   return [
     {
       col: 'left', badge: '1', title: 'Text', items: [
@@ -2940,108 +2932,53 @@ function sections(app) {
     },
     {
       col: 'left', badge: '2', title: 'Congeal', items: [
-        { kind: 'seg', path: 'congealStyle', options: [['liquid', 'Liquid'], ['geometric', 'Geometric']], hint: 'Liquid: beads that flow and fuse. Geometric: a crisp union of the dots, like Pathfinder’s Unite' },
-        { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, digits: 2, unit: '×', show: () => app.geometric, hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges' },
-        { kind: 'range', path: 'bridge', label: 'Bridge width', min: 0.1, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
-        { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 3, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
-        { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
+        { kind: 'presets' },
+        { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, digits: 2, unit: '×', hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges. Grown dots reach further in proportion' },
+        { kind: 'range', path: 'bridge', label: 'Bridge width', min: 0.1, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
+        { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 3, step: 0.01, mult: 100, unit: '%', hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
+        { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
         { kind: 'congealBtns' },
-        { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots turn to liquid and congeal' },
-        { kind: 'range', path: 'beadSize', label: 'Bead size', min: 1, max: 16, step: 1, unit: 'dots', hint: 'Most dots that gather into one bead' },
-        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster is the same size and fully merged, 100 = sizes and degrees of congealing vary widely' },
-        { kind: 'note', html: 'Every dry dot is live: liquid that reaches one fuses with it.' },
+        { kind: 'seg', path: 'pattern', options: [['clusters', 'Clusters'], ['runs', 'Swelling runs']], hint: 'Clusters: random groups of dots congeal. Swelling runs: dots congeal along the strokes, each a little bigger than the last' },
+        { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots congeal' },
+        { kind: 'range', path: 'beadSize', label: 'Cluster size', min: 1, max: 16, step: 1, unit: 'dots', show: clusters, hint: 'Most dots that congeal together' },
+        { kind: 'range', path: 'runLength', label: 'Run length', min: 2, max: 16, step: 1, unit: 'dots', show: runs, hint: 'How many dots each run follows along the stroke' },
+        { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 0.6, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run' },
+        { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle']] },
+        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes vary widely' },
       ],
     },
     {
       col: 'left', badge: '3', title: 'Cursor', items: [
-        { kind: 'seg', path: 'tool', options: [['congeal', 'Congeal'], ['dots', 'Place dots'], ['wipe', 'Wipe']] },
-        { kind: 'popup', path: 'liquefy', label: 'Liquefy on', options: [['hover', 'Hover'], ['press', 'Press']], show: tool('congeal') },
+        { kind: 'seg', path: 'tool', options: [['congeal', 'Congeal'], ['dots', 'Place dots'], ['wipe', 'Dry']] },
+        { kind: 'popup', path: 'liquefy', label: 'Congeal on', options: [['hover', 'Hover'], ['press', 'Press']], show: tool('congeal') },
         { kind: 'note', html: 'Click to place a dot the size of the type’s dots; drag to draw a row; Alt-click removes one.', show: tool('dots') },
-        { kind: 'note', html: 'Press and drag to soak up liquid.', show: tool('wipe') },
+        { kind: 'note', html: 'Press and drag to dry congealed dots again.', show: tool('wipe') },
         { kind: 'range', path: 'cursorRadius', label: 'Radius', min: 6, max: 400, step: 1, unit: 'px' },
-        { kind: 'range', path: 'pull', label: 'Pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How strongly the cursor gathers liquid toward its centre, where surface tension fuses it into one bead', show: tool('congeal') },
-        { kind: 'range', path: 'carry', label: 'Carry', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'While pressed, beads under the cursor travel with it', show: tool('congeal') },
         { kind: 'dotBtns' },
       ],
     },
     {
-      col: 'left', badge: '4', title: 'Liquid', items: [
-        { kind: 'presets' },
-        { kind: 'range', path: 'gravity', label: 'Gravity', min: 0, max: 1, step: 0.01, digits: 2, unit: 'g', hint: '0 = surface lying flat, 1 = surface upright (heavy beads run down)' },
-        { kind: 'range', path: 'gravityAngle', label: 'Direction', min: -180, max: 180, step: 1, unit: '°' },
-        { kind: 'range', path: 'mat.surfaceTension', label: 'Surface tension', min: 5, max: 1000, step: 0.1, digits: 1, unit: 'mN/m', log: true },
-        { kind: 'range', path: 'mat.viscosity', label: 'Viscosity', min: 0.3, max: 200, step: 0.01, digits: 2, unit: 'mPa·s', log: true },
-        { kind: 'range', path: 'mat.contactAngle', label: 'Contact angle', min: 10, max: 170, step: 1, unit: '°', hint: 'Low = wets and spreads, high = beads up' },
-        { kind: 'range', path: 'mat.pinning', label: 'Pinning', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'Contact-line friction: how readily beads stick before sliding. Bigger beads break free first' },
-        { kind: 'range', path: 'coalesce', label: 'Coalesce', min: -1, max: 1, step: 0.01, mult: 100, unit: '%', hint: '+100 = beads from different dots merge into one body, 0 = they pass through each other, negative = they push apart' },
-        { kind: 'range', path: 'timeScale', label: 'Time', min: 0.05, max: 3, step: 0.01, digits: 2, unit: '×', log: true },
-      ],
-    },
-    {
       col: 'right', badge: '◐', title: 'Material', items: [
-        { kind: 'seg', path: 'material', big: true, options: [['sweat', 'Sweat'], ['ink', 'Ink'], ['mercury', 'Mercury']] },
-        { kind: 'switch', path: 'flat', label: 'Flat', sub: 'No relief, shading, shadows or highlights: dots and liquid in flat colour' },
-        { kind: 'popup', path: 'mat.dotStyle', label: 'Dry dots', options: [['print', 'Printed'], ['bead', 'Beads']], hint: 'Dots that have not congealed: printed ink, or droplets that sit still' },
-        { kind: 'color', path: 'mat.dots', label: 'Dots', show: () => app.matSettings.dotStyle === 'print', swatches: ['#16161b', '#ffffff', '#b3262b', '#1f4fd1'] },
-        { kind: 'color', path: 'mat.tint', label: 'Liquid', show: notMerc, swatches: ['#f4eee6', '#cfe8f2', '#000000', '#b3262b'] },
-        { kind: 'color', path: 'mat.tint', label: 'Metal tint', show: isMerc, swatches: ['#dfe3e8', '#f1d48a', '#e8b9a8'] },
-        { kind: 'range', path: 'mat.clarity', label: 'Clarity', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: notMerc, hint: '100 = clear water or sweat, 0 = opaque ink' },
-        { kind: 'range', path: 'mat.ior', label: 'Refraction', min: 1.0, max: 1.9, step: 0.001, digits: 3, unit: 'n', show: notMerc, hint: 'Index of refraction: how strongly beads bend and magnify what is under them (water 1.333)' },
-        { kind: 'range', path: 'mat.gloss', label: 'Gloss', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: notMerc },
-        { kind: 'range', path: 'mat.finish', label: 'Finish', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: isMerc, hint: '0 = mirror chrome, 100 = crystalline satin' },
-        { kind: 'range', path: 'mat.glints', label: 'Glints', min: 0, max: 1.5, step: 0.01, mult: 100, unit: '%', show: isMerc },
-      ],
-    },
-    {
-      col: 'right', badge: '◉', title: 'Heatmap', items: [
-        { kind: 'switch', path: 'heat.on', label: 'Heatmap', sub: 'The blobs as a heat map: the closer to a blob’s heart, the further along the colours' },
-        { kind: 'heatColors', show: () => app.settings.heat.on },
-        { kind: 'range', path: 'heat.band', label: 'Band width', min: 1, max: 120, step: 0.5, digits: 1, unit: 'px', log: true, show: () => app.settings.heat.on, hint: 'The width of each colour band, measured from the edge of the blob' },
-        { kind: 'range', path: 'heat.inner', label: 'Bands inside', min: 0, max: 7, step: 0.1, digits: 1, unit: '', show: () => app.settings.heat.on, hint: 'How many colours fall inside a blob’s edge; the rest ring the outside. Only blobs deeper than this reach the centre colour' },
-        { kind: 'range', path: 'heat.growth', label: 'Band growth', min: 0.5, max: 2, step: 0.01, digits: 2, unit: '×', show: () => app.settings.heat.on, hint: 'Each band outward is this many times as wide as the one inside it: 1 = all bands even' },
-        { kind: 'range', path: 'heat.merge', label: 'Merge', min: 0, max: 120, step: 1, unit: 'px', show: () => app.settings.heat.on, hint: 'Rounds the outline and joins shapes closer than about this distance before the bands are laid out' },
-        { kind: 'range', path: 'heat.blend', label: 'Blend', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.settings.heat.on, hint: 'Blur between neighbouring colours: 0 = crisp contour bands, 100 = smooth gradient' },
-        { kind: 'switch', path: 'heat.dry', label: 'Include dry dots', sub: 'Off: only congealed blobs make heat', show: () => app.settings.heat.on },
-        { kind: 'switch', path: 'heat.dotsOnTop', label: 'Dots on top', sub: 'Draw the dots over the map in the dot colour', show: () => app.settings.heat.on },
-      ],
-    },
-    {
-      col: 'right', badge: '▦', title: 'Surface', items: [
-        { kind: 'popup', path: 'mat.surface', label: 'Surface', options: [['plain', 'Plain'], ['paper', 'Paper'], ['skin', 'Skin']] },
-        { kind: 'color', path: 'mat.background', label: 'Colour', hint: 'Kept separately for each material', swatches: ['#ff2a98', '#c48c6c', '#eeeae2', '#1d2024'] },
-        { kind: 'range', path: 'surfScale', label: 'Texture scale', min: 0.2, max: 4, step: 0.01, digits: 2, unit: '×', log: true },
-        { kind: 'range', path: 'grain', label: 'Grain', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', path: 'lens', label: 'Lens depth', min: 0, max: 400, step: 1, unit: 'px', hint: 'How far the surface sits behind the liquid, as if the beads were on glass in front of it. Deeper = beads warp, magnify and invert what is under them, like real water' },
-        { kind: 'range', path: 'wetTrails', label: 'Wet trails', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much the surface darkens where liquid has run' },
-        { kind: 'image' },
-        { kind: 'popup', path: 'image.fit', label: 'Fit', options: [['cover', 'Fill the artboard'], ['contain', 'Fit inside']], show: hasImg },
-        { kind: 'range', path: 'image.zoom', label: 'Zoom', min: 0.2, max: 6, step: 0.01, digits: 2, unit: '×', log: true, show: hasImg },
-        { kind: 'range', path: 'image.x', label: 'Offset X', min: -1, max: 1, step: 0.001, mult: 100, unit: '%', show: hasImg },
-        { kind: 'range', path: 'image.y', label: 'Offset Y', min: -1, max: 1, step: 0.001, mult: 100, unit: '%', show: hasImg },
-      ],
-    },
-    {
-      col: 'right', badge: '☀', title: 'Light', items: [
-        { kind: 'popup', path: 'light.env', label: 'Environment', options: [['studio', 'Studio softbox'], ['soft', 'Light tent'], ['window', 'Window'], ['night', 'Night']] },
-        { kind: 'note', html: `Press ${WAVE} beside a slider to sweep it end to end and back.` },
-        { kind: 'range', osc: true, path: 'light.azimuth', label: 'Direction', min: -180, max: 180, step: 1, unit: '°' },
-        { kind: 'range', osc: true, path: 'light.elevation', label: 'Height', min: 12, max: 85, step: 1, unit: '°' },
-        { kind: 'range', osc: true, path: 'light.exposure', label: 'Exposure', min: 0.3, max: 2.5, step: 0.01, digits: 2, unit: '×' },
-        { kind: 'range', osc: true, path: 'light.shadow', label: 'Shadow', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', osc: true, path: 'light.softness', label: 'Softness', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', osc: true, path: 'light.caustics', label: 'Caustics', min: 0, max: 3, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', osc: true, path: 'light.bloom', label: 'Bloom', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', osc: true, path: 'light.grain', label: 'Grain', min: 0, max: 1, step: 0.01, mult: 100, unit: '%' },
+        { kind: 'look' },
+        { kind: 'color', path: 'mat.dots', label: 'Dots', show: notHeat, swatches: ['#000000', '#ffffff', '#b3262b'] },
+        { kind: 'color', path: 'mat.tint', label: 'Congealed', show: notHeat, swatches: ['#000000', '#ffffff', '#b3262b'] },
+        { kind: 'color', path: 'mat.background', label: 'Background', show: notHeat, swatches: ['#000000', '#ffffff', '#ff2a98'] },
+        { kind: 'heatColors', show: heat },
+        { kind: 'range', path: 'heat.band', label: 'Band width', min: 1, max: 120, step: 0.5, digits: 1, unit: 'px', log: true, show: heat, hint: 'The width of each colour band, measured from the edge of the blob' },
+        { kind: 'range', path: 'heat.inner', label: 'Bands inside', min: 0, max: 7, step: 0.1, digits: 1, unit: '', show: heat, hint: 'How many colours fall inside a blob’s edge; the rest ring the outside. Only blobs deeper than this reach the centre colour' },
+        { kind: 'range', path: 'heat.growth', label: 'Band growth', min: 0.5, max: 2, step: 0.01, digits: 2, unit: '×', show: heat, hint: 'Each band outward is this many times as wide as the one inside it: 1 = all bands even' },
+        { kind: 'range', path: 'heat.merge', label: 'Merge', min: 0, max: 120, step: 1, unit: 'px', show: heat, hint: 'Rounds the outline and joins shapes closer than about this distance before the bands are laid out' },
+        { kind: 'range', path: 'heat.blend', label: 'Blend', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: heat, hint: 'Blur between neighbouring colours: 0 = crisp contour bands, 100 = smooth gradient' },
+        { kind: 'switch', path: 'heat.dry', label: 'Include dry dots', sub: 'Off: only congealed dots make heat', show: heat },
+        { kind: 'switch', path: 'heat.dotsOnTop', label: 'Dots on top', sub: 'Draw the dots over the map in the dot colour', show: heat },
+        { kind: 'color', path: 'mat.dots', label: 'Dots', show: () => heat() && app.settings.heat.dotsOnTop, swatches: ['#16161b', '#ffffff'] },
       ],
     },
     {
       col: 'right', badge: '↑', title: 'Canvas & output', items: [
         { kind: 'popup', path: 'aspect', label: 'Artboard', options: [...Object.keys(ARTBOARDS).map(k => [k, `${k} · ${ARTBOARDS[k][0]}×${ARTBOARDS[k][1]}`]), ['custom', 'Custom…']] },
         { kind: 'pair', paths: ['customW', 'customH'], label: 'Size', show: () => app.settings.aspect === 'custom', min: 200, max: 4000 },
-        { kind: 'range', path: 'scale', label: 'Physical width', min: 8, max: 150, step: 1, unit: 'cm', hint: 'Real-world width of the artboard. Smaller = surface tension dominates and beads stay round' },
-        { kind: 'popup', path: 'perf.simRes', label: 'Simulation', number: true, options: [[256, 'Draft · 256'], [384, 'Medium · 384'], [512, 'High · 512'], [640, 'Ultra · 640'], [768, 'Extreme · 768']] },
         { kind: 'range', path: 'perf.renderScale', label: 'Render scale', min: 0.35, max: 1, step: 0.05, mult: 100, unit: '%' },
-        { kind: 'range', path: 'perf.maxSubsteps', label: 'Max substeps', min: 4, max: 160, step: 1, unit: '/frame' },
         { kind: 'actions' },
       ],
     },
@@ -3110,6 +3047,7 @@ function buildUI(app) {
       case 'color': return showable(colorCtl(it), it);
       case 'switch': return showable(switchCtl(it), it);
       case 'heatColors': return showable(heatColorsCtl(), it);
+      case 'look': return lookCtl();
       case 'text': return textCtl();
       case 'margins': return rangeCtl({
         label: 'Margins', min: 0, max: 600, step: 1, unit: 'px', hint: 'All four margins together',
@@ -3349,6 +3287,29 @@ function buildUI(app) {
     return node;
   }
 
+  // the material: sweat or ink colours, or the heat map
+  function lookCtl() {
+    const seg = el('div', 'seg');
+    seg.setAttribute('role', 'radiogroup');
+    const opts = [['sweat', 'Sweat'], ['ink', 'Ink'], ['heat', 'Heatmap']];
+    const cur = () => (app.settings.heat.on ? 'heat' : app.settings.material);
+    const btns = opts.map(([v, t]) => {
+      const b = btn(null, t);
+      b.setAttribute('role', 'radio');
+      b.addEventListener('click', () => {
+        const before = app.snapshot();
+        if (v === 'heat') app.set('heat.on', true, { history: false });
+        else { app.set('heat.on', false, { history: false }); app.set('material', v, { history: false }); }
+        app.history.push(before);
+        refreshAll();
+      });
+      seg.append(b);
+      return [v, b];
+    });
+    refreshers.push(() => btns.forEach(([v, b]) => { const on = cur() === v; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }));
+    return seg;
+  }
+
   // the heat map's colours, centre first: recolour, reorder, remove or add (up to eight)
   function heatColorsCtl() {
     const wrap = el('div', 'group');
@@ -3447,7 +3408,7 @@ function buildUI(app) {
       const b = btn('chip', p.name, p.hint);
       b.addEventListener('click', () => {
         const before = app.snapshot();
-        const patch = p.patch(app.defaults.mat[app.settings.material]);
+        const patch = p.patch();
         for (const k in patch) app.set(k, patch[k], { history: false });
         app.history.push(before);
         app.toast(p.name);
@@ -3870,7 +3831,10 @@ class App {
     const n = wet.length;
     const dots = new Float32Array(Math.max(1, n) * 8);
     wet.forEach((d, i) => dots.set([d.x, ah - d.y, d.x, ah - d.y, d.r, d.r, 0, 0], i * 8));
-    const reach = s.reach * this.layout.pitch * 1.001;
+    // reach grows with the dots: two dots swollen to 1.3× reach 1.3× as far
+    const r0 = this.layout.r, base = s.reach * this.layout.pitch * 1.001;
+    const reachOf = (a, b) => base * (a.r + b.r) / (2 * r0);
+    const reach = base * wet.reduce((m, d) => Math.max(m, d.r / r0), 1);
     const out = [];
     if (reach > 0) {
       // bucket by reach so only nearby pairs are compared
@@ -3887,7 +3851,7 @@ class App {
           for (const j of cell.get(key(gx, gy)) || []) {
             if (j <= i) continue;
             const b = wet[j];
-            if (Math.hypot(a.x - b.x, a.y - b.y) > reach) continue;
+            if (Math.hypot(a.x - b.x, a.y - b.y) > reachOf(a, b)) continue;
             out.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
             if (a.heat && b.heat) hot.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
           }
@@ -3913,6 +3877,7 @@ class App {
     const pitch = this.layout.pitch;
     const near = dots.map((a) => dots.map((b, j) => (a !== b && Math.hypot(a.x - b.x, a.y - b.y) < pitch * 1.5 ? j : -1)).filter(j => j >= 0));
     const taken = new Uint8Array(N);
+    if (s.pattern === 'runs') { this.congealRuns(dots, rng, near, want); return; }
     const cellPerPx = this.sim.nx / this.art[0];
     let count = 0, guard = 0;
     while (count < want && guard++ < N * 4) {
@@ -3950,6 +3915,51 @@ class App {
         }
       }
       cluster.forEach(i => this.liquefy(dots[i]));
+    }
+  }
+
+  // swelling runs: walk along the stroke from a random dot, keeping as straight a line as the letter
+  // allows, and make each dot a little bigger than the last (or swell toward the middle of the run)
+  congealRuns(dots, rng, near, want) {
+    const s = this.settings, pitch = this.layout.pitch;
+    const N = dots.length, taken = new Uint8Array(N);
+    let count = 0, guard = 0;
+    while (count < want && guard++ < N * 4) {
+      const free = [];
+      for (let i = 0; i < N; i++) if (!taken[i]) free.push(i);
+      if (!free.length) break;
+      const len = Math.min(want - count + 1, Math.max(2, Math.round(s.runLength * (1 - s.variation * rng() * 0.6))));
+      const path = [free[Math.floor(rng() * free.length)]];
+      taken[path[0]] = 1;
+      let dir = null;
+      while (path.length < len) {
+        const a = dots[path[path.length - 1]];
+        let best = -1, bs = Infinity;
+        for (const j of near[path[path.length - 1]]) {
+          if (taken[j]) continue;
+          const b = dots[j], dx = b.x - a.x, dy = b.y - a.y, dl = Math.hypot(dx, dy);
+          // nearest first, then the straightest continuation of the run so far
+          const turn = dir ? 1 - (dx * dir[0] + dy * dir[1]) / dl : 0;
+          const sc = dl / pitch + 0.9 * turn + 0.15 * rng();
+          if (sc < bs) { bs = sc; best = j; }
+        }
+        if (best < 0) break;
+        const a2 = dots[best];
+        const dl = Math.hypot(a2.x - a.x, a2.y - a.y) || 1;
+        dir = [(a2.x - a.x) / dl, (a2.y - a.y) / dl];
+        taken[best] = 1;
+        path.push(best);
+      }
+      count += path.length;
+      const rate = Math.max(0, s.growth * (1 + s.variation * (rng() - 0.5)));
+      const n = path.length;
+      path.forEach((idx, i) => {
+        const d = dots[idx];
+        const t = s.runShape === 'swell' ? Math.min(i, n - 1 - i) : i;
+        const k = 1 + rate * t;
+        this.liquefy(d);
+        this.geo.set(d.key, { s: k, base: k, ox: 0, oy: 0, w: 0, px: d.x, py: d.y });
+      });
     }
   }
 
@@ -4254,9 +4264,9 @@ class App {
           w = t < 1 ? (1 - t * t) * (1 - t * t) : 0;
         }
         let g = this.geo.get(d.key);
-        if (!g) { if (!w) continue; g = { s: 1, ox: 0, oy: 0, w: 0, px: d.x, py: d.y }; this.geo.set(d.key, g); }
+        if (!g) { if (!w) continue; g = { s: 1, base: 1, ox: 0, oy: 0, w: 0, px: d.x, py: d.y }; this.geo.set(d.key, g); }
         if (w > g.w) { g.w = w; g.px = p.x; g.py = p.y; }
-        const ts = 1 + s.hoverGrow * g.w, tx = (g.px - d.x) * s.hoverPull * g.w, ty = (g.py - d.y) * s.hoverPull * g.w;
+        const ts = (g.base || 1) * (1 + s.hoverGrow * g.w), tx = (g.px - d.x) * s.hoverPull * g.w, ty = (g.py - d.y) * s.hoverPull * g.w;
         const ns = g.s + (ts - g.s) * k, nx = g.ox + (tx - g.ox) * k, ny = g.oy + (ty - g.oy) * k;
         if (Math.abs(ns - g.s) > 1e-4 || Math.abs(nx - g.ox) > 0.01 || Math.abs(ny - g.oy) > 0.01) moved = true;
         g.s = ns; g.ox = nx; g.oy = ny;
@@ -4264,9 +4274,22 @@ class App {
       if (moved && !this.staticDirty) this.uploadUnion();
     }
     if (this.staticDirty) this.uploadStatic();
+    // the dry tool: congealed dots under the cursor go back to plain dots
+    if (tool === 'wipe' && p.down && p.inside && !this.paused) {
+      const R = s.cursorRadius;
+      const ax = p.px, ay = p.py, sx = p.x - ax, sy = p.y - ay, l2 = sx * sx + sy * sy;
+      for (const d of this.dots) {
+        if (!d.liquid) continue;
+        const t = l2 > 0 ? clamp(((d.x - ax) * sx + (d.y - ay) * sy) / l2, 0, 1) : 1;
+        if (Math.hypot(d.x - (ax + sx * t), d.y - (ay + sy * t)) < R * 0.85 + d.r * 0.3) {
+          d.liquid = false; this.liquid.delete(d.key); this.geo.delete(d.key); this.staticDirty = true;
+        }
+      }
+    }
     if (this.injectQueue.length) {
       this.sim.inject(this.injectQueue, ms.contactAngle);
       this.injectQueue.length = 0;
+      this.simUsed = true;
     }
 
     // cursor velocity (m/s, sim axes), smoothed
@@ -4274,7 +4297,8 @@ class App {
     p.vx = p.vx * 0.6 + vx * 0.4; p.vy = p.vy * 0.6 + vy * 0.4;
     const cellPerPx = nx / aw;
     const r0 = this.layout.r;
-    if (!this.paused) {
+    // congealing is geometric: the liquid sim only runs if something ever put liquid into it
+    if (!this.paused && this.simUsed) {
       const ph = {
         dx: this.dx, rhoL: this.mat.rhoL,
         sigma: ms.surfaceTension / 1000, viscosity: ms.viscosity / 1000, theta: ms.contactAngle,
