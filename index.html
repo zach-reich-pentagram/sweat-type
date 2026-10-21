@@ -2050,6 +2050,7 @@ function defaultSettings() {
     runShape: 'swell',
     hideCursor: false,
     reach: 1.5,
+    bridgeMode: 'any',
     bridge: 0.9,
     hoverGrow: 0.4,
     heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 12.6, inner: 4, growth: 0.98, blend: 0, dry: true, dotsOnTop: false },
@@ -2108,7 +2109,7 @@ const EFFECTS = {
   reset: new Set(['aspect', 'customW', 'customH', 'scale', 'perf.simRes']),
   env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
   congeal: new Set(['amount', 'beadSize', 'variation', 'seed', 'congealStyle', 'pattern', 'runLength', 'growth', 'runShape']),
-  union: new Set(['reach', 'bridge']),
+  union: new Set(['reach', 'bridge', 'bridgeMode']),
   dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
 };
 
@@ -2934,6 +2935,7 @@ function sections(app) {
       col: 'left', badge: '2', title: 'Congeal', items: [
         { kind: 'presets' },
         { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, digits: 2, unit: '×', hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges. Grown dots reach further in proportion' },
+        { kind: 'popup', path: 'bridgeMode', label: 'Bridges', options: [['any', 'Any direction'], ['grid', 'Neighbours only']], hint: 'Neighbours only: a dot joins just the dots directly above, below or beside it, never diagonally or further away, however much it grows' },
         { kind: 'range', path: 'bridge', label: 'Bridge width', min: 0.1, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
         { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 3, step: 0.01, mult: 100, unit: '%', hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
         { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
@@ -2943,7 +2945,7 @@ function sections(app) {
         { kind: 'range', path: 'beadSize', label: 'Cluster size', min: 1, max: 16, step: 1, unit: 'dots', show: clusters, hint: 'Most dots that congeal together' },
         { kind: 'range', path: 'runLength', label: 'Run length', min: 2, max: 16, step: 1, unit: 'dots', show: runs, hint: 'How many dots each run follows along the stroke' },
         { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 0.6, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run' },
-        { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle']] },
+        { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle'], ['both', 'Grow and swell']] },
         { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes vary widely' },
       ],
     },
@@ -3825,14 +3827,15 @@ class App {
     // each congealed dot where the hover has moved and grown it to
     const wet = this.dots.filter(d => d.liquid && d.geo).map(d => {
       const g = this.geo.get(d.key);
-      return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat } : d;
+      return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat, x0: d.x, y0: d.y } : { ...d, x0: d.x, y0: d.y };
     });
     const hot = [];
     const n = wet.length;
     const dots = new Float32Array(Math.max(1, n) * 8);
     wet.forEach((d, i) => dots.set([d.x, ah - d.y, d.x, ah - d.y, d.r, d.r, 0, 0], i * 8));
     // reach grows with the dots: two dots swollen to 1.3× reach 1.3× as far
-    const r0 = this.layout.r, base = s.reach * this.layout.pitch * 1.001;
+    const r0 = this.layout.r, pitch = this.layout.pitch, base = s.reach * pitch * 1.001;
+    const grid = s.bridgeMode === 'grid';
     const reachOf = (a, b) => base * (a.r + b.r) / (2 * r0);
     const reach = base * wet.reduce((m, d) => Math.max(m, d.r / r0), 1);
     const out = [];
@@ -3852,6 +3855,11 @@ class App {
             if (j <= i) continue;
             const b = wet[j];
             if (Math.hypot(a.x - b.x, a.y - b.y) > reachOf(a, b)) continue;
+            // neighbours only: straight up, down or across on the type's grid, and no further than the next dot
+            if (grid) {
+              const gx = Math.abs(a.x0 - b.x0), gy = Math.abs(a.y0 - b.y0);
+              if (Math.min(gx, gy) > 0.25 * pitch || Math.max(gx, gy) > 1.15 * pitch) continue;
+            }
             out.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
             if (a.heat && b.heat) hot.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
           }
@@ -3955,8 +3963,11 @@ class App {
       const n = path.length;
       path.forEach((idx, i) => {
         const d = dots[idx];
-        const t = s.runShape === 'swell' ? Math.min(i, n - 1 - i) : i;
-        const k = 1 + rate * t;
+        // ramp: bigger dot by dot; swell: biggest in the middle; both: the ramp with a swell on top
+        const sw = Math.min(i, n - 1 - i);
+        const k = s.runShape === 'swell' ? 1 + rate * sw
+          : s.runShape === 'both' ? (1 + rate * i) * (1 + rate * sw)
+          : 1 + rate * i;
         this.liquefy(d);
         this.geo.set(d.key, { s: k, base: k, ox: 0, oy: 0, w: 0, px: d.x, py: d.y });
       });
