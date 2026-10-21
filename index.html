@@ -468,6 +468,7 @@
   #board.typing { cursor: text; }
   #board.tool-dots { cursor: crosshair; }
   #board.tool-wipe { cursor: cell; }
+  #board.nocursor, #board.nocursor.typing { cursor: none; }
   #gl, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #overlay { pointer-events: none; }
   #typing { position: fixed; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; resize: none; border: 0; padding: 0; }
@@ -475,11 +476,6 @@
   .hint.gone { opacity: 0; }
   #fatal { position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); max-width: 520px; padding: 14px 16px; z-index: 6;
            background: rgb(255, 59, 48); color: #fff; border-radius: var(--radius-card); font-weight: 500; }
-
-  /* the brand, set in the face itself */
-  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 4px 2px; }
-  .brand .mark { height: 22px; color: var(--label); }
-  .brand .mark svg { height: 100%; width: auto; display: block; }
 
   /* a section that opens and closes */
   .panel > .disclose { margin: -10px 0; }
@@ -496,6 +492,9 @@
   .osc:hover { background: var(--fill-2); color: var(--label); }
   .osc.on { background: var(--blue); color: #fff; }
   .osc svg { width: 13px; height: 8px; display: block; }
+  .osc:disabled { opacity: 0.3; cursor: default; }
+  .popup.own .pvalue { color: var(--blue); font-weight: 600; }
+  .cwrap .osc { font-size: 12px; font-weight: 600; line-height: 1; }
   .note svg { width: 14px; height: 9px; display: inline-block; vertical-align: -1px; }
 
   /* colour: swatches and a round well, the value typeable beside them */
@@ -578,6 +577,8 @@
       <div class="stagebar">
         <button class="btn" id="pause" title="Pause or resume the liquid (Space)">Pause</button>
         <div class="note" id="hud" aria-live="off">—</div>
+        <button class="btn" id="dryall" title="Remove all liquid and return every dot to its place">Dry all</button>
+        <button class="btn" id="hidecursor" title="Hide the pointer over the artboard; the cursor still works">Hide cursor</button>
         <button class="btn" id="hideui" title="Hide the controls and show the artwork alone (H)">Hide UI</button>
         <button class="btn" id="fullscreen" title="The artwork alone, full screen (F)">Full screen</button>
       </div>
@@ -1367,15 +1368,92 @@ void main() {
   float h = max(sqrt(max(Rs * Rs - dist * dist, 0.0)) - Rs * uCosT, 0.0);
   // round the foot into a meniscus: a near-vertical contact line aliases into a dashed rim
   float e = clamp((vR - dist) / max(2.5 * uAa, 0.2 * vR), 0.0, 1.0);
-  o = vec4(cov, h * e * (2.0 - e), 0.0, 1.0);
+  o = vec4(cov, h * e * (2.0 - e), 0.0, 0.0);
 }`;
 
 // ---------------------------------------------------------------- height prep (render res)
+
+// ---------------------------------------------------------------- geometric union (instanced capsules)
+// congealed dots joined Pathfinder-style: every shape is a capsule (a dot is one of zero length),
+// written into b = coverage, a = height (px) of the dot texture, unioned by max blending
+const segVS = `#version 300 es
+precision highp float;
+precision highp sampler2D;
+uniform sampler2D uSegs;   // per instance, two texels: (ax, ay, bx, by) artboard px y up, (rA, rB, 0, 0)
+uniform vec2 uArt;
+uniform float uAa;
+out vec2 vP;
+flat out vec4 vSeg;
+flat out vec2 vRad;
+const vec2 C[6] = vec2[6](vec2(0, -1), vec2(1, -1), vec2(1, 1), vec2(0, -1), vec2(1, 1), vec2(0, 1));
+ivec2 at(int j) { return ivec2(j % 4096, j / 4096); }
+void main() {
+  vec4 sg = texelFetch(uSegs, at(2 * gl_InstanceID), 0);
+  vec2 rad = texelFetch(uSegs, at(2 * gl_InstanceID + 1), 0).xy;
+  vec2 a = sg.xy, b = sg.zw, d = b - a;
+  float len = length(d);
+  vec2 u = len > 1e-3 ? d / len : vec2(1.0, 0.0), n = vec2(-u.y, u.x);
+  float R = max(rad.x, rad.y) + 2.0 * uAa;
+  vec2 c = C[gl_VertexID];
+  vec2 P = a - u * R + u * (len + 2.0 * R) * c.x + n * R * c.y;
+  vP = P;
+  vSeg = sg;
+  vRad = rad;
+  gl_Position = vec4(P / uArt * 2.0 - 1.0, 0.0, 1.0);
+}`;
+const segFS = GLSL_HEADER + `
+in vec2 vP;
+flat in vec4 vSeg;
+flat in vec2 vRad;
+uniform float uAa, uWf, uCosT, uSinT;   // bridge waist, as a fraction of the mean radius
+out vec4 o;
+void main() {
+  float rA = vRad.x, rB = vRad.y, rm = 0.5 * (rA + rB);
+  vec2 a = vSeg.xy, d = vSeg.zw - a;
+  float D = length(d);
+  vec2 u = D > 1e-3 ? d / D : vec2(1.0, 0.0), n = vec2(-u.y, u.x);
+  // local frame: A at the origin, B at (D, 0); the shape is symmetric about the axis
+  vec2 p = vec2(dot(vP - a, u), abs(dot(vP - a, n)));
+  float sdc = min(length(p) - rA, length(p - vec2(D, 0.0)) - rB);
+  float sd = sdc;
+  if (D > abs(rA - rB) + 1e-3) {
+    if (uWf >= 0.999) {
+      // full width: the straight-sided hull of the two dots, bounded by their outer tangent line
+      float b = (rA - rB) / D, c = sqrt(1.0 - b * b);
+      float along = dot(p, vec2(c, -b));
+      if (along >= 0.0 && along <= c * D) sd = min(sdc, dot(p, vec2(b, c)) - rA);
+    } else {
+      // a filleted neck: arcs of radius F, each tangent to both dots, pinching to the waist
+      float q = 0.5 * D, w = uWf * rm;
+      float F = (q * q + w * w - rm * rm) / (2.0 * (rm - w));
+      if (F > 0.0) {
+        float x0 = (D * D + (rA + F) * (rA + F) - (rB + F) * (rB + F)) / (2.0 * D);
+        float h2 = (rA + F) * (rA + F) - x0 * x0;
+        if (h2 > 0.0) {
+          float h = sqrt(h2);
+          vec2 Cc = vec2(x0, h);
+          float d1 = dot(p, normalize(vec2(-h, x0)));
+          float d2 = dot(p - Cc, normalize(vec2(h, D - x0)));
+          float neck = max(max(d1, d2), F - length(p - Cc));
+          sd = min(sdc, neck);
+        }
+      }
+    }
+  }
+  float cov = clamp(-sd / uAa + 0.5, 0.0, 1.0);
+  // relief: depth inside the shape mapped onto the profile of a resting dot, so the neck sits lower
+  float t = max(-sd, 0.0), xr = max(rm - t, 0.0);
+  float Rs = rm / uSinT;
+  float hgt = max(sqrt(max(Rs * Rs - xr * xr, 0.0)) - Rs * uCosT, 0.0);
+  float e = clamp(t / max(2.5 * uAa, 0.2 * rm), 0.0, 1.0);
+  o = vec4(0.0, 0.0, cov, hgt * e * (2.0 - e));
+}`;
+
 const prepFS = GLSL_HEADER + BICUBIC + `
 in vec2 vUv;
 uniform sampler2D uRes;     // (liquid px, thickest species px, wet) sim res
 uniform vec2 uSimN;
-uniform sampler2D uDotTex;  // (coverage, bead px) render res
+uniform sampler2D uDotTex;  // (dry coverage, dry bead px, union coverage, union px) render res
 uniform int uBeadStyle;
 uniform float uCongeal;
 uniform float uMeniscus;    // px
@@ -1391,9 +1469,9 @@ void main() {
   float lifted = sqrt(liq * liq + 2.0 * uMeniscus * liq);
   liq = mix(liq, lifted, smoothstep(uFilmPx * 2.0, uFilmPx * 7.0, liq));
   vec4 d = texture(uDotTex, uv);
-  float H = uBeadStyle == 1 ? max(liq, d.g) : liq;
-  // b: exact coverage of dry beads, so their silhouettes anti-alias cleanly
-  o = vec4(H, uBeadStyle == 1 ? 0.0 : d.r, uBeadStyle == 1 ? d.r : 0.0, rs.b);
+  float H = max(uBeadStyle == 1 ? max(liq, d.g) : liq, d.a);
+  // b: exact coverage of dry beads and union shapes, so their silhouettes anti-alias cleanly
+  o = vec4(H, uBeadStyle == 1 ? 0.0 : d.r, max(uBeadStyle == 1 ? d.r : 0.0, d.b), rs.b);
 }`;
 
 // ---------------------------------------------------------------- caustics + shadows
@@ -1495,6 +1573,100 @@ void main() {
   o = s;
 }`;
 
+
+// ---------------------------------------------------------------- heatmap
+// density of everything on the artboard (dry dots, union shapes, liquid), blurred, then mapped onto a ramp
+const heatMaskFS = GLSL_HEADER + BICUBIC + `
+in vec2 vUv;
+uniform sampler2D uDotTex;  // (dry coverage, -, union coverage, -)
+uniform sampler2D uRes;     // sim: liquid px
+uniform vec2 uSimN;
+uniform float uFilmPx, uDry;
+out vec4 o;
+void main() {
+  vec4 d = texture(uDotTex, vUv);
+  float liq = bicubic(uRes, vUv, uSimN).r;
+  float m = max(max(d.r * uDry, d.b), smoothstep(uFilmPx, uFilmPx * 4.0, liq));
+  o = vec4(m, 0.0, 0.0, 1.0);
+}`;
+// jump flooding over the blob outline: every texel learns the nearest point on the edge
+const heatSeedFS = GLSL_HEADER + `
+uniform sampler2D uField;
+uniform ivec2 uSize;
+out vec4 o;
+float F(ivec2 p) { return texelFetch(uField, clamp(p, ivec2(0), uSize - 1), 0).r; }
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  float f = F(c);
+  bool in0 = f >= 0.5;
+  float fE = F(c + ivec2(1, 0)), fW = F(c - ivec2(1, 0)), fN = F(c + ivec2(0, 1)), fS = F(c - ivec2(0, 1));
+  o = vec4(-1e6, -1e6, 0.0, 0.0);
+  if (in0 != (fE >= 0.5) || in0 != (fW >= 0.5) || in0 != (fN >= 0.5) || in0 != (fS >= 0.5)) {
+    // sub-texel: slide along the gradient to where the field crosses one half
+    vec2 g = vec2(fE - fW, fN - fS) * 0.5;
+    float gl = length(g);
+    vec2 off = gl > 1e-4 ? -g / gl * clamp((f - 0.5) / gl, -1.0, 1.0) : vec2(0.0);
+    o = vec4(vec2(c) + 0.5 + off, 1.0, 0.0);
+  }
+}`;
+const heatStepFS = GLSL_HEADER + `
+uniform sampler2D uSeeds;
+uniform ivec2 uSize;
+uniform int uStep;
+out vec4 o;
+void main() {
+  ivec2 c = ivec2(gl_FragCoord.xy);
+  vec2 pc = vec2(c) + 0.5;
+  vec4 best = texelFetch(uSeeds, c, 0);
+  float bd = best.z > 0.5 ? distance(pc, best.xy) : 1e20;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    if (i == 0 && j == 0) continue;
+    ivec2 q = c + ivec2(i, j) * uStep;
+    if (q.x < 0 || q.y < 0 || q.x >= uSize.x || q.y >= uSize.y) continue;
+    vec4 sd = texelFetch(uSeeds, q, 0);
+    if (sd.z > 0.5) { float d = distance(pc, sd.xy); if (d < bd) { bd = d; best = sd; } }
+  }
+  o = best;
+}`;
+// colours laid out by distance from the blob edge: equal steps (or growing ones) inside and out
+const heatFS = GLSL_HEADER + BICUBIC + `
+in vec2 vUv;
+uniform sampler2D uField;
+uniform sampler2D uSeeds;
+uniform vec2 uFieldSize;
+uniform float uTexArt;      // artboard px per field texel
+uniform sampler2D uDotTex;
+uniform vec3 uCols[8];
+uniform int uN;
+uniform float uBand, uInner, uGrowth, uBlend, uDotsOnTop;
+uniform vec3 uDotCol;
+out vec4 o;
+float bandsAt(float x) {    // how many bands fit in x px when each is uGrowth times the last
+  if (abs(uGrowth - 1.0) < 1e-3) return x / uBand;
+  return log(max(1.0 + x * (uGrowth - 1.0) / uBand, 1e-6)) / log(uGrowth);
+}
+void main() {
+  vec2 q = vUv * uFieldSize;
+  vec4 sd = texelFetch(uSeeds, clamp(ivec2(q), ivec2(0), ivec2(uFieldSize) - 1), 0);
+  float inside = step(0.5, bicubic(uField, vUv, uFieldSize).r);
+  float d = sd.z > 0.5 ? distance(q, sd.xy) * uTexArt : 1e5;
+  // depth below the deepest band's floor: the edge sits uInner bands out from the core
+  float depthCore = abs(uGrowth - 1.0) < 1e-3 ? uInner * uBand : uBand * (pow(uGrowth, uInner) - 1.0) / (uGrowth - 1.0);
+  float x = max(depthCore + (inside > 0.5 ? -d : d), 0.0);
+  float idx = bandsAt(x);
+  float n1 = float(uN - 1);
+  float t = clamp(idx, 0.0, n1) - 0.5;
+  float i = clamp(floor(t), 0.0, max(n1 - 1.0, 0.0)), fr = t - i;
+  float aa = max(fwidth(t) * 0.75, 1e-4);
+  float b = max(uBlend * 0.5, aa);
+  float w = smoothstep(0.5 - b, 0.5 + b, fr);
+  vec3 a = uCols[0], c = uCols[0];
+  for (int k = 0; k < 8; k++) { if (float(k) == i) a = uCols[k]; if (float(k) == i + 1.0) c = uCols[k]; }
+  vec3 col = uN > 1 ? mix(a, c, w) : uCols[0];
+  vec4 dt = texture(uDotTex, vUv);
+  col = mix(col, uDotCol, max(dt.r, dt.b) * uDotsOnTop);
+  o = vec4(col, 1.0);
+}`;
 
 // ---------------------------------------------------------------- composite
 const compositeFS = GLSL_HEADER + PI + HASH + `
@@ -1828,9 +2000,9 @@ const PER_MATERIAL = {
     tint: '#f4eee6', clarity: 0.97, ior: 1.333, gloss: 0.97,
   },
   ink: {
-    background: '#ff2a98', surface: 'plain', dots: '#16161b', dotStyle: 'print',
+    background: '#000000', surface: 'plain', dots: '#ffffff', dotStyle: 'print',
     surfaceTension: 12.1, viscosity: 200, contactAngle: 62, pinning: 0,
-    tint: '#000000', clarity: 0, ior: 1.45, gloss: 0.92,
+    tint: '#ffffff', clarity: 0, ior: 1.45, gloss: 0.92,
   },
   mercury: {
     background: '#e9eaeb', surface: 'plain', dots: '#2b2d31', dotStyle: 'bead',
@@ -1846,10 +2018,10 @@ const OSC_PERIOD = 10;
 function defaultSettings() {
   return {
     material: 'ink',
-    weight: 'light',
+    weight: 'regular',
     fontSize: 320,
-    leading: 1.05,
-    tracking: 0,
+    leading: 1.0,
+    tracking: -32,
     align: 'center',
     valign: 'middle',
     marginTop: 96, marginRight: 96, marginBottom: 96, marginLeft: 96,
@@ -1860,7 +2032,7 @@ function defaultSettings() {
     beadSize: 1,
     variation: 0.6,
     seed: 7,
-    flat: false,
+    flat: true,
     // cursor
     tool: 'congeal',
     liquefy: 'hover',
@@ -1877,6 +2049,13 @@ function defaultSettings() {
     grain: 0.15,
     wetTrails: 0.35,
     lens: 80,
+    congealStyle: 'geometric',
+    hideCursor: false,
+    reach: 1.5,
+    bridge: 0.9,
+    hoverGrow: 0.4,
+    heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 12.6, inner: 4, growth: 0.98, blend: 0, dry: true, dotsOnTop: false },
+    hoverPull: 0.12,
     image: { fit: 'cover', zoom: 1, x: 0, y: 0 },
     placed: [],
     mat: JSON.parse(JSON.stringify(PER_MATERIAL)),
@@ -1937,7 +2116,8 @@ const EFFECTS = {
   layout: new Set(['weight', 'fontSize', 'leading', 'tracking', 'align', 'valign', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft']),
   reset: new Set(['aspect', 'customW', 'customH', 'scale', 'perf.simRes']),
   env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
-  congeal: new Set(['amount', 'beadSize', 'variation', 'seed']),
+  congeal: new Set(['amount', 'beadSize', 'variation', 'seed', 'congealStyle']),
+  union: new Set(['reach', 'bridge']),
   dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
 };
 
@@ -2142,7 +2322,7 @@ class DotSetter {
           const c = gd[1];
           const dots = [];
           for (let j = 0; j < c.length; j += 2) dots.push([xs[i] + (c[j] + off) * k, y - (c[j + 1] + off) * k]);
-          glyphs.push({ ch, id: ids[gi], charIndex: gi, x: xs[i], y, line: li, adv: xs[i + 1] - xs[i], dots });
+          glyphs.push({ ch, id: ids[gi], charIndex: gi, x: xs[i], y, line: li, r: R * k, adv: xs[i + 1] - xs[i], dots });
         }
       }
       const endIdx = L.end;
@@ -2433,6 +2613,11 @@ class Renderer {
     this.p = {
       env: kit.program(envFS, undefined, 'env'),
       dots: kit.program(dotsFS, dotsVS, 'dots'),
+      segs: kit.program(segFS, segVS, 'segs'),
+      heatMask: kit.program(heatMaskFS, undefined, 'heatMask'),
+      heat: kit.program(heatFS, undefined, 'heat'),
+      heatSeed: kit.program(heatSeedFS, undefined, 'heatSeed'),
+      heatStep: kit.program(heatStepFS, undefined, 'heatStep'),
       prep: kit.program(prepFS, undefined, 'prep'),
       causticPrep: kit.program(causticPrepFS, undefined, 'causticPrep'),
       caustic: kit.program(causticFS, causticVS, 'caustic'),
@@ -2445,6 +2630,9 @@ class Renderer {
     };
     this.env = kit.texture(1024, 512, 'rgba16f', { filter: 'linear', mipmap: true, wrapS: 'repeat' });
     this.dotData = kit.texture(4096, 1, 'rgba32f');
+    this.union = { dots: kit.texture(4096, 1, 'rgba32f'), bridges: kit.texture(4096, 1, 'rgba32f'), nd: 0, nb: 0, r: 0, w: 1 };
+    // the heat-map lines alone: their dry dots and union shapes
+    this.heat = { dots: kit.texture(4096, 1, 'rgba32f'), n: 0, udots: kit.texture(4096, 1, 'rgba32f'), ubridges: kit.texture(4096, 1, 'rgba32f'), nd: 0, nb: 0 };
     this.dotCount = 0;
     this.blank = kit.texture(1, 1, 'rgba8');
     this.img = null;
@@ -2463,6 +2651,7 @@ class Renderer {
     const q = (d) => [Math.max(2, Math.round(w / d)), Math.max(2, Math.round(h / d))];
     this.t = {
       dot: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
+      hdot: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
       prep: k.texture(w, h, 'rgba16f', { filter: 'linear' }),
       caus: k.texture(hw, hh, 'rgba16f', { filter: 'linear' }),
       caus2: k.texture(hw, hh, 'rgba16f', { filter: 'linear' }),
@@ -2476,6 +2665,10 @@ class Renderer {
       sB: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
       sT: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
       b4g: k.texture(...q(4), 'rgba16f', { filter: 'linear' }),
+      hm: k.texture(...q(2), 'rgba16f', { filter: 'linear' }),
+      hmB: k.texture(...q(2), 'rgba16f', { filter: 'linear' }),
+      jA: k.texture(...q(2), 'rgba32f'),
+      jB: k.texture(...q(2), 'rgba32f'),
     };
     this.dotsDirty = true;
   }
@@ -2523,19 +2716,104 @@ class Renderer {
     this.dotsDirty = true;
   }
 
+  // the geometric union: congealed dots and the bridges between them, as segments (artboard px, y up)
+  // instances are two texels each: (ax, ay, bx, by), (rA, rB, 0, 0)
+  setUnion(dots, nd, bridges, nb, width) {
+    const U = this.union;
+    U.dots = this.uploadRows(U.dots, dots, nd * 2);
+    U.bridges = this.uploadRows(U.bridges, bridges, nb * 2);
+    U.nd = nd; U.nb = nb; U.w = width;
+    this.dotsDirty = true;
+  }
+
+  setHeatDots(data, count) {
+    this.heat.dots = this.uploadRows(this.heat.dots, data, count);
+    this.heat.n = count;
+    this.dotsDirty = true;
+  }
+
+  setHeatUnion(dots, nd, bridges, nb) {
+    const H = this.heat;
+    H.udots = this.uploadRows(H.udots, dots, nd * 2);
+    H.ubridges = this.uploadRows(H.ubridges, bridges, nb * 2);
+    H.nd = nd; H.nb = nb;
+    this.dotsDirty = true;
+  }
+
+  uploadRows(tex, data, count) {
+    const k = this.kit, gl = k.gl;
+    const rows = Math.max(1, Math.ceil(count / 4096));
+    if (tex.h !== rows) { k.deleteTexture(tex); tex = k.texture(4096, rows, 'rgba32f'); }
+    const full = new Float32Array(4096 * rows * 4);
+    full.set(data.subarray(0, count * 4));
+    gl.bindTexture(gl.TEXTURE_2D, tex.tex);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 4096, rows, gl.RGBA, gl.FLOAT, full);
+    return tex;
+  }
+
   drawDots(art, thetaDeg) {
     const k = this.kit, gl = k.gl;
     const th = Math.min(Math.max(thetaDeg, 12), 88) * Math.PI / 180;
+    const aa = art[0] / this.w;
     k.clear(this.t.dot);
+    const max = { blend: [gl.ONE, gl.ONE], blendEq: gl.MAX };
     k.run(this.p.dots, {
-      uDots: this.dotData, uArt: art, uAa: art[0] / this.w, uCosT: Math.cos(th), uSinT: Math.sin(th),
-    }, this.t.dot, { blend: [gl.ONE, gl.ONE], blendEq: gl.MAX, instances: this.dotCount });
+      uDots: this.dotData, uArt: art, uAa: aa, uCosT: Math.cos(th), uSinT: Math.sin(th),
+    }, this.t.dot, { ...max, instances: this.dotCount });
+    const U = this.union;
+    const seg = (tex, n, wf, target = this.t.dot) => k.run(this.p.segs, {
+      uSegs: tex, uArt: art, uAa: aa, uWf: wf, uCosT: Math.cos(th), uSinT: Math.sin(th),
+    }, target, { ...max, instances: n });
+    if (U.nd) seg(U.dots, U.nd, 1);
+    if (U.nb) seg(U.bridges, U.nb, U.w);
+    // the heat-map lines alone, for the heat map's mask
+    const H = this.heat;
+    k.clear(this.t.hdot);
+    if (H.n) k.run(this.p.dots, {
+      uDots: H.dots, uArt: art, uAa: aa, uCosT: Math.cos(th), uSinT: Math.sin(th),
+    }, this.t.hdot, { ...max, instances: H.n });
+    if (H.nd) seg(H.udots, H.nd, 1, this.t.hdot);
+    if (H.nb) seg(H.ubridges, H.nb, U.w, this.t.hdot);
     this.dotsDirty = false;
   }
 
   setImage(source) {
     if (this.img) this.kit.deleteTexture(this.img);
     this.img = source ? this.kit.textureFromSource(source, { flipY: true, filter: 'linear', mipmap: true }) : null;
+  }
+
+  // heatmap: density field at half resolution, blurred by the spread, mapped onto the colour ramp
+  renderHeat(scene, res) {
+    const k = this.kit, s = scene.settings, H = s.heat, m = s.mat[s.material], sim = scene.sim;
+    const [aw] = scene.art;
+    k.run(this.p.heatMask, {
+      uDotTex: this.t.hdot, uRes: res, uSimN: [sim.nx, sim.ny], uFilmPx: 0.08 / scene.pxMm, uDry: H.dry ? 1 : 0,
+    }, this.t.hm);
+    // a light blur rounds the outline and lets near neighbours merge (the threshold sits at one half)
+    const texArt = aw / this.t.hm.w, step = Math.max(H.merge / texArt / 4.2, 0.05);
+    if (H.merge > 0.5) for (let i = 0; i < 4; i++) {
+      k.run(this.p.blur, { uSrc: this.t.hm, uDir: [step / this.t.hm.w, 0] }, this.t.hmB);
+      k.run(this.p.blur, { uSrc: this.t.hmB, uDir: [0, step / this.t.hm.h] }, this.t.hm);
+    }
+    // distance to the outline by jump flooding
+    const size = [this.t.hm.w, this.t.hm.h];
+    k.run(this.p.heatSeed, { uField: this.t.hm, uSize: size }, this.t.jA);
+    let src = this.t.jA, dst = this.t.jB;
+    for (let st = 1 << Math.ceil(Math.log2(Math.max(...size))) >> 1; st >= 1; st >>= 1) {
+      k.run(this.p.heatStep, { uSeeds: src, uSize: size, uStep: st }, dst);
+      [src, dst] = [dst, src];
+    }
+    const cols = new Float32Array(24);
+    const list = H.colors.length ? H.colors : ['#ffffff'];
+    list.slice(0, 8).forEach((c, i) => cols.set(srgbToLinear(c), i * 3));
+    k.run(this.p.heat, {
+      uField: this.t.hm, uSeeds: src, uFieldSize: size, uTexArt: texArt, uDotTex: this.t.dot, uCols: cols, uN: Math.min(list.length, 8),
+      uBand: Math.max(H.band, 0.5), uInner: H.inner, uGrowth: H.growth, uBlend: H.blend, uDotsOnTop: H.dotsOnTop ? 1 : 0, uDotCol: srgbToLinear(m.dots),
+    }, this.t.hdr);
+    k.run(this.p.final, {
+      uHdr: this.t.hdr, uBloom: this.t.b8, uStreakA: this.t.sA, uStreakB: this.t.sB,
+      uBloomAmt: 0, uGlints: 0, uGrain: s.light.grain, uTime: scene.staticGrain ? 0 : this.time, uHasBloom: 0, uKnee: 1,
+    }, null);
   }
 
   // scene: { art, sim, mToPx, pxMm, settings, dotTheta, hmaxPx, imgXf }
@@ -2547,6 +2825,7 @@ class Renderer {
     const sim = scene.sim;
     if (this.dotsDirty) this.drawDots(scene.art, scene.dotTheta);
     const res = sim.resolve(scene.mToPx);
+    if (scene.heatMode === 'all') { this.renderHeat(scene, res); return; }
     // 1) heights at render resolution
     k.run(this.p.prep, {
       uRes: res, uSimN: [sim.nx, sim.ny], uDotTex: this.t.dot, uBeadStyle: m.dotStyle === 'bead' ? 1 : 0,
@@ -2661,6 +2940,11 @@ function sections(app) {
     },
     {
       col: 'left', badge: '2', title: 'Congeal', items: [
+        { kind: 'seg', path: 'congealStyle', options: [['liquid', 'Liquid'], ['geometric', 'Geometric']], hint: 'Liquid: beads that flow and fuse. Geometric: a crisp union of the dots, like Pathfinder’s Unite' },
+        { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, digits: 2, unit: '×', show: () => app.geometric, hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges' },
+        { kind: 'range', path: 'bridge', label: 'Bridge width', min: 0.1, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
+        { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 3, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
+        { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.geometric, hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
         { kind: 'congealBtns' },
         { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots turn to liquid and congeal' },
         { kind: 'range', path: 'beadSize', label: 'Bead size', min: 1, max: 16, step: 1, unit: 'dots', hint: 'Most dots that gather into one bead' },
@@ -2709,6 +2993,19 @@ function sections(app) {
       ],
     },
     {
+      col: 'right', badge: '◉', title: 'Heatmap', items: [
+        { kind: 'switch', path: 'heat.on', label: 'Heatmap', sub: 'The blobs as a heat map: the closer to a blob’s heart, the further along the colours' },
+        { kind: 'heatColors', show: () => app.settings.heat.on },
+        { kind: 'range', path: 'heat.band', label: 'Band width', min: 1, max: 120, step: 0.5, digits: 1, unit: 'px', log: true, show: () => app.settings.heat.on, hint: 'The width of each colour band, measured from the edge of the blob' },
+        { kind: 'range', path: 'heat.inner', label: 'Bands inside', min: 0, max: 7, step: 0.1, digits: 1, unit: '', show: () => app.settings.heat.on, hint: 'How many colours fall inside a blob’s edge; the rest ring the outside. Only blobs deeper than this reach the centre colour' },
+        { kind: 'range', path: 'heat.growth', label: 'Band growth', min: 0.5, max: 2, step: 0.01, digits: 2, unit: '×', show: () => app.settings.heat.on, hint: 'Each band outward is this many times as wide as the one inside it: 1 = all bands even' },
+        { kind: 'range', path: 'heat.merge', label: 'Merge', min: 0, max: 120, step: 1, unit: 'px', show: () => app.settings.heat.on, hint: 'Rounds the outline and joins shapes closer than about this distance before the bands are laid out' },
+        { kind: 'range', path: 'heat.blend', label: 'Blend', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: () => app.settings.heat.on, hint: 'Blur between neighbouring colours: 0 = crisp contour bands, 100 = smooth gradient' },
+        { kind: 'switch', path: 'heat.dry', label: 'Include dry dots', sub: 'Off: only congealed blobs make heat', show: () => app.settings.heat.on },
+        { kind: 'switch', path: 'heat.dotsOnTop', label: 'Dots on top', sub: 'Draw the dots over the map in the dot colour', show: () => app.settings.heat.on },
+      ],
+    },
+    {
       col: 'right', badge: '▦', title: 'Surface', items: [
         { kind: 'popup', path: 'mat.surface', label: 'Surface', options: [['plain', 'Plain'], ['paper', 'Paper'], ['skin', 'Skin']] },
         { kind: 'color', path: 'mat.background', label: 'Colour', hint: 'Kept separately for each material', swatches: ['#ff2a98', '#c48c6c', '#eeeae2', '#1d2024'] },
@@ -2724,7 +3021,7 @@ function sections(app) {
       ],
     },
     {
-      col: 'right', badge: '☀', title: 'Light', collapsible: true, items: [
+      col: 'right', badge: '☀', title: 'Light', items: [
         { kind: 'popup', path: 'light.env', label: 'Environment', options: [['studio', 'Studio softbox'], ['soft', 'Light tent'], ['window', 'Window'], ['night', 'Night']] },
         { kind: 'note', html: `Press ${WAVE} beside a slider to sweep it end to end and back.` },
         { kind: 'range', osc: true, path: 'light.azimuth', label: 'Direction', min: -180, max: 180, step: 1, unit: '°' },
@@ -2738,7 +3035,7 @@ function sections(app) {
       ],
     },
     {
-      col: 'right', badge: '↑', title: 'Canvas & output', collapsible: true, items: [
+      col: 'right', badge: '↑', title: 'Canvas & output', items: [
         { kind: 'popup', path: 'aspect', label: 'Artboard', options: [...Object.keys(ARTBOARDS).map(k => [k, `${k} · ${ARTBOARDS[k][0]}×${ARTBOARDS[k][1]}`]), ['custom', 'Custom…']] },
         { kind: 'pair', paths: ['customW', 'customH'], label: 'Size', show: () => app.settings.aspect === 'custom', min: 200, max: 4000 },
         { kind: 'range', path: 'scale', label: 'Physical width', min: 8, max: 150, step: 1, unit: 'cm', hint: 'Real-world width of the artboard. Smaller = surface tension dominates and beads stay round' },
@@ -2775,28 +3072,23 @@ function buildUI(app) {
   const cols = { left: $('colLeft'), right: $('colRight') };
 
   // the wordmark, set in the face itself
-  const brand = el('div', 'brand');
-  const mark = el('span', 'mark');
-  mark.setAttribute('aria-label', 'sweat');
-  brand.append(mark, el('span', 'note', 'Type specimen · Interdot'));
-  cols.left.append(brand);
-  drawMark(mark);
 
   for (const sec of sections(app)) {
-    const box = el('section', 'panel' + (sec.collapsible ? '' : ' open'));
+    const startOpen = false;
+    const box = el('section', 'panel' + (startOpen ? ' open' : ''));
     const head = el('div', 'phead', `<span class="badge">${sec.badge}</span><span>${sec.title}</span>`);
     let body = box;
-    if (sec.collapsible) {
-      const d = btn('disclose', null);
+    {
+      const d = btn('disclose' + (startOpen ? ' open' : ''), null);
       d.append(head, el('span', 'caret', '›'));
-      d.setAttribute('aria-expanded', 'false');
+      d.setAttribute('aria-expanded', String(startOpen));
       d.addEventListener('click', () => {
         const open = !box.classList.contains('open');
         box.classList.toggle('open', open); d.classList.toggle('open', open); d.setAttribute('aria-expanded', String(open));
       });
       body = el('div', 'advbody');
       box.append(d, body);
-    } else box.append(head);
+    }
     cols[sec.col].append(box);
     // menus and colours sit together in rows split by hairlines
     let rows = null;
@@ -2816,7 +3108,8 @@ function buildUI(app) {
       case 'seg': return showable(segCtl(it), it);
       case 'popup': return showable(popupCtl(it), it);
       case 'color': return showable(colorCtl(it), it);
-      case 'switch': return switchCtl(it);
+      case 'switch': return showable(switchCtl(it), it);
+      case 'heatColors': return showable(heatColorsCtl(), it);
       case 'text': return textCtl();
       case 'margins': return rangeCtl({
         label: 'Margins', min: 0, max: 600, step: 1, unit: 'px', hint: 'All four margins together',
@@ -3056,6 +3349,51 @@ function buildUI(app) {
     return node;
   }
 
+  // the heat map's colours, centre first: recolour, reorder, remove or add (up to eight)
+  function heatColorsCtl() {
+    const wrap = el('div', 'group');
+    const list = el('div', 'rows');
+    const tools = el('div', 'btnrow');
+    const add = btn('btn', 'Add colour'), rev = btn('btn', 'Reverse'), reset = btn('btn', 'Reset');
+    tools.append(add, rev, reset);
+    wrap.append(el('div', 'note', 'Centre of a blob first, open surface last.'), list, tools);
+    const cols = () => app.settings.heat.colors;
+    const put = (c) => { app.set('heat.colors', c); draw(); };
+    add.addEventListener('click', () => { const c = cols(); if (c.length < 8) put([...c, c[c.length - 1] || '#ffffff']); });
+    rev.addEventListener('click', () => put([...cols()].reverse()));
+    reset.addEventListener('click', () => put(clone(app.defaults.heat.colors)));
+    let sig = '';
+    function draw() {
+      const c = cols();
+      sig = c.join();
+      list.innerHTML = '';
+      c.forEach((hex, i) => {
+        const row = el('div', 'colorrow');
+        const lab = el('span', 'plabel', i === 0 ? 'Centre' : i === c.length - 1 ? 'Outside' : `Band ${i}`);
+        const cw = el('div', 'cwrap');
+        const well = el('label', 'well'), chip = el('span'), inp = el('input');
+        inp.type = 'color'; inp.value = hex; chip.style.background = hex;
+        inp.setAttribute('aria-label', lab.textContent + ' colour');
+        well.append(chip, inp);
+        inp.addEventListener('input', () => { begin(); const n = [...cols()]; n[i] = inp.value; app.set('heat.colors', n, { history: false }); chip.style.background = inp.value; });
+        inp.addEventListener('change', () => { commit(); draw(); });
+        const up = btn('osc', '↑', 'Move toward the centre'), dn = btn('osc', '↓', 'Move outward'), x = btn('osc', '×', 'Remove');
+        up.disabled = i === 0; dn.disabled = i === c.length - 1; x.disabled = c.length <= 2;
+        const swap = (j) => { const n = [...cols()]; [n[i], n[j]] = [n[j], n[i]]; put(n); };
+        up.addEventListener('click', () => swap(i - 1));
+        dn.addEventListener('click', () => swap(i + 1));
+        x.addEventListener('click', () => put(cols().filter((_, k) => k !== i)));
+        cw.append(well, el('span', 'val', hex), up, dn, x);
+        row.append(lab, cw);
+        list.append(row);
+      });
+      add.disabled = c.length >= 8;
+    }
+    draw();
+    refreshers.push(() => { if (cols().join() !== sig && !pending) draw(); });
+    return wrap;
+  }
+
   function switchCtl(it) {
     const c = el('label', 'check');
     c.append(el('span', 'box'));
@@ -3065,7 +3403,7 @@ function buildUI(app) {
     c.append(t);
     c.setAttribute('role', 'switch');
     c.tabIndex = 0;
-    const toggle = (e) => { e.preventDefault(); app.set(it.path, !getPath(app.settings, it.path)); refresh(); };
+    const toggle = (e) => { e.preventDefault(); app.set(it.path, !getPath(app.settings, it.path)); refreshAll(); };
     c.addEventListener('click', toggle);
     c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') toggle(e); });
     const refresh = () => { const on = !!getPath(app.settings, it.path); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); };
@@ -3133,14 +3471,12 @@ function buildUI(app) {
   function dotBtnsCtl() {
     const row = el('div', 'btnrow');
     const clr = btn('btn wide', 'Clear placed dots');
-    const dry = btn('btn wide', 'Dry all', 'Remove all liquid and return every dot to its place');
     clr.addEventListener('click', () => {
       if (!app.settings.placed.length) { app.toast('No placed dots'); return; }
       app.set('placed', []);
       refreshAll();
     });
-    dry.addEventListener('click', () => app.dryAll());
-    row.append(clr, dry);
+    row.append(clr);
     refreshers.push(() => { clr.disabled = !app.settings.placed.length; });
     return row;
   }
@@ -3203,6 +3539,9 @@ function buildUI(app) {
   const bPause = $('pause');
   bPause.addEventListener('click', () => app.togglePause());
   $('hideui').addEventListener('click', () => app.setUiHidden(true));
+  $('dryall').addEventListener('click', () => app.dryAll());
+  const bCursor = $('hidecursor');
+  bCursor.addEventListener('click', () => { app.set('hideCursor', !app.settings.hideCursor); refreshAll(); });
   $('fullscreen').addEventListener('click', () => app.toggleFullscreen());
   $('showui').addEventListener('click', () => app.setUiHidden(false));
 
@@ -3220,9 +3559,12 @@ function buildUI(app) {
   function refreshAll() {
     refreshers.forEach(f => f());
     bPause.textContent = app.paused ? 'Resume' : 'Pause';
+    bCursor.textContent = app.settings.hideCursor ? 'Show cursor' : 'Hide cursor';
+    bCursor.classList.toggle('on', !!app.settings.hideCursor);
     bPause.classList.toggle('on', app.paused);
     app.board.classList.toggle('tool-dots', app.settings.tool === 'dots');
     app.board.classList.toggle('tool-wipe', app.settings.tool === 'wipe');
+    app.board.classList.toggle('nocursor', !!app.settings.hideCursor);
     app.updateLetterbox();
   }
   refreshAll();
@@ -3250,18 +3592,19 @@ class App {
   constructor() {
     this.settings = defaultSettings();
     this.defaults = defaultSettings();
-    this.text = new TextModel('Ready\nSet\nSweat');
+    this.text = new TextModel('Sweat');
     this.history = new History();
     this.frameCount = 0;
     this.paused = false;
     this.pointer = { inside: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, down: null, seen: false };
-    this.caret = 15;
+    this.caret = 5;
     this.focused = false;
     this.dirty = { layout: false, alloc: false, env: false, congeal: false };
     this.lastTime = performance.now();
     this.fps = 60;
     this.exportRequest = null;
     this.liquid = new Set();     // keys of dots that have turned to liquid
+    this.geo = new Map();        // geometric mode: hover offset and growth per congealed dot
     this.seen = new Set();       // glyph ids that have already had their share congealed
     this.injectQueue = [];
     this.dots = [];
@@ -3370,6 +3713,8 @@ class App {
       if (EFFECTS.env.has(p)) this.dirty.env = true;
       if (EFFECTS.congeal.has(p)) this.dirty.congeal = true;
       if (EFFECTS.dots.has(p)) this.renderer.dotsDirty = true;
+      if (EFFECTS.union.has(p)) this.staticDirty = true;
+      if (p === 'heat.on') this.dirty.layout = true;
       if (p === 'aspect' || p === 'customW' || p === 'customH') this.fitBoard();
       if (p === 'perf.renderScale') this.fitBoard();
       if (p === 'tool') this.ui?.refresh();
@@ -3443,6 +3788,7 @@ class App {
     const [aw, ah] = this.art;
     const lay = this.setter.layout(this.text.text, this.text.ids, s, { w: aw, h: ah });
     this.layout = lay;
+    this.ui?.refresh();
     this.buildDots();
     // newly typed letters sweat their share straight away
     const fresh = lay.glyphs.filter(g => !this.seen.has(g.id));
@@ -3457,16 +3803,19 @@ class App {
     const lay = this.layout;
     const r = lay.r;
     const dots = [];
+    const geo = this.geometric, heat = !!this.settings.heat.on;
+    const mk = (o, h) => ({ ...o, geo, heat, sp: h & 3, liquid: this.liquid.has(o.key) });
     for (const g of lay.glyphs) {
       g.dots.forEach(([x, y], j) => {
         const key = g.id * 1024 + j;
-        dots.push({ key, gid: g.id, x, y, r, sp: hash2(key, 99) & 3, liquid: this.liquid.has(key) });
+        dots.push(mk({ key, gid: g.id, x, y, r: g.r }, hash2(key, 99)));
       });
     }
     for (const p of this.settings.placed) {
       const key = -p.id;
-      dots.push({ key, gid: -1, x: p.x, y: p.y, r, sp: hash2(p.id, 7) & 3, liquid: this.liquid.has(key) });
+      dots.push(mk({ key, gid: -1, x: p.x, y: p.y, r }, hash2(p.id, 7)));
     }
+    this.heatMode = heat ? 'all' : 'none';
     this.dots = dots;
     this.dotByKey = new Map(dots.map(d => [d.key, d]));
     this.staticDirty = true;
@@ -3478,6 +3827,11 @@ class App {
     const data = new Float32Array(Math.max(1, list.length) * 4);
     list.forEach((d, i) => data.set([d.x, ah - d.y, d.r, 0], i * 4));
     this.renderer.setDots(data, list.length);
+    const hl = list.filter(d => d.heat);
+    const hdata = new Float32Array(Math.max(1, hl.length) * 4);
+    hl.forEach((d, i) => hdata.set([d.x, ah - d.y, d.r, 0], i * 4));
+    this.renderer.setHeatDots(hdata, hl.length);
+    this.uploadUnion();
     this.staticList = list;
     this.staticGen++;
     this.staticDirty = false;
@@ -3488,13 +3842,64 @@ class App {
     return [x / aw * this.sim.nx, (1 - y / ah) * this.sim.ny];
   }
 
+  get geometric() { return this.settings.congealStyle === 'geometric'; }
+
   liquefy(d) {
     if (d.liquid) return;
     d.liquid = true;
     this.liquid.add(d.key);
-    const [cx, cy] = this.toCells(d.x, d.y);
-    this.injectQueue.push([cx, cy, d.r / this.art[0] * this.sim.nx, d.sp]);
+    // geometric congealing is drawn, not simulated: no liquid goes into the sim
+    if (!d.geo) {
+      const [cx, cy] = this.toCells(d.x, d.y);
+      this.injectQueue.push([cx, cy, d.r / this.art[0] * this.sim.nx, d.sp]);
+    }
     this.staticDirty = true;
+  }
+
+  // Pathfinder-style union of the congealed dots: each dot, plus a straight bridge to every other
+  // congealed dot within reach (in dot spacings)
+  uploadUnion() {
+    const [, ah] = this.art;
+    const s = this.settings;
+    // each congealed dot where the hover has moved and grown it to
+    const wet = this.dots.filter(d => d.liquid && d.geo).map(d => {
+      const g = this.geo.get(d.key);
+      return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat } : d;
+    });
+    const hot = [];
+    const n = wet.length;
+    const dots = new Float32Array(Math.max(1, n) * 8);
+    wet.forEach((d, i) => dots.set([d.x, ah - d.y, d.x, ah - d.y, d.r, d.r, 0, 0], i * 8));
+    const reach = s.reach * this.layout.pitch * 1.001;
+    const out = [];
+    if (reach > 0) {
+      // bucket by reach so only nearby pairs are compared
+      const cell = new Map();
+      const key = (x, y) => x + ',' + y;
+      wet.forEach((d, i) => {
+        const k = key(Math.floor(d.x / reach), Math.floor(d.y / reach));
+        if (!cell.has(k)) cell.set(k, []);
+        cell.get(k).push(i);
+      });
+      wet.forEach((a, i) => {
+        const cx = Math.floor(a.x / reach), cy = Math.floor(a.y / reach);
+        for (let gy = cy - 1; gy <= cy + 1; gy++) for (let gx = cx - 1; gx <= cx + 1; gx++) {
+          for (const j of cell.get(key(gx, gy)) || []) {
+            if (j <= i) continue;
+            const b = wet[j];
+            if (Math.hypot(a.x - b.x, a.y - b.y) > reach) continue;
+            out.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
+            if (a.heat && b.heat) hot.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
+          }
+        }
+      });
+    }
+    this.renderer.setUnion(dots, n, new Float32Array(out.length ? out : new Array(8).fill(0)), out.length / 8, s.bridge);
+    // the same shapes again, only those of heat-map lines, for the heat map's own mask
+    const hw = wet.filter(d => d.heat);
+    const hd = new Float32Array(Math.max(1, hw.length) * 8);
+    hw.forEach((d, i) => hd.set([d.x, ah - d.y, d.x, ah - d.y, d.r, d.r, 0, 0], i * 8));
+    this.renderer.setHeatUnion(hd, hw.length, new Float32Array(hot.length ? hot : new Array(8).fill(0)), hot.length / 8);
   }
 
   // turn a share of one letterform's dots to liquid, in random clusters that gather into beads
@@ -3550,6 +3955,7 @@ class App {
 
   // dry everything, then congeal every letterform (and the placed dots) from the current seed
   restart(toast) {
+    this.geo.clear();
     this.sim.clear();
     this.liquid.clear();
     this.injectQueue.length = 0;
@@ -3575,6 +3981,7 @@ class App {
   }
 
   dryAll() {
+    this.geo.clear();
     this.sim.clear();
     this.liquid.clear();
     this.injectQueue.length = 0;
@@ -3833,6 +4240,29 @@ class App {
         if (Math.hypot(d.x - (ax + sx * t), d.y - (ay + sy * t)) < R * 0.85 + d.r * 0.3) this.liquefy(d);
       }
     }
+    // geometric hover: congealed dots the cursor passes over swell and drift toward it, and stay that way
+    // (each keeps the strongest touch it has had, pulled toward where the cursor was at that moment)
+    if (this.geometric && !this.paused && (this.geo.size || (tool === 'congeal' && active && (s.hoverGrow > 0 || s.hoverPull > 0)))) {
+      const on = tool === 'congeal' && active, R = Math.max(s.cursorRadius, 1);
+      const k = 1 - Math.exp(-dt * 9);
+      let moved = false;
+      for (const d of this.dots) {
+        if (!d.liquid || !d.geo) continue;
+        let w = 0;
+        if (on) {
+          const t = Math.hypot(d.x - p.x, d.y - p.y) / R;
+          w = t < 1 ? (1 - t * t) * (1 - t * t) : 0;
+        }
+        let g = this.geo.get(d.key);
+        if (!g) { if (!w) continue; g = { s: 1, ox: 0, oy: 0, w: 0, px: d.x, py: d.y }; this.geo.set(d.key, g); }
+        if (w > g.w) { g.w = w; g.px = p.x; g.py = p.y; }
+        const ts = 1 + s.hoverGrow * g.w, tx = (g.px - d.x) * s.hoverPull * g.w, ty = (g.py - d.y) * s.hoverPull * g.w;
+        const ns = g.s + (ts - g.s) * k, nx = g.ox + (tx - g.ox) * k, ny = g.oy + (ty - g.oy) * k;
+        if (Math.abs(ns - g.s) > 1e-4 || Math.abs(nx - g.ox) > 0.01 || Math.abs(ny - g.oy) > 0.01) moved = true;
+        g.s = ns; g.ox = nx; g.oy = ny;
+      }
+      if (moved && !this.staticDirty) this.uploadUnion();
+    }
     if (this.staticDirty) this.uploadStatic();
     if (this.injectQueue.length) {
       this.sim.inject(this.injectQueue, ms.contactAngle);
@@ -3871,7 +4301,7 @@ class App {
 
     // beads that run over a dry dot pick it up
     // every dry dot is live: liquid that reaches one fuses with it
-    if (!this.paused && this.frameCount % 3 === 0 && this.staticList?.length) {
+    if (!this.paused && this.dots.some(d => !d.geo) && this.frameCount % 3 === 0 && this.staticList?.length) {
       const gen = this.staticGen, list = this.staticList;
       const thr = 0.15 * this.capPx(r0) / this.mToPx;
       // in the heavier weights neighbouring dots overlap, so the ring stays inside the gap they leave
@@ -3889,7 +4319,7 @@ class App {
 
     this.renderer.render({
       art: [aw, ah], sim: this.sim, mToPx: this.mToPx, pxMm: this.pxMm, settings: s,
-      dotTheta: ms.contactAngle, hmaxPx: Math.max(this.capPx(r0), this.sim.hmaxEst * this.mToPx),
+      heatMode: this.heatMode, dotTheta: ms.contactAngle, hmaxPx: Math.max(this.capPx(r0), this.sim.hmaxEst * this.mToPx),
       imgXf: this.imageXf(), staticGrain: this.reducedMotion,
     }, this.paused ? 0 : dt);
 
@@ -4016,20 +4446,6 @@ class App {
     this.toast('Recording… press Stop recording to save');
     this.ui?.refresh();
   }
-}
-
-// the wordmark, set in Interdot from the same dot data
-function drawMark(el) {
-  if (!el) return;
-  const setter = new DotSetter();
-  const r = FONT.radii.regular, off = r - FONT.base;
-  let x = 0, circles = '';
-  for (const ch of 'sweat') {
-    const g = setter.glyph(ch);
-    for (let j = 0; j < g[1].length; j += 2) circles += `<circle cx="${(x + g[1][j] + off).toFixed(1)}" cy="${(FONT.xh - g[1][j + 1] - off).toFixed(1)}" r="${r}"/>`;
-    x += g[0];
-  }
-  el.innerHTML = `<svg viewBox="20 -40 ${x + 10} ${FONT.xh + 100}" fill="currentColor" aria-hidden="true">${circles}</svg>`;
 }
 
 function stamp() {

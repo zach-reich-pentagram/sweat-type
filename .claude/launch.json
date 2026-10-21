@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sweat-type",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "47193", "--bind", "127.0.0.1"],
+      "port": 47193,
+      "autoPort": false
+    }
+  ]
+}
