@@ -1999,9 +1999,9 @@ const PER_MATERIAL = {
     tint: '#f4eee6', clarity: 0.97, ior: 1.333, gloss: 0.97,
   },
   ink: {
-    background: '#000000', surface: 'plain', dots: '#ffffff', dotStyle: 'print',
+    background: '#ffffff', surface: 'plain', dots: '#000000', dotStyle: 'print',
     surfaceTension: 12.1, viscosity: 200, contactAngle: 62, pinning: 0,
-    tint: '#ffffff', clarity: 0, ior: 1.45, gloss: 0.92,
+    tint: '#000000', clarity: 0, ior: 1.45, gloss: 0.92,
   },
 };
 
@@ -2012,7 +2012,7 @@ const OSC_PERIOD = 10;
 function defaultSettings() {
   return {
     material: 'ink',
-    weight: 'regular',
+    weight: 'thin',
     fontSize: 320,
     leading: 1.0,
     tracking: -32,
@@ -2022,9 +2022,9 @@ function defaultSettings() {
     aspect: '16:9', customW: 1920, customH: 1080,
     scale: 30,
     // congeal
-    amount: 0,
+    amount: 0.35,
     beadSize: 1,
-    variation: 0.6,
+    variation: 0.5,
     seed: 7,
     flat: true,
     // cursor
@@ -2044,15 +2044,15 @@ function defaultSettings() {
     wetTrails: 0.35,
     lens: 80,
     congealStyle: 'geometric',
-    pattern: 'clusters',
-    runLength: 5,
-    growth: 0.14,
+    pattern: 'runs',
+    runLength: 8,
+    growth: 0.25,
     runShape: 'swell',
     hideCursor: false,
-    reach: 1.5,
+    reach: 0.75,
     bridgeMode: 'any',
-    bridge: 0.9,
-    hoverGrow: 0.4,
+    bridge: 0.5,
+    hoverGrow: 0.45,
     heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 12.6, inner: 4, growth: 0.98, blend: 0, dry: true, dotsOnTop: false },
     hoverPull: 0.12,
     image: { fit: 'cover', zoom: 1, x: 0, y: 0 },
@@ -2946,7 +2946,7 @@ function sections(app) {
         { kind: 'range', path: 'runLength', label: 'Run length', min: 2, max: 16, step: 1, unit: 'dots', show: runs, hint: 'How many dots each run follows along the stroke' },
         { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run, compounding: at 40% a dot two steps in is nearly twice the size' },
         { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle'], ['both', 'Grow and swell']] },
-        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes vary widely' },
+        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes and growth vary widely' },
       ],
     },
     {
@@ -3936,14 +3936,14 @@ class App {
       const free = [];
       for (let i = 0; i < N; i++) if (!taken[i]) free.push(i);
       if (!free.length) break;
-      const len = Math.min(want - count + 1, Math.max(2, Math.round(s.runLength * (1 - s.variation * rng() * 0.6))));
+      // every run is the full length: when one end runs out of free dots it grows from the other
+      const len = Math.max(2, Math.round(s.runLength));
       const path = [free[Math.floor(rng() * free.length)]];
       taken[path[0]] = 1;
-      let dir = null;
-      while (path.length < len) {
-        const a = dots[path[path.length - 1]];
+      const step = (from, dir) => {
+        const a = dots[from];
         let best = -1, bs = Infinity;
-        for (const j of near[path[path.length - 1]]) {
+        for (const j of near[from]) {
           if (taken[j]) continue;
           const b = dots[j], dx = b.x - a.x, dy = b.y - a.y, dl = Math.hypot(dx, dy);
           // nearest first, then the straightest continuation of the run so far
@@ -3951,12 +3951,20 @@ class App {
           const sc = dl / pitch + 0.9 * turn + 0.15 * rng();
           if (sc < bs) { bs = sc; best = j; }
         }
-        if (best < 0) break;
-        const a2 = dots[best];
-        const dl = Math.hypot(a2.x - a.x, a2.y - a.y) || 1;
-        dir = [(a2.x - a.x) / dl, (a2.y - a.y) / dl];
-        taken[best] = 1;
-        path.push(best);
+        return best;
+      };
+      const dirOf = (p, q) => { const dx = dots[q].x - dots[p].x, dy = dots[q].y - dots[p].y, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+      let tailOpen = true, headOpen = true;
+      while (path.length < len && (tailOpen || headOpen)) {
+        if (tailOpen) {
+          const n1 = path.length;
+          const j = step(path[n1 - 1], n1 > 1 ? dirOf(path[n1 - 2], path[n1 - 1]) : null);
+          if (j < 0) tailOpen = false; else { taken[j] = 1; path.push(j); continue; }
+        }
+        if (headOpen) {
+          const j = step(path[0], path.length > 1 ? dirOf(path[1], path[0]) : null);
+          if (j < 0) headOpen = false; else { taken[j] = 1; path.unshift(j); }
+        }
       }
       count += path.length;
       const rate = Math.max(0, s.growth * (1 + s.variation * (rng() - 0.5)));
