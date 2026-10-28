@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sweat Type</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='12' r='5' fill='%23ff2a98'/%3E%3Ccircle cx='22' cy='12' r='5' fill='%23ff2a98'/%3E%3Cpath d='M16 14c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z' fill='%2316161b'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💦%3C/text%3E%3C/svg%3E">
+<!-- House style: extracted from sweat-type and image-experiments. The design rules are in ~/.claude/CLAUDE.md. -->
 <style>
   /* ------------------------------------------------------------------ tokens
      Apple's semantic colours: labels, fills and separators by vibrancy tier,
@@ -16,6 +17,8 @@
     --blue: rgb(0, 136, 255);
     --blue-soft: rgba(0, 136, 255, 0.14);
     --blue-ring: rgba(0, 136, 255, 0.35);
+    --green: rgb(52, 199, 89);
+    --red: rgb(255, 59, 48);
     --label: #000;
     --label-2: rgba(60, 60, 67, 0.60);
     --label-3: rgba(60, 60, 67, 0.30);
@@ -55,6 +58,8 @@
       --blue: rgb(0, 145, 255);
       --blue-soft: rgba(0, 145, 255, 0.22);
       --blue-ring: rgba(0, 145, 255, 0.45);
+      --green: rgb(48, 209, 88);
+      --red: rgb(255, 69, 58);
       --label: #FFF;
       --label-2: rgba(235, 235, 245, 0.60);
       --label-3: rgba(235, 235, 245, 0.30);
@@ -75,45 +80,31 @@
       --glass-sheen: rgba(255, 255, 255, 0.07);
       --card-glass: rgba(255, 255, 255, 0.06);
       --seg-on: rgb(99, 99, 102);
+      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
       --knob: rgb(229, 229, 234);
       --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
       --gray-4: rgb(58, 58, 60);
       --gray-6: rgb(28, 28, 30);
     }
   }
   @media (prefers-contrast: more) {
-    :root {
-      --blue: rgb(30, 110, 244);
-      --label-2: rgba(60, 60, 67, 0.80);
-      --label-3: rgba(60, 60, 67, 0.55);
-      --separator: rgba(60, 60, 67, 0.55);
-      --gray: rgb(108, 108, 112);
-    }
+    :root { --blue: rgb(30, 110, 244); --label-2: rgba(60, 60, 67, 0.80); --label-3: rgba(60, 60, 67, 0.55); --separator: rgba(60, 60, 67, 0.55); --gray: rgb(108, 108, 112); }
   }
   @media (prefers-contrast: more) and (prefers-color-scheme: dark) {
-    :root {
-      --blue: rgb(92, 184, 255);
-      --label-2: rgba(235, 235, 245, 0.80);
-      --label-3: rgba(235, 235, 245, 0.55);
-      --separator: rgba(160, 160, 168, 0.8);
-      --gray: rgb(174, 174, 178);
-    }
+    :root { --blue: rgb(92, 184, 255); --label-2: rgba(235, 235, 245, 0.80); --label-3: rgba(235, 235, 245, 0.55); --separator: rgba(160, 160, 168, 0.8); --gray: rgb(174, 174, 178); }
   }
 
   /* ------------------------------------------------------------- type
      The macOS desktop scale, tracked per size the way SF Pro is:
-     Title 3 15/20 for the name, Headline 13/16 for section heads, Body 13/16,
-     Subheadline 11/14 for notes and Footnote 10/13 for the smallest marks. */
+     Title 3 15/20, Headline/Body 13/16, Subheadline 11/14 for notes,
+     Footnote 10/13 for the smallest marks. */
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
   html, body { height: 100%; }
   body {
-    background: var(--bg);
-    color: var(--label);
-    font-family: var(--font);
+    background: var(--bg); color: var(--label); font-family: var(--font);
     font-size: 13px; line-height: 16px; letter-spacing: -0.08px; font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    overflow: hidden;
+    -webkit-font-smoothing: antialiased; overflow: hidden;
   }
   button, input, textarea, select { font: inherit; color: inherit; letter-spacing: inherit; }
   ::selection { background: var(--blue-ring); }
@@ -121,31 +112,21 @@
 
   /* ------------------------------------------------------------ shell
      The canvas is the content and runs edge to edge; the two sidebars are the
-     controls layer, floating over it in Liquid Glass. */
+     controls layer, floating over it in Liquid Glass, as tall as what they hold. */
   .app { height: 100vh; }
   .body { position: relative; height: 100%; }
-
   .col {
-    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); bottom: max(var(--margin), env(safe-area-inset-bottom));
-    z-index: 4; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px;
-    color: var(--label);
-    /* Liquid Glass, regular: it blurs and lifts what is behind it, catches the
-       light along its top edge, and is rimmed with light — a rounded rectangle,
-       as larger glass is */
+    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); max-height: calc(100% - var(--margin) * 2);
+    z-index: 4; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; color: var(--label);
     background: linear-gradient(180deg, var(--glass-sheen), transparent 120px), var(--glass);
     -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
-    border-radius: var(--radius-glass);
-    box-shadow: var(--glass-edge), var(--glass-shadow);
+    border-radius: var(--radius-glass); box-shadow: var(--glass-edge), var(--glass-shadow);
     transform: translateZ(0);   /* its own layer, so the blur is redrawn cleanly on resize */
   }
   .col.left { left: max(var(--margin), env(safe-area-inset-left)); width: 320px; }
   .col.right { right: max(var(--margin), env(safe-area-inset-right)); width: 300px; }
-  /* sections inside the glass are lighter still, so the glass reads through them */
   .col .panel { background: var(--card-glass); }
-
-  /* in a column that scrolls, nothing is squeezed to fit: it scrolls instead */
   .col > *, .panel > * { flex-shrink: 0; }
-  /* the scroll bar kept inside the rounded glass: clear of the corners, in from the edge */
   .col { scrollbar-width: thin; scrollbar-color: var(--fill) transparent; }
   .col::-webkit-scrollbar { width: 14px; }
   .col::-webkit-scrollbar-track { background: transparent; margin: var(--radius-glass) 0; }
@@ -153,11 +134,22 @@
   .col::-webkit-scrollbar-corner { background: transparent; }
 
   /* ----------------------------------------------------------- sections
-     Grouped cards in the content layer — a regular standard material, never glass. */
+     Every panel collapses: its whole head is the button, a chevron at the end turns
+     down when open, and everything below the head shows only while open. All start closed. */
   .panel { background: var(--card); border-radius: var(--radius-card); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
   .panel.off { opacity: 0.45; }
-  .panel.off .btn, .panel.off .chip, .panel.off .seg, .panel.off .drop { pointer-events: none; }
-  .phead { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 16px; font-weight: 400; letter-spacing: -0.08px; }
+  .panel:not(.open) > :not(.phead) { display: none; }
+  .phead {
+    display: flex; align-items: center; gap: 8px; width: calc(100% + 28px); margin: -14px; padding: 14px;
+    border: 0; background: transparent; color: var(--label); text-align: left; cursor: pointer; border-radius: var(--radius-card);
+  }
+  .phead::after {
+    content: ""; margin-left: auto; width: 7px; height: 12px; background: var(--label-3); transition: transform .2s ease, background-color .15s ease;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 12'%3E%3Cpath d='M1.2 1.2 5.8 6l-4.6 4.8' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 12'%3E%3Cpath d='M1.2 1.2 5.8 6l-4.6 4.8' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .phead:hover::after { background: var(--label-2); }
+  .panel.open > .phead::after { transform: rotate(90deg); }
   .badge {
     width: 20px; height: 20px; min-width: 20px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
@@ -165,29 +157,27 @@
     font-size: 10px; line-height: 13px; font-weight: 600; letter-spacing: 0.12px; font-variant-numeric: tabular-nums;
   }
   .note { color: var(--label-2); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
+  .grouphead {
+    border-top: 0.5px solid var(--separator); padding-top: 12px;
+    font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06px; text-transform: uppercase; color: var(--label-2);
+  }
 
   /* ---------------------------------------------------------- controls */
-  /* push buttons: sized to their label, a quiet fill, the label in the label
-     colour; the accent only for the one primary action */
+  /* push buttons: sized to their label, a quiet fill; the accent only for the one primary action */
   .btn {
     height: 30px; padding: 0 14px; border: 0; border-radius: 9px;
     background: var(--fill-2); color: var(--label);
     font-weight: 500; cursor: pointer; text-align: center; white-space: nowrap;
     transition: background-color .15s ease;
   }
-  .btn:hover { background: var(--fill); }
-  .btn:active { background: var(--fill); }
-  .btn.on, .btn.primary { background: var(--blue); color: #fff; font-weight: 600; }
+  .btn:hover, .btn:active { background: var(--fill); }
+  .btn.primary, .btn.on { background: var(--blue); color: #fff; font-weight: 600; }
   .btn.primary:hover { filter: brightness(1.08); }
   .btn[disabled] { color: var(--label-3); background: var(--fill-3); cursor: default; }
-  /* buttons that belong together sit together, in one row */
-  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start; align-items: center; }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* segmented controls: a sunken track, the chosen segment raised in the material */
-  .seg {
-    display: flex; gap: 2px; padding: 2px; min-height: var(--target);
-    background: var(--fill-3); border-radius: calc(var(--radius-control) + 2px);
-  }
+  .seg { display: flex; gap: 2px; padding: 2px; min-height: var(--target); background: var(--fill-3); border-radius: calc(var(--radius-control) + 2px); }
   .seg button {
     flex: 1 1 0; min-width: 60px; border: 0; background: transparent; border-radius: var(--radius-control);
     padding: 0 8px; cursor: pointer; white-space: nowrap; font-weight: 500; color: var(--label);
@@ -195,40 +185,32 @@
   }
   .seg button:hover:not(.on) { background: var(--fill-3); }
   .seg button.on { background: var(--seg-on); box-shadow: var(--seg-shadow); font-weight: 600; }
+  .seg.small { min-height: 32px; }
+  .seg.small button { min-width: 0; font-size: 12px; }
 
   /* choice chips: capsules, the chosen one in the accent */
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
     min-height: var(--target); min-width: 60px; padding: 0 16px; border: 0; border-radius: 999px;
-    background: var(--fill-3); color: var(--label); font-weight: 500; cursor: pointer;
-    transition: background-color .15s ease;
+    background: var(--fill-3); color: var(--label); font-weight: 500; cursor: pointer; transition: background-color .15s ease;
   }
   .chip:hover:not(.on) { background: var(--fill-2); }
   .chip.on { background: var(--blue); color: #fff; font-weight: 600; }
 
-  /* pop-up menus: label on the left, the choice on the right beside the
-     up-and-down chevrons in a small round well, rows split by a hairline */
+  /* pop-up menus: label left, choice right beside chevrons in a small round well, rows split by a hairline */
+  .rows { display: flex; flex-direction: column; gap: 10px; }
   .popup { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--target); }
-  .popup + .popup, .rows > .popup + .popup { border-top: 0.5px solid var(--separator); }
-  .rows { display: flex; flex-direction: column; }
+  .popup + .popup { border-top: 0.5px solid var(--separator); }
+  .popup.off { opacity: 0.4; pointer-events: none; }
   .plabel { color: var(--label); white-space: nowrap; }
-  .pwrap {
-    position: relative; display: inline-flex; align-items: center; min-width: 0;
-    min-height: var(--target); padding: 0 32px 0 8px; border-radius: var(--radius-control);
-  }
+  .pwrap { position: relative; display: inline-flex; align-items: center; min-width: 0; min-height: var(--target); padding: 0 32px 0 8px; border-radius: var(--radius-control); }
   .pvalue { color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* the menu itself, over the whole of the choice and the chevrons, unseen */
   .pwrap select {
     position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: 3;
-    -webkit-appearance: none; appearance: none; border: 0; background: transparent;
-    opacity: 0; cursor: pointer; font-size: 16px;
+    -webkit-appearance: none; appearance: none; border: 0; background: transparent; opacity: 0; cursor: pointer; font-size: 16px;
   }
   .pwrap:has(select:focus-visible) { outline: 3px solid var(--blue-ring); outline-offset: -2px; }
-  /* the round well behind the chevrons */
-  .pwrap::after {
-    content: ""; position: absolute; right: 0; top: 50%; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%;
-    background: var(--fill-2); pointer-events: none; z-index: 0;
-  }
+  .pwrap::after { content: ""; position: absolute; right: 0; top: 50%; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%; background: var(--fill-2); pointer-events: none; z-index: 0; }
   .pwrap::before {
     content: ""; position: absolute; right: 7px; top: 50%; width: 8px; height: 12px; margin-top: -6px; z-index: 2;
     background: var(--label-2); pointer-events: none;
@@ -237,55 +219,33 @@
   }
   .pwrap:hover::after { background: var(--fill); }
 
+  /* text fields: a sunken fill, no border, a focus ring in the accent */
+  .field { border: 0; border-radius: var(--radius-control); padding: 10px 12px; width: 100%; background: var(--fill-3); outline: none; resize: vertical; transition: box-shadow .15s ease; }
+  .field::placeholder { color: var(--label-3); }
+  .field:focus { box-shadow: 0 0 0 3px var(--blue-ring); }
+  textarea.field { min-height: 88px; }
+
+  /* drop zones */
   .drop {
-    min-height: 96px; border: 1.5px dashed var(--label-3); border-radius: var(--radius-card);
-    padding: 18px 12px; text-align: center; cursor: pointer; background: var(--fill-3);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-height: 72px; border: 1.5px dashed var(--label-3); border-radius: var(--radius-card); padding: 18px 12px; text-align: center; cursor: pointer;
+    background: var(--fill-3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
     transition: background-color .15s ease, border-color .15s ease;
   }
   .drop:hover { border-color: var(--label-2); }
-  .drop.hot { background: var(--blue-soft); border-color: var(--blue); }
+  .drop.hot, body.dragging .drop { background: var(--blue-soft); border-color: var(--blue); }
 
-  .field {
-    border: 0; border-radius: var(--radius-control); padding: 10px 12px; width: 100%;
-    background: var(--fill-3); resize: vertical; outline: none;
-    transition: box-shadow .15s ease;
-  }
-  .field::placeholder { color: var(--label-3); }
-  .field:focus { box-shadow: 0 0 0 3px var(--blue-ring); }
-  textarea.field { min-height: 88px; line-height: 16px; }
-
+  /* labelled sliders: name left, value right in label-2 tabular figures */
   .row { display: flex; flex-direction: column; gap: 2px; }
   .rowhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .rowhead .val { color: var(--label-2); font-variant-numeric: tabular-nums; }
-
-  /* a value you can type into: nothing until you go near it, a field while you do */
-  .val.typein { cursor: text; padding: 1px 6px; margin: -1px -6px; border-radius: 6px; transition: background-color .15s ease; }
-  .val.typein:hover { background: var(--fill-3); }
-  .val.typein.editing { background: var(--bg-2); color: var(--label); box-shadow: 0 0 0 3px var(--blue-ring); outline: none; min-width: 36px; text-align: right; }
-
-  /* sliders, drawn like the system's: a thick rounded track filled in the accent
-     up to a wide capsule handle, a full target tall */
+  .rowhead .lab { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+  .rowhead:has(.lab) { align-items: center; }
   input[type=range] {
     --p: 50%;
-    -webkit-appearance: none; appearance: none; width: 100%; height: var(--target); margin: 0;
-    background: transparent; cursor: pointer;
+    -webkit-appearance: none; appearance: none; width: 100%; height: var(--target); margin: -6px 0; background: transparent; cursor: pointer;
   }
-  .row input[type=range] { margin: -6px 0; }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 8px; border-radius: 4px;
-    background: linear-gradient(to right, var(--blue) 0 var(--p), var(--fill) var(--p) 100%);
-  }
-  /* a tick across the track where the font's own range ends */
-  input[type=range].marked::-webkit-slider-runnable-track {
-    background:
-      linear-gradient(to right, transparent calc(var(--m) - 1.5px), var(--label) calc(var(--m) - 1.5px), var(--label) calc(var(--m) + 1.5px), transparent calc(var(--m) + 1.5px)),
-      linear-gradient(to right, var(--blue) 0 var(--p), var(--fill) var(--p) 100%);
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 28px; height: 20px; margin-top: -6px; border-radius: 10px; border: 0;
-    background: var(--knob); box-shadow: var(--knob-shadow);
-  }
+  input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--blue) 0 var(--p), var(--fill) var(--p) 100%); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 20px; margin-top: -6px; border-radius: 10px; border: 0; background: var(--knob); box-shadow: var(--knob-shadow); }
   input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--fill); }
   input[type=range]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--blue); }
   input[type=range]::-moz-range-thumb { width: 28px; height: 20px; border-radius: 10px; border: 0; background: var(--knob); box-shadow: var(--knob-shadow); }
@@ -294,60 +254,109 @@
   input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: var(--knob-shadow), 0 0 0 3px var(--blue-ring); }
   input[type=range]:disabled { cursor: default; opacity: 0.5; }
 
-  /* the one on/off choice is a switch */
+  /* a value you can type into: nothing until you go near it, a field while you do */
+  .val.typein { cursor: text; padding: 1px 6px; margin: -1px -6px; border-radius: 6px; transition: background-color .15s ease; }
+  .val.typein:hover { background: var(--fill-3); }
+  .val.typein.editing { background: var(--bg-2); color: var(--label); box-shadow: 0 0 0 3px var(--blue-ring); outline: none; min-width: 36px; text-align: right; }
+
+  /* sweep: a small round button beside every slider's name. Grey while still; in the accent
+     while the slider runs, its wave showing how: a triangle to bounce, a sawtooth to loop. */
+  .osc { width: 22px; height: 22px; min-width: 22px; margin: -3px 0; border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+         display: inline-flex; align-items: center; justify-content: center; background: var(--fill-3); color: var(--label-2); transition: background-color .15s ease; }
+  .osc:hover { background: var(--fill-2); color: var(--label); }
+  .osc.on { background: var(--blue); color: #fff; }
+  .osc svg { width: 13px; height: 8px; display: block; }
+
+  /* on/off is a switch (a real checkbox underneath), green when on */
   .check { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--target); cursor: pointer; }
-  .check > span:last-child { order: -1; }
-  .box {
-    width: 42px; min-width: 42px; height: 26px; border-radius: 13px; background: var(--fill); position: relative;
-    transition: background-color .2s ease;
-  }
-  .box::after {
-    content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%;
-    background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
-    transition: transform .2s ease;
-  }
-  .check.on .box { background: rgb(52, 199, 89); }
-  .check.on .box::after { transform: translateX(16px); }
-  @media (prefers-color-scheme: dark) { .check.on .box { background: rgb(48, 209, 88); } }
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .check + .check { border-top: 0.5px solid var(--separator); }
+  .box { width: 42px; min-width: 42px; height: 26px; border-radius: 13px; background: var(--fill); position: relative; transition: background-color .2s ease; }
+  .box::after { content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06); transition: transform .2s ease; }
+  .check:has(input:checked) .box { background: var(--green); }
+  .check:has(input:checked) .box::after { transform: translateX(16px); }
+  .check:has(input:focus-visible) .box { box-shadow: 0 0 0 3px var(--blue-ring); }
 
-  .disclose {
-    display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: var(--target);
-    border: 0; background: transparent; cursor: pointer; padding: 0; margin: -10px 0; color: var(--label);
-  }
-  .disclose .caret { color: var(--label-3); font-size: 18px; font-weight: 600; transition: transform .2s ease; }
-  .disclose.open .caret { transform: rotate(90deg); }
-  .advbody { display: none; flex-direction: column; gap: 14px; padding-top: 12px; }
-  .advbody.open { display: flex; }
-  .group { display: flex; flex-direction: column; gap: 8px; }
-  .grouphead {
-    border-top: 0.5px solid var(--separator); padding-top: 12px;
-    font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06px; text-transform: uppercase; color: var(--label-2);
-  }
-
-
-  /* ------------------------------------------------------------- stage
-     The canvas is content: solid, edge to edge in its card, with the toolbar
-     over it floating in glass. */
-  .stagewrap { position: absolute; inset: 0; overflow: hidden; }
-  .stagebar {
-    /* centred over the open canvas between the two sidebars */
-    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); left: calc(50% + 10px); transform: translateX(-50%); z-index: 3;
-    display: flex; align-items: center; gap: 12px; padding: 7px 14px; color: var(--label);
-    background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
-    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-    border-radius: 999px; box-shadow: var(--glass-edge), var(--glass-shadow);
-    max-width: calc(100% - 720px); white-space: nowrap;
-  }
-  .stagebar .note { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
-  /* the artwork is fitted to the open canvas between the sidebars */
-  .stage { position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
-           padding: 68px calc(var(--margin) * 2 + 300px + 24px) 32px calc(var(--margin) * 2 + 320px + 24px); }
-  .hint { position: absolute; bottom: 18px; left: calc(var(--margin) * 2 + 320px + 8px); color: rgba(235, 235, 245, 0.6); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
-  .stage.light .hint { color: rgba(60, 60, 67, 0.6); }
-
+  /* read-outs: key left, value right, hairline between */
   .kv { display: flex; justify-content: space-between; gap: 8px; min-height: 24px; align-items: center; }
   .kv + .kv { border-top: 0.5px solid var(--separator); }
   .kv .val { color: var(--label-2); font-variant-numeric: tabular-nums; }
+
+  /* colour: a round well (a real colour input underneath), the hex beside it */
+  .colorrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--target); }
+  .colorrow + .colorrow, .popup + .colorrow, .colorrow + .popup { border-top: 0.5px solid var(--separator); }
+  .cwrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .cwrap .val { color: var(--label-2); font-variant-numeric: tabular-nums; font-size: 11px; min-width: 52px; text-align: right; text-transform: lowercase; }
+  .well { position: relative; width: 26px; height: 26px; min-width: 26px; border-radius: 50%; overflow: hidden; cursor: pointer;
+          box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 0 0 2px var(--fill-3); }
+  .well input { position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px); border: 0; padding: 0; cursor: pointer; opacity: 0; }
+  .well span { position: absolute; inset: 0; border-radius: 50%; }
+  .well:has(input:focus-visible) { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 0 0 3px var(--blue-ring); }
+
+  /* menus that open from a button: glass, beside the button that opened them */
+  .menu { position: fixed; inset: auto; margin: 0; border: 0; width: 248px; padding: 12px; color: var(--label);
+          background: linear-gradient(180deg, var(--glass-sheen), transparent 80px), var(--glass);
+          -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+          border-radius: var(--radius-card); box-shadow: var(--glass-edge), var(--glass-shadow); }
+  .menu:popover-open { display: flex; flex-direction: column; gap: 6px; }
+  .menu .popup { min-height: 36px; }
+  .menu .pwrap { min-height: 32px; }
+  .menuhead { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06px; text-transform: uppercase; color: var(--label-2); padding: 0 2px 4px; }
+
+  /* ------------------------------------------------------------- stage */
+  .stagewrap { position: absolute; inset: 0; overflow: hidden; }
+  /* The top bar: a floating glass capsule centred over the open canvas.
+     It has the glass rim ONLY — never --glass-shadow or any drop shadow underneath. */
+  .stagebar {
+    position: absolute; top: max(var(--margin), env(safe-area-inset-top)); left: calc(50% + 10px); transform: translateX(-50%); z-index: 3;
+    display: flex; align-items: center; gap: 10px; padding: 5px 5px 5px 14px; color: var(--label);
+    background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 999px; box-shadow: var(--glass-edge);
+    max-width: calc(100% - 720px); white-space: nowrap;
+  }
+  .stagebar .note { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .stagebar .note b { color: var(--label); font-weight: 600; }
+  .stagebar .btn { height: 28px; border-radius: 999px; padding: 0 12px; }
+  /* recording: the one place red means something other than an error */
+  .btn.rec { background: var(--red); color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .btn.rec::before { content: ""; display: inline-block; width: 7px; height: 7px; margin: 0 6px 1px 0; border-radius: 50%; background: #fff; animation: blink 1s steps(2, jump-none) infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .stage { position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--bg);
+           padding: 68px calc(var(--margin) * 2 + 300px + 24px) 40px calc(var(--margin) * 2 + 320px + 24px); }
+  .hint { position: absolute; bottom: 18px; left: calc(var(--margin) * 2 + 320px + 8px); right: calc(var(--margin) * 2 + 300px + 8px);
+          color: var(--label-2); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; pointer-events: none; text-align: center; }
+  /* the content, as large as the open canvas lets its proportions be */
+  .fit { width: 100%; height: 100%; container-type: size; display: flex; align-items: center; justify-content: center; }
+  #board { --r: 1; position: relative; width: min(100cqw, calc(100cqh * var(--r))); aspect-ratio: var(--r); background: var(--canvas, var(--bg-2)); color: var(--ink, var(--label)); box-shadow: var(--glass-shadow); overflow: hidden; }
+  /* a canvas too close to the page to see (dark in dark mode, light in light mode) gets a
+     hairline in the inverse: bright round a dark canvas, dark round a light one. Set by canvasEdge(). */
+  #board[data-edge="bright"] { outline: 1px solid rgba(255, 255, 255, 0.4); }
+  #board[data-edge="dark"] { outline: 1px solid rgba(0, 0, 0, 0.2); }
+  /* the text on the canvas, set entirely by the Type and Colour controls; empty to begin with */
+  .specimen { position: absolute; inset: 8%; outline: none; overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;
+              font-family: var(--t-font); font-size: var(--t-size); line-height: var(--t-leading); letter-spacing: var(--t-tracking); text-align: var(--t-align); }
+
+  /* floating glass bits: tooltip, toast, show-UI button */
+  .float {
+    position: absolute; z-index: 6; pointer-events: none;
+    background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--glass-edge), var(--glass-shadow);
+  }
+  #toast { left: 50%; bottom: 44px; transform: translate(-50%, 8px); padding: 8px 16px; border-radius: 999px; opacity: 0; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast.err { color: var(--red); }
+  #showUi { position: fixed; top: 12px; right: 12px; z-index: 7; display: none; opacity: 0; transition: opacity .2s; border-radius: 999px; pointer-events: auto; }
+  #showUi:hover, #showUi:focus-visible { opacity: 1; }
+
+  /* ------------------------------------------------------------ hidden UI: the content alone, edge to edge */
+  html[data-ui="off"] .col, html[data-ui="off"] .stagebar, html[data-ui="off"] .hint { display: none; }
+  html[data-ui="off"] .stage { padding: 0; }
+  html[data-ui="off"] .stagewrap { position: fixed; inset: 0; height: auto; border-radius: 0; z-index: 5; }
+  html[data-ui="off"] #board { box-shadow: none; outline: none; }
+  html[data-ui="off"] #showUi { display: block; }
 
   /* ------------------------------------------------------------ size classes
      Regular width: a sidebar floating either side of the canvas. Narrower:
@@ -355,252 +364,101 @@
      sections below it in the page, solid rather than floating. */
   @media (max-width: 1179px) {
     .col.left, .col.right { left: max(var(--margin), env(safe-area-inset-left)); right: auto; width: 330px; }
-    .col.left { bottom: auto; height: calc(60% - var(--margin) - var(--gutter) / 2); }
-    .col.right { top: auto; height: calc(40% - var(--margin) - var(--gutter) / 2); }
-    .stage { padding: 68px 32px 32px calc(var(--margin) * 2 + 330px + 24px); }
+    .col.left { max-height: calc(68% - var(--margin) - var(--gutter) / 2); }
+    .col.right { top: auto; bottom: max(var(--margin), env(safe-area-inset-bottom)); max-height: calc(32% - var(--margin) - var(--gutter) / 2); }
+    .stage { padding: 68px 32px 40px calc(var(--margin) * 2 + 330px + 24px); }
     .stagebar { left: calc(50% + 185px); max-width: calc(100% - 420px); }
-    .hint { left: calc(var(--margin) * 2 + 330px + 8px); }
+    .hint { left: calc(var(--margin) * 2 + 330px + 8px); right: 24px; }
   }
   @media (max-width: 759px) {
     :root { --margin: 16px; }
-    body { overflow: auto; background: var(--bg); }
+    body { overflow: auto; }
     .app { height: auto; min-height: 100vh; }
-    .body { height: auto; display: flex; flex-direction: column; gap: var(--gutter); padding: var(--margin);
-            padding-top: max(var(--margin), env(safe-area-inset-top)); }
-    .stagewrap { position: relative; inset: auto; order: -1; flex-shrink: 0; height: 58vh; border-radius: var(--radius-glass); box-shadow: 0 0 0 0.5px var(--separator); }
-    .stage { padding: 56px 20px 20px; }
+    .body { height: auto; display: flex; flex-direction: column; gap: var(--gutter); padding: var(--margin); padding-top: max(var(--margin), env(safe-area-inset-top)); }
+    .stagewrap { position: relative; inset: auto; order: -1; flex-shrink: 0; height: 62vh; border-radius: var(--radius-glass); box-shadow: 0 0 0 0.5px var(--separator); }
+    .stage { padding: 56px 16px 32px; }
     .stagebar { left: 50%; max-width: calc(100% - 24px); }
-    .hint { left: 18px; }
+    .hint { left: 16px; right: 16px; bottom: 10px; }
     /* in the page rather than over the canvas: nothing to see through, so solid */
-    .col.left, .col.right { position: static; width: auto; height: auto; overflow: visible;
+    .col.left, .col.right { position: static; width: auto; height: auto; max-height: none; overflow: visible;
       background: var(--sidebar); -webkit-backdrop-filter: none; backdrop-filter: none; transform: none; }
     .col .panel { background: var(--card); }
   }
-
-  /* Liquid Glass takes its appearance from what is behind it. Over the canvas,
-     the floating glass is light over a light canvas and dark over a dark one,
-     whatever the system's own appearance; in the stacked phone layout it sits
-     on the page, which follows the system. */
-  @media (min-width: 760px) {
-    html[data-canvas="dark"] .col, html[data-canvas="dark"] .stagebar {
-      color-scheme: dark;
-      --blue: rgb(0, 145, 255);
-      --blue-soft: rgba(0, 145, 255, 0.22);
-      --blue-ring: rgba(0, 145, 255, 0.45);
-      --label: #FFF;
-      --label-2: rgba(235, 235, 245, 0.60);
-      --label-3: rgba(235, 235, 245, 0.30);
-      --label-4: rgba(235, 235, 245, 0.16);
-      --fill: rgba(120, 120, 128, 0.36);
-      --fill-2: rgba(120, 120, 128, 0.32);
-      --fill-3: rgba(118, 118, 128, 0.24);
-      --separator: rgba(84, 84, 88, 0.65);
-      --separator-opaque: rgb(56, 56, 58);
-      --bg: #000000;
-      --bg-2: #1C1C1E;
-      --bg-3: #2C2C2E;
-      --card: rgba(44, 44, 46, 0.62);
-      --glass: rgba(28, 28, 30, 0.75);
-      --sidebar: #151517;                    /* that glass over the plain dark page */
-      --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
-      --seg-on: rgb(99, 99, 102);
-      --knob: rgb(229, 229, 234);
-      --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
-      --gray-4: rgb(58, 58, 60);
-      --gray-6: rgb(28, 28, 30);
-      --glass-sheen: rgba(255, 255, 255, 0.07);
-      --card-glass: rgba(255, 255, 255, 0.06);
-    }
-    html[data-canvas="light"] .col, html[data-canvas="light"] .stagebar {
-      color-scheme: light;
-      --blue: rgb(0, 136, 255);
-      --blue-soft: rgba(0, 136, 255, 0.14);
-      --blue-ring: rgba(0, 136, 255, 0.35);
-      --label: #000;
-      --label-2: rgba(60, 60, 67, 0.60);
-      --label-3: rgba(60, 60, 67, 0.30);
-      --label-4: rgba(60, 60, 67, 0.18);
-      --fill: rgba(120, 120, 128, 0.20);
-      --fill-2: rgba(120, 120, 128, 0.16);
-      --fill-3: rgba(118, 118, 128, 0.12);
-      --separator: rgba(60, 60, 67, 0.29);
-      --separator-opaque: rgb(198, 198, 200);
-      --bg: #F2F2F7;                           /* systemGroupedBackground */
-      --bg-2: #FFFFFF;                         /* secondarySystemGroupedBackground */
-      --bg-3: #F2F2F7;                         /* tertiarySystemGroupedBackground */
-      --card: rgba(255, 255, 255, 0.78);       /* regular standard material, inside the glass */
-      --glass: rgba(255, 255, 255, 0.72);      /* Liquid Glass, regular */
-      --sidebar: #FBFBFD;                      /* that glass over the plain light page */
-      --glass-edge: inset 0 0 0 0.5px rgba(255, 255, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
-      --seg-on: #FFFFFF;
-      --seg-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
-      --knob: #FFFFFF;
-      --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.22), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
-      --gray: rgb(142, 142, 147);
-      --gray-4: rgb(209, 209, 214);
-      --gray-6: rgb(242, 242, 247);
-      --glass-sheen: rgba(255, 255, 255, 0.35);
-      --card-glass: rgba(118, 118, 128, 0.07);
-    }
+  @media (prefers-reduced-motion: reduce) {
+    #toast, #showUi, .btn, .seg button, .chip, .box, .box::after, .phead::after, .osc, .val.typein { transition: none; }
+    .btn.rec::before { animation: none; }
   }
-
-  /* the styles as a segmented row, each with a dot of its own colour */
-  .seg.small { min-height: 32px; }
-  .seg.small button { min-width: 0; }
-  .chips.small .chip { min-height: 30px; min-width: 0; padding: 0 12px; font-size: 12px; }
-  .mono { font-variant-numeric: tabular-nums; }
-  .checks { display: flex; flex-direction: column; }
-  .checks .check + .check { border-top: 0.5px solid var(--separator); }
-  .check .sub { color: var(--label-2); font-size: 11px; line-height: 14px; display: block; }
-  .check > span:first-child { flex: 0 0 auto; }
-
-  /* ------------------------------------------------------------ this tool
-     Everything above is the Amigues tool's stylesheet as it stands. Below is
-     only what a live canvas, colour wells and a hideable interface need on top. */
-  [hidden] { display: none !important; }
-  :root { --stage: #E5E5EA; --letter: #000; }
-  @media (prefers-color-scheme: dark) { :root { --stage: #0B0B0C; } }
-  .stage { background: var(--stage); padding: 0; display: block; touch-action: none; }
-  #board { position: absolute; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28), 0 0 0 0.5px rgba(0, 0, 0, 0.12); cursor: default; touch-action: none; }
+  /* ---- this app */
+  /* the artboard is a WebGL canvas with a 2D layer over it for the caret and the cursor's ring */
+  .stage { touch-action: none; }
+  #board { cursor: default; touch-action: none; }
   #board.typing { cursor: text; }
   #board.tool-dots { cursor: crosshair; }
   #board.tool-wipe { cursor: cell; }
   #board.nocursor, #board.nocursor.typing { cursor: none; }
   #gl, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #overlay { pointer-events: none; }
+  /* typing goes to a field off to the side; the caret is drawn on the canvas */
   #typing { position: fixed; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; resize: none; border: 0; padding: 0; }
-  .hint { pointer-events: none; color: var(--label-2); transition: opacity .6s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 36px); }
-  .hint.gone { opacity: 0; }
-  #fatal { position: absolute; left: 50%; bottom: 48px; transform: translateX(-50%); max-width: 520px; padding: 14px 16px; z-index: 6;
-           background: rgb(255, 59, 48); color: #fff; border-radius: var(--radius-card); font-weight: 500; }
-
-  /* a section that opens and closes */
-  .panel > .disclose { margin: -10px 0; }
-  .panel > .disclose .phead { pointer-events: none; }
-  .panel:not(.open) > .advbody { display: none; }
-  .panel > .advbody { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
-
-  .rowhead .lab { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-  .row.nested .rowhead .lab { color: var(--label-2); padding-left: 14px; }
-  .row .note { margin-top: -4px; }
-  /* sweep a light slider end to end: a small round control beside its label */
-  .osc { width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--fill-3); color: var(--label-2);
-         display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background-color .15s ease; }
-  .osc:hover { background: var(--fill-2); color: var(--label); }
-  .osc.on { background: var(--blue); color: #fff; }
-  .osc svg { width: 13px; height: 8px; display: block; }
-  .osc:disabled { opacity: 0.3; cursor: default; }
-  .popup.own .pvalue { color: var(--blue); font-weight: 600; }
-  .cwrap .osc { font-size: 12px; font-weight: 600; line-height: 1; }
-  .note svg { width: 14px; height: 9px; display: inline-block; vertical-align: -1px; }
-
-  /* colour: swatches and a round well, the value typeable beside them */
-  .colorrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--target); }
-  .popup + .colorrow, .colorrow + .colorrow, .colorrow + .popup { border-top: 0.5px solid var(--separator); }
-  .cwrap { display: flex; align-items: center; gap: 5px; min-width: 0; }
-  .colorrow .plabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .swatch { width: 18px; height: 18px; min-width: 18px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
-            box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); transition: transform .12s ease; }
-  .swatch:hover { transform: scale(1.12); }
-  .swatch.on { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 0 0 2px var(--bg-2), 0 0 0 3.5px var(--blue); }
-  .well { position: relative; width: 26px; height: 26px; min-width: 26px; border-radius: 50%; overflow: hidden; cursor: pointer;
-          box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 0 0 2px var(--fill-3); }
-  .well input { position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px); border: 0; padding: 0; cursor: pointer; opacity: 0; }
-  .well span { position: absolute; inset: 0; border-radius: 50%; }
-  .cwrap .val { color: var(--label-2); font-variant-numeric: tabular-nums; font-size: 11px; min-width: 52px; text-align: right; text-transform: lowercase; margin-left: 2px; }
-
-  .pair { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: var(--target); }
-  .pair .fields { display: flex; align-items: center; gap: 6px; }
-  .pair .field { width: 76px; padding: 6px 8px; text-align: right; font-variant-numeric: tabular-nums; resize: none; }
-  .pair .x { color: var(--label-2); }
-
-  .imgrow { display: flex; align-items: center; gap: 10px; min-height: var(--target); }
-  .imgrow .thumb { width: 52px; height: 34px; border-radius: 8px; background: var(--fill-3) center / cover no-repeat; flex: 0 0 auto;
-                   box-shadow: inset 0 0 0 0.5px var(--separator); }
-  .imgrow .name { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .drop { min-height: 72px; }
-  .drop .note { pointer-events: none; }
-  body.dragging .drop { background: var(--blue-soft); border-color: var(--blue); }
-
-  textarea.field.textbox { min-height: 86px; font-size: 15px; line-height: 20px; }
-  .seg.small button { font-size: 12px; }
-  .chips.small .chip { min-height: 28px; }
-
-  /* the stage bar: transport, the state of the sim, and the way out of the interface */
-  .stagebar { gap: 10px; padding: 5px 5px 5px 5px; }
-  .stagebar .btn { height: 28px; border-radius: 999px; padding: 0 12px; }
-  .stagebar .note { padding: 0 4px; min-width: 0; }
-  .stagebar .note b { color: var(--label); font-weight: 600; }
-
-  #toast { position: absolute; top: calc(max(var(--margin), env(safe-area-inset-top)) + 52px); left: 50%; transform: translate(-50%, -6px); z-index: 7;
-           padding: 8px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; white-space: nowrap;
-           background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
-           -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-           box-shadow: var(--glass-edge), var(--glass-shadow); color: var(--label); font-weight: 500; }
-  #toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-  /* the interface hidden: the artwork alone, edge to edge */
-  html.ui-off .col, html.ui-off .stagebar, html.ui-off .hint { display: none !important; }
-  html.ui-off .stage { background: var(--letter); }
-  html.ui-off #board { box-shadow: none; }
-  html.ui-off #toast { top: max(var(--margin), env(safe-area-inset-top)); }
-  #showui { position: absolute; right: max(var(--margin), env(safe-area-inset-right)); bottom: max(var(--margin), env(safe-area-inset-bottom)); z-index: 8;
-            height: 32px; padding: 0 14px; border: 0; border-radius: 999px; cursor: pointer; font-weight: 500; color: var(--label);
-            background: linear-gradient(180deg, var(--glass-sheen), transparent), var(--glass);
-            -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-            box-shadow: var(--glass-edge), var(--glass-shadow); opacity: 0; transition: opacity .3s ease; pointer-events: none; display: none; }
-  html.ui-off #showui { display: block; }
-  html.ui-off.peek #showui { opacity: 1; pointer-events: auto; }
-  html.ui-off.idle, html.ui-off.idle #board { cursor: none; }
-
-  @media (max-width: 759px) {
-    .stagewrap { overflow: hidden; }
-    html.ui-off .stagewrap { position: fixed; inset: 0; height: auto; border-radius: 0; z-index: 5; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hint, #toast, #showui, .btn, .seg button, .chip, .box, .box::after { transition: none; }
-  }
+  /* the one error that stops the app: no WebGL */
+  #fatal { left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 10px 16px; border-radius: 999px; color: var(--red); pointer-events: auto; }
+  /* a switch's second line */
+  .check .sub { display: block; color: var(--label-2); font-size: 11px; line-height: 14px; letter-spacing: 0.06px; }
+  /* the heat map's colour list: small round buttons to move a colour or remove it */
+  .mini { width: 22px; height: 22px; min-width: 22px; border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+          display: inline-flex; align-items: center; justify-content: center; background: var(--fill-3); color: var(--label-2);
+          font-size: 12px; font-weight: 600; line-height: 1; transition: background-color .15s ease; }
+  .mini:hover:not(:disabled) { background: var(--fill-2); color: var(--label); }
+  .mini:disabled { color: var(--label-4); cursor: default; }
+  .colorrow .cwrap .mini:first-of-type { margin-left: 2px; }
+  @media (prefers-reduced-motion: reduce) { .mini { transition: none; } }
+  /* six buttons don't fit a phone's width: the bar scrolls sideways there rather than clipping */
+  @media (max-width: 759px) { .stagebar { overflow-x: auto; scrollbar-width: none; } .stagebar::-webkit-scrollbar { display: none; } .stagebar .note { display: none; } }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="body">
-
-    <!-- ============ left column ============ -->
-    <aside class="col left" id="colLeft" aria-label="Type and liquid"></aside>
-
-    <!-- ============ stage ============ -->
+    <aside class="col left" id="colLeft" aria-label="Type, congealing and cursor"></aside>
     <main class="stagewrap">
       <div class="stagebar">
-        <button class="btn" id="pause" title="Pause or resume the liquid (Space)">Pause</button>
-        <div class="note" id="hud" aria-live="off">—</div>
-        <button class="btn" id="dryall" title="Remove all liquid and return every dot to its place">Dry all</button>
-        <button class="btn" id="hidecursor" title="Hide the pointer over the artboard; the cursor still works">Hide cursor</button>
-        <button class="btn" id="hideui" title="Hide the controls and show the artwork alone (H)">Hide UI</button>
-        <button class="btn" id="fullscreen" title="The artwork alone, full screen (F)">Full screen</button>
+        <div class="note" id="hud" aria-live="polite">—</div>
+        <button class="btn" id="pause" title="Pause or resume (Space)">Pause</button>
+        <button class="btn" id="dryall" title="Dry every congealed dot">Dry all</button>
+        <button class="btn" id="hidecursor" title="Hide the pointer over the canvas; the cursor still works">Hide cursor</button>
+        <button class="btn" id="record" title="Record the canvas as video; press again to stop and save">Record</button>
+        <button class="btn" data-hide-ui title="Hide the controls (H)">Hide UI</button>
+        <button class="btn" id="fullscreen" title="The canvas alone, full screen (F)">Full screen</button>
       </div>
       <div class="stage" id="stage">
-        <div id="board">
-          <canvas id="gl"></canvas>
-          <canvas id="overlay"></canvas>
-        </div>
-        <div class="hint" id="hint">Hover dots to sweat them together · click the artboard to type · H hides the controls</div>
-        <div id="fatal" hidden></div>
+        <div class="fit"><div id="board"><canvas id="gl"></canvas><canvas id="overlay"></canvas></div></div>
+        <div class="hint" id="hint">Click the canvas to type · hover the dots to congeal them · click any value to type it · H hides the controls</div>
       </div>
-      <div id="toast" role="status"></div>
-      <button id="showui" type="button" title="Show the controls (H or Esc)">Show controls</button>
+      <div class="float" id="toast" role="status"></div>
+      <div class="float" id="fatal" hidden></div>
+      <button class="btn float" id="showUi" title="Show the controls (H or Esc)">Show UI</button>
     </main>
-
-    <!-- ============ right column ============ -->
-    <aside class="col right" id="colRight" aria-label="Look and output"></aside>
-
+    <aside class="col right" id="colRight" aria-label="Material and output"></aside>
   </div>
 </div>
+<!-- the one sweep menu, opened beside whichever slider's button was pressed -->
+<div class="menu" id="sweep" popover>
+  <div class="menuhead" id="sweepName"></div>
+  <div class="seg small" id="sweepMode" role="group" aria-label="Sweep">
+    <button data-mode="off">Off</button><button data-mode="bounce">Bounce</button><button data-mode="loop">Loop</button>
+  </div>
+  <div class="popup"><span class="plabel">Interpolation</span><span class="pwrap"><span class="pvalue"></span>
+    <select id="sweepEase" aria-label="Interpolation">
+      <option value="linear">Linear</option><option value="inout" selected>Ease in-out</option><option value="in">Ease in</option>
+      <option value="out">Ease out</option><option value="sine">Sine</option>
+    </select></span></div>
+  <div class="popup"><span class="plabel">Duration</span><span class="pwrap"><span class="pvalue"></span>
+    <select id="sweepDur" aria-label="Duration of one sweep">
+      <option value="0.5">0.5 s</option><option value="1">1 s</option><option value="2" selected>2 s</option><option value="4">4 s</option>
+      <option value="8">8 s</option><option value="16">16 s</option><option value="30">30 s</option>
+    </select></span></div>
+</div>
 <textarea id="typing" aria-label="Specimen text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-<input type="file" id="imgFile" accept="image/*" hidden>
 <script type="module">
 const FULLSCREEN_VS = `#version 300 es
 out vec2 vUv;
@@ -1629,7 +1487,7 @@ void main() {
   o = best;
 }`;
 // colours laid out by distance from the blob edge: equal steps (or growing ones) inside and out
-const heatFS = GLSL_HEADER + BICUBIC + `
+const heatFS = GLSL_HEADER + BICUBIC + HASH + `
 in vec2 vUv;
 uniform sampler2D uField;
 uniform sampler2D uSeeds;
@@ -1639,6 +1497,7 @@ uniform sampler2D uDotTex;
 uniform vec3 uCols[8];
 uniform int uN;
 uniform float uBand, uInner, uGrowth, uBlend, uDotsOnTop;
+uniform float uOrganic, uOrgScale;   // how far the contours wander from the letters, and the size of the wandering (px)
 uniform vec3 uDotCol;
 out vec4 o;
 float bandsAt(float x) {    // how many bands fit in x px when each is uGrowth times the last
@@ -1647,9 +1506,17 @@ float bandsAt(float x) {    // how many bands fit in x px when each is uGrowth t
 }
 void main() {
   vec2 q = vUv * uFieldSize;
+  // organic: the field is read through a slow, layered warp, so the contours drift off the letters'
+  // grid in soft lobes, and each band's width breathes along its length
+  vec2 Pa = q * uTexArt / max(uOrgScale, 1.0);
+  float reachPx = uOrganic * (uBand * 2.0 + uOrgScale * 0.35);
+  vec2 warp = (vec2(fbm(Pa + 3.1), fbm(Pa * 1.07 + 17.3)) - 0.5) * 2.0 * reachPx;
+  q += warp / uTexArt;
+  vec2 uvq = q / uFieldSize;
   vec4 sd = texelFetch(uSeeds, clamp(ivec2(q), ivec2(0), ivec2(uFieldSize) - 1), 0);
-  float inside = step(0.5, bicubic(uField, vUv, uFieldSize).r);
+  float inside = step(0.5, bicubic(uField, uvq, uFieldSize).r);
   float d = sd.z > 0.5 ? distance(q, sd.xy) * uTexArt : 1e5;
+  d += (fbm(Pa * 2.3 + 41.0) - 0.5) * 2.0 * uOrganic * uBand * 1.2;
   // depth below the deepest band's floor: the edge sits uInner bands out from the core
   float depthCore = abs(uGrowth - 1.0) < 1e-3 ? uInner * uBand : uBand * (pow(uGrowth, uInner) - 1.0) / (uGrowth - 1.0);
   float x = max(depthCore + (inside > 0.5 ? -d : d), 0.0);
@@ -1964,24 +1831,12 @@ void main() {
 // ---- js/font.js
 // interdot: every weight is a union of circles on one shared grid. centres (font units, thin weight) per glyph;
 // a heavier weight grows each dot from the same lower-left corner, so its centre shifts by (r - base)
-const FONT = {"upm":1000,"asc":800,"desc":-205,"cap":738,"xh":543,"base":31,"radii":{"thin":31,"light":48,"regular":60.5,"bold":72.5},"glyphs":{"0":[684,[168,708,264,708,360,708,457,708,71,611,554,611,71,514,554,514,71,417,554,417,71,321,554,321,71,224,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"1":[419,[168,709,265,709,72,611,265,611,265,513,265,417,265,320,265,224,265,128,265,32]],"2":[637,[260,709,357,709,167,708,454,611,71,610,71,514,456,514,454,417,359,321,263,224,166,128,71,31,168,31,263,31,358,31,454,31]],"3":[684,[168,707,264,707,360,707,457,707,554,612,71,610,554,515,264,418,360,418,457,418,264,321,360,321,457,321,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"4":[682,[359,705,456,705,264,610,456,610,264,513,456,513,167,417,456,417,167,321,456,321,71,224,456,224,456,129,71,128,167,128,263,128,360,128,552,128,456,32]],"5":[587,[72,705,168,705,264,705,360,705,457,705,72,609,72,513,72,417,168,417,264,417,360,417,457,319,457,224,71,128,457,128,168,32,264,32,360,32]],"6":[682,[167,705,263,705,361,705,455,705,71,610,552,610,71,514,71,417,167,417,263,417,361,417,455,417,71,321,552,321,71,224,552,224,71,128,552,128,167,32,263,32,361,32,455,32]],"7":[681,[71,705,168,705,264,705,360,705,455,705,551,705,551,609,455,513,455,417,360,320,360,224,263,128,263,32]],"8":[681,[167,706,262,706,360,706,456,706,71,609,551,609,71,512,551,512,167,416,263,416,360,416,456,416,167,320,263,320,360,320,456,320,71,225,551,225,71,128,551,128,167,32,262,32,360,32,456,32]],"9":[683,[168,705,264,705,360,705,456,705,72,608,553,608,71,512,553,512,71,416,553,416,168,321,264,321,360,321,456,321,553,320,553,223,72,128,553,128,168,32,264,32,360,32,456,32]],"A":[800,[379,704,283,609,379,609,476,609,283,512,475,512,186,417,572,417,186,320,572,320,186,224,283,224,379,224,475,224,571,224,668,129,91,128,667,33,91,32]],"B":[684,[457,693,71,692,168,692,264,692,361,692,554,596,71,595,554,500,71,498,71,403,457,403,168,402,264,402,361,402,457,306,71,305,71,210,554,209,71,113,554,113,71,16,168,16,264,16,361,16,457,16]],"C":[781,[265,706,361,706,458,706,168,610,554,610,71,513,651,513,71,417,71,320,71,224,650,224,168,127,554,127,265,31,361,31,458,31]],"D":[748,[71,705,180,705,289,705,399,705,71,608,509,608,71,512,617,512,71,417,618,417,71,321,617,321,71,224,618,224,71,128,509,128,72,31,180,31,289,31,399,31]],"E":[586,[71,706,167,706,263,706,360,706,456,706,71,611,71,514,71,417,167,417,263,417,360,417,456,417,71,321,71,224,71,129,71,31,167,31,263,31,360,31,456,31]],"F":[591,[168,706,266,706,364,706,461,706,71,705,71,614,71,518,71,422,168,422,266,422,364,422,461,422,71,324,71,226,71,127,71,31]],"G":[800,[269,707,365,707,461,707,173,610,559,610,655,514,76,513,76,418,76,322,462,321,559,321,655,321,77,225,655,225,173,128,559,128,269,31,365,31,461,31]],"H":[781,[71,707,651,707,71,611,651,611,71,514,651,514,71,418,168,418,264,418,360,418,458,418,554,418,651,418,71,322,651,322,71,225,651,225,71,129,651,129,71,31,651,31]],"I":[241,[91,704,91,608,91,512,91,416,91,320,91,224,91,127,91,31]],"J":[530,[400,705,400,609,400,514,400,416,400,320,400,225,16,128,400,128,114,31,209,31,305,31]],"K":[684,[71,707,553,707,71,610,457,610,71,514,360,514,71,419,167,419,264,419,71,320,168,320,264,320,71,224,361,224,71,128,457,128,71,31,554,31]],"L":[594,[71,718,71,620,71,523,71,425,71,326,71,229,71,131,71,31,169,31,268,31,365,31,464,31]],"M":[966,[71,705,166,705,648,705,744,703,71,610,166,610,648,610,744,608,71,513,264,513,549,513,744,511,71,417,264,417,549,417,744,415,71,321,264,321,549,321,744,319,71,225,359,225,469,225,744,223,71,127,359,127,469,127,744,125,744,36,71,31,359,31,469,31]],"N":[780,[71,707,650,707,71,610,650,610,71,514,168,514,650,514,71,418,264,418,650,418,71,321,360,321,650,321,71,225,457,225,650,225,71,129,554,129,650,129,71,31,650,31]],"O":[747,[180,705,289,705,399,705,508,705,71,609,617,609,71,513,617,513,71,417,617,417,71,321,617,321,71,225,617,225,71,128,617,128,180,31,289,31,399,31,508,31]],"P":[638,[71,705,167,705,264,705,359,705,456,705,71,609,553,609,71,514,553,514,71,417,553,417,71,321,167,321,264,321,360,321,457,321,71,225,71,129,71,31]],"Q":[874,[263,704,360,704,456,704,551,704,167,608,648,608,71,512,744,512,71,415,744,415,71,320,744,320,71,223,456,223,744,223,167,128,551,128,648,128,263,31,360,31,456,31,647,31,744,-65]],"R":[693,[71,707,169,707,268,707,365,707,464,707,71,610,563,610,71,514,563,514,71,418,563,418,71,320,169,320,268,320,365,320,464,320,71,225,365,225,71,129,464,129,71,29,563,29]],"S":[684,[168,707,264,707,360,707,457,707,71,611,553,611,71,514,168,417,264,417,360,321,457,321,554,224,71,128,554,128,168,31,264,31,360,31,457,31]],"T":[781,[71,707,168,707,265,707,362,707,458,707,554,707,651,707,362,610,362,513,362,418,362,322,362,224,362,129,362,31]],"U":[778,[71,705,648,705,71,609,648,609,71,514,648,514,71,416,648,416,71,321,648,321,71,224,648,224,551,129,167,128,262,33,359,33,456,33]],"V":[778,[71,705,648,705,71,609,648,609,167,513,552,513,167,417,552,417,167,320,552,320,263,224,456,224,263,128,456,128,360,32]],"W":[1173,[71,708,557,708,1043,708,71,613,557,613,1043,613,71,516,557,516,1043,516,168,420,460,420,654,420,947,420,168,322,460,322,654,322,947,322,168,226,460,226,654,226,947,226,265,129,363,129,751,129,849,129,265,31,363,31,751,31,849,31]],"X":[639,[71,705,509,705,71,608,509,608,180,513,399,513,289,418,289,320,180,225,399,225,71,129,509,129,71,31,509,31]],"Y":[777,[71,705,648,705,71,609,648,609,167,512,552,512,167,416,552,416,264,320,456,320,360,224,360,129,360,32]],"Z":[682,[71,705,168,705,263,705,360,705,456,705,552,705,552,609,456,513,359,417,263,320,167,224,71,128,71,32,168,32,263,32,360,32,456,32,552,32]],"a":[588,[168,513,265,513,361,513,71,417,458,417,168,321,265,321,361,321,458,321,71,225,458,225,71,128,458,128,168,31,265,31,361,31,458,31]],"b":[684,[71,708,71,610,71,515,264,515,361,515,71,418,168,418,457,418,71,322,554,322,71,226,554,226,71,127,167,127,457,127,71,31,264,31,360,31]],"c":[588,[167,515,264,515,360,515,71,418,457,418,71,321,71,225,71,128,458,128,167,32,264,32,360,32]],"d":[684,[554,705,554,609,264,513,361,512,554,512,168,417,458,417,554,416,71,320,554,320,71,224,554,224,168,128,458,127,554,127,264,31,361,31,554,31]],"e":[587,[168,514,264,514,361,514,71,418,457,418,71,321,168,321,264,321,361,321,457,321,71,224,71,128,457,128,167,31,264,31,361,31]],"f":[488,[268,800,361,800,169,705,169,609,71,513,169,513,268,513,169,417,169,321,169,225,169,129,169,31]],"g":[696,[566,528,171,526,270,526,369,526,71,427,467,427,566,427,566,329,71,327,71,230,566,229,71,130,468,130,566,130,566,32,171,31,270,31,369,31,566,-67,71,-166,566,-166,171,-264,270,-264,369,-264,467,-264]],"h":[586,[71,707,71,611,71,514,263,514,359,514,71,419,168,419,456,419,71,320,456,320,71,225,456,225,71,129,456,129,71,31,456,31]],"i":[201,[71,707,71,514,71,418,71,321,71,225,71,129,71,31]],"j":[311,[181,706,181,514,181,417,181,322,181,225,181,130,181,31,181,-63,71,-159]],"k":[588,[71,707,71,611,71,515,362,515,71,418,265,418,71,321,168,321,71,225,265,225,71,128,361,128,71,31,458,31]],"l":[201,[71,707,71,611,71,515,71,418,71,321,71,224,71,128,71,31]],"m":[876,[71,515,264,515,361,515,553,515,650,515,71,418,168,418,457,418,746,418,71,321,457,321,746,321,71,224,457,224,746,224,71,128,457,128,746,128,71,31,457,31,746,31]],"n":[587,[71,513,264,513,361,513,71,418,168,418,457,418,71,321,457,321,71,224,457,224,71,127,457,127,71,32,457,32]],"o":[586,[166,514,263,514,360,514,71,418,456,418,71,321,456,321,71,224,456,224,71,129,456,129,166,32,263,32,360,32]],"p":[686,[71,514,265,514,361,514,71,417,167,417,459,417,71,320,556,319,71,222,556,222,71,125,167,125,459,125,71,29,265,29,360,29,71,-70,71,-167]],"q":[688,[265,514,363,514,558,513,168,417,460,417,558,417,71,320,557,320,71,223,557,223,168,125,460,125,557,125,557,29,265,28,363,28,557,-68,557,-166]],"r":[490,[71,514,264,514,360,514,71,418,168,418,71,321,71,225,71,128,71,31]],"s":[588,[169,515,265,515,362,515,72,418,168,418,457,418,168,321,264,321,264,225,362,225,71,128,362,128,458,128,169,31,265,31,362,31]],"t":[489,[167,708,167,610,71,514,167,514,263,514,167,417,167,321,167,225,167,129,359,129,167,31,263,31]],"u":[587,[71,515,457,515,71,418,457,418,71,321,457,321,71,224,457,224,71,128,360,128,457,128,168,31,264,31,457,31]],"v":[587,[71,514,457,514,71,417,457,417,167,321,360,321,167,225,360,225,167,128,360,128,264,32]],"w":[973,[71,514,457,514,843,514,361,418,457,418,553,418,71,417,843,417,168,321,361,321,553,321,746,321,361,225,553,225,746,225,168,224,264,128,361,128,553,128,650,128,264,31,650,31]],"x":[637,[71,512,180,512,398,512,507,512,180,416,398,416,289,319,289,223,180,127,398,127,71,31,180,31,398,31,507,31]],"y":[587,[71,515,457,515,71,418,457,418,168,321,360,321,168,225,360,225,168,128,360,128,264,31,264,-65,71,-161,168,-161]],"z":[637,[71,511,181,511,290,511,399,511,507,511,507,415,290,319,398,319,181,222,290,222,71,126,71,31,181,31,290,31,399,31,507,31]],".":[201,[71,31]],",":[147,[31,31,31,-63]],"-":[600,[]]," ":[400,[]]}};
+const FONT = {"upm":1000,"asc":995,"desc":-205,"cap":738,"xh":543,"base":31,"radii":{"thin":31,"light":48,"regular":60.5,"bold":72.5},"glyphs":{"0":[684,[168,31,264,31,360,31,457,31,168,708,264,708,360,708,457,708,71,128,71,224,71,321,71,417,71,514,71,611,554,128,554,224,554,321,554,417,554,514,554,611]],"1":[419,[72,611,168,709,265,709,265,611,265,513,265,417,265,320,265,224,265,128,265,32]],"2":[637,[71,31,168,31,263,31,358,31,454,31,166,128,263,224,359,321,454,417,456,514,454,611,357,709,260,709,167,708,71,610,71,514]],"3":[684,[168,31,264,31,360,31,457,31,71,128,554,128,554,224,264,321,360,321,457,321,264,418,360,418,457,418,554,515,554,612,71,610,168,707,264,707,360,707,457,707]],"4":[682,[71,128,167,128,263,128,360,128,456,224,552,128,456,129,456,32,456,513,456,417,456,321,456,705,456,610,359,705,264,513,264,610,167,417,167,321,71,224]],"5":[587,[71,128,168,32,264,32,360,32,457,128,457,224,457,319,168,417,264,417,360,417,72,417,168,705,264,705,360,705,72,705,457,705,72,609,72,513]],"6":[682,[71,128,71,224,71,321,71,417,71,514,71,610,167,417,263,417,361,417,455,417,552,128,552,224,552,321,167,32,263,32,361,32,455,32,167,705,263,705,361,705,455,705,552,610]],"7":[681,[263,32,263,128,360,224,360,320,455,417,455,513,551,609,551,705,455,705,360,705,264,705,168,705,71,705]],"8":[681,[71,128,71,225,551,128,551,225,167,32,262,32,360,32,456,32,167,320,263,320,360,320,456,320,167,416,263,416,360,416,456,416,167,706,262,706,360,706,456,706,71,512,71,609,551,512,551,609]],"9":[683,[72,128,168,32,264,32,360,32,456,32,553,128,553,223,553,320,71,416,553,512,72,608,553,416,553,608,71,512,168,321,264,321,360,321,456,321,168,705,264,705,360,705,456,705]]," ":[400,[]],"A":[800,[475,224,91,32,91,128,186,224,283,224,379,224,667,33,571,224,668,129,572,320,186,320,572,417,186,417,475,512,283,512,283,609,476,609,379,704,379,609]],"B":[684,[71,16,168,16,264,16,361,16,457,16,554,113,554,209,457,306,457,403,71,403,168,402,264,402,361,402,457,693,71,692,168,692,264,692,361,692,554,500,554,596,71,595,71,498,71,305,71,210,71,113]],"C":[781,[71,224,71,320,71,417,71,513,168,610,168,127,554,610,554,127,651,513,650,224,265,706,361,706,458,706,265,31,361,31,458,31]],"D":[748,[72,31,71,128,71,224,71,321,71,417,71,512,71,608,71,705,180,705,289,705,399,705,509,608,617,512,618,417,617,321,618,224,509,128,180,31,289,31,399,31]],"E":[586,[71,31,167,31,263,31,360,31,456,31,71,417,167,417,263,417,360,417,456,417,71,706,167,706,263,706,360,706,456,706,71,611,71,514,71,321,71,224,71,129]],"F":[591,[71,31,71,127,71,226,71,324,71,422,71,518,71,614,71,705,168,422,266,422,364,422,461,422,168,706,266,706,364,706,461,706]],"G":[800,[269,31,365,707,461,31,173,128,559,128,655,225,655,321,559,321,462,321,76,322,77,225,76,418,76,513,173,610,559,610,365,31,269,707,461,707,655,514]],"H":[781,[71,31,71,129,71,225,71,322,71,418,71,514,71,611,71,707,651,31,651,129,651,225,651,322,651,418,651,514,651,611,651,707,168,418,264,418,360,418,458,418,554,418]],"I":[241,[91,31,91,127,91,224,91,320,91,416,91,512,91,608,91,704]],"J":[530,[114,31,305,31,16,128,400,128,400,225,400,320,400,416,400,514,400,609,400,705,209,31]],"K":[684,[71,31,71,128,71,224,71,320,71,419,71,514,71,610,71,707,167,419,264,419,168,320,264,320,360,514,457,610,553,707,361,224,457,128,554,31]],"L":[594,[71,31,169,31,268,31,365,31,464,31,71,131,71,229,71,326,71,425,71,523,71,620,71,718]],"M":[966,[71,31,71,127,71,225,71,321,71,417,71,513,71,610,71,705,166,610,166,705,264,321,264,417,264,513,359,31,359,127,359,225,469,31,469,127,469,225,549,321,549,417,549,513,648,610,648,705,744,36,744,125,744,223,744,319,744,415,744,511,744,608,744,703]],"N":[780,[71,31,71,129,71,225,71,321,71,418,71,514,71,610,71,707,168,514,264,418,360,321,457,225,554,129,650,31,650,129,650,225,650,321,650,418,650,514,650,610,650,707]],"O":[747,[180,31,289,31,399,31,508,31,71,128,71,225,71,321,71,417,71,513,71,609,617,128,617,225,617,321,617,417,617,513,617,609,180,705,289,705,399,705,508,705]],"P":[638,[71,31,71,129,71,225,71,321,71,417,71,514,71,609,71,705,167,321,167,705,264,321,264,705,360,321,359,705,553,417,553,514,553,609,457,321,456,705]],"Q":[874,[263,31,360,31,456,31,647,31,648,128,744,-65,744,223,744,320,744,415,744,512,648,608,551,128,551,704,456,223,456,704,360,704,263,704,71,223,71,320,71,415,71,512,167,128,167,608]],"R":[693,[71,418,71,514,71,610,71,320,169,320,268,320,365,320,464,320,563,418,563,514,563,610,71,707,169,707,268,707,365,707,464,707,71,225,365,225,71,129,464,129,71,29,563,29]],"S":[684,[168,31,264,31,360,31,457,31,71,128,554,128,554,224,360,321,457,321,168,417,264,417,71,514,71,611,168,707,264,707,360,707,457,707,553,611]],"T":[781,[362,31,362,129,362,224,362,322,362,418,362,513,362,610,362,707,265,707,168,707,71,707,458,707,554,707,651,707]],"U":[778,[71,705,71,609,71,514,71,416,71,321,71,224,648,705,648,609,648,514,648,416,648,321,648,224,167,128,551,129,456,33,359,33,262,33]],"V":[778,[71,705,71,609,648,705,648,609,167,513,167,417,167,320,552,513,552,417,552,320,456,224,456,128,263,224,263,128,360,32]],"W":[1173,[265,31,363,31,751,31,849,31,265,129,363,129,751,129,849,129,168,226,460,226,654,226,947,226,168,322,460,322,654,322,947,322,168,420,460,420,654,420,947,420,71,516,71,613,71,708,557,516,557,613,557,708,1043,516,1043,613,1043,708]],"X":[639,[71,31,509,31,71,129,509,129,71,608,509,608,71,705,509,705,180,513,399,513,180,225,399,225,289,418,289,320]],"Y":[777,[71,705,71,609,648,705,648,609,167,512,552,512,167,416,552,416,264,320,456,320,360,224,360,129,360,32]],"Z":[682,[71,32,168,32,263,32,360,32,456,32,552,32,71,128,167,224,263,320,359,417,456,513,552,609,552,705,71,705,168,705,263,705,360,705,456,705]],"a":[588,[168,31,265,31,361,31,458,31,168,321,265,321,361,321,458,321,168,513,265,513,361,513,71,128,71,225,71,417,458,128,458,225,458,417]],"b":[684,[71,31,71,127,71,226,71,322,71,418,71,515,71,610,71,708,264,515,361,515,168,418,457,418,554,226,554,322,167,127,457,127,264,31,360,31]],"c":[588,[167,32,264,32,360,32,458,128,71,128,71,225,71,321,71,418,457,418,167,515,264,515,360,515]],"d":[684,[264,31,361,31,554,31,168,128,458,127,554,127,554,224,554,320,458,417,361,512,264,513,168,417,71,224,71,320,554,416,554,512,554,609,554,705]],"e":[587,[167,31,264,31,361,31,457,128,71,128,71,224,71,321,71,418,168,321,264,321,361,321,457,321,457,418,168,514,264,514,361,514]],"f":[488,[169,31,169,129,169,225,169,321,169,417,169,513,169,609,169,705,268,513,71,513,268,800,361,800]],"g":[696,[71,130,71,230,171,31,270,31,369,31,468,130,566,130,171,526,270,526,369,526,71,327,71,427,566,229,566,329,566,427,566,528,566,32,566,-67,566,-166,71,-166,171,-264,270,-264,369,-264,467,-264,467,427]],"h":[586,[71,31,71,129,71,225,71,320,71,419,71,514,71,611,71,707,168,419,263,514,359,514,456,31,456,129,456,225,456,320,456,419]],"i":[201,[71,31,71,129,71,225,71,321,71,418,71,514,71,707]],"j":[311,[181,31,181,-63,181,130,181,225,181,322,181,417,181,514,71,-159,181,706]],"k":[588,[71,31,71,128,71,225,71,321,71,418,71,515,71,611,71,707,362,515,265,418,168,321,265,225,361,128,458,31]],"l":[201,[71,31,71,128,71,224,71,321,71,418,71,515,71,611,71,707]],"m":[876,[71,31,71,128,71,224,71,321,71,418,71,515,168,418,264,515,361,515,553,515,650,515,457,31,457,128,457,224,457,321,457,418,746,31,746,128,746,224,746,321,746,418]],"n":[587,[71,32,71,127,71,224,71,321,71,418,71,513,168,418,264,513,361,513,457,32,457,127,457,224,457,321,457,418]],"o":[586,[166,32,263,32,360,32,166,514,263,514,360,514,71,129,71,224,71,321,71,418,456,129,456,224,456,321,456,418]],"p":[686,[71,29,71,-70,71,-167,71,125,71,222,71,320,71,417,71,514,265,514,361,514,167,417,459,417,556,319,556,222,167,125,459,125,265,29,360,29]],"q":[688,[71,223,71,320,557,223,557,320,168,417,460,417,558,417,168,125,460,125,265,514,363,514,265,28,363,28,557,125,557,-68,557,29,557,-166,558,513]],"r":[490,[71,31,71,128,71,225,71,321,71,418,71,514,168,418,264,514,360,514]],"s":[588,[71,128,169,31,265,31,362,31,362,225,458,128,264,225,264,321,168,321,72,418,169,515,265,515,362,515,457,418,456,225,73,321]],"t":[489,[167,31,263,31,167,129,359,129,167,225,167,321,167,417,167,514,167,610,167,708,263,514,71,514]],"u":[587,[71,515,71,418,71,321,71,224,71,128,457,515,457,418,457,321,457,224,457,128,360,128,457,31,264,31,168,31]],"v":[587,[71,514,71,417,457,514,457,417,167,321,167,225,167,128,360,321,360,225,360,128,264,32]],"w":[973,[71,514,71,417,168,321,168,224,264,128,264,31,361,128,361,225,361,321,361,418,553,128,553,225,553,321,553,418,457,418,457,514,650,128,650,31,746,225,746,321,843,514,843,417]],"x":[637,[71,31,180,31,398,31,507,31,180,127,398,127,180,416,398,416,180,512,398,512,71,512,507,512,289,223,289,319]],"y":[587,[71,-161,264,31,168,-161,264,-65,168,128,168,225,168,321,71,418,71,515,457,418,457,515,360,128,360,225,360,321]],"z":[637,[71,31,181,31,290,31,399,31,507,31,71,126,181,222,290,222,290,319,398,319,507,415,71,511,181,511,290,511,399,511,507,511]],".":[201,[71,31]],",":[147,[31,31,31,-63]],"-":[600,[]]}};
 
 
 // ---- js/params.js
 // settings model: defaults, artboard presets, control definitions
 
-const ARTBOARDS = {
-  '16:9': [1920, 1080],
-  '3:2': [1800, 1200],
-  '4:3': [1600, 1200],
-  '1:1': [1440, 1440],
-  '4:5': [1280, 1600],
-  '2:3': [1200, 1800],
-  '9:16': [1080, 1920],
-  '21:9': [2520, 1080],
-  'A4 portrait': [1414, 2000],
-  'A4 landscape': [2000, 1414],
-};
 
 const WEIGHTS = [['thin', 'Thin'], ['light', 'Light'], ['regular', 'Regular'], ['bold', 'Bold']];
 
@@ -2015,11 +1870,12 @@ function defaultSettings() {
     weight: 'thin',
     fontSize: 320,
     leading: 1.0,
-    tracking: -32,
+    tracking: -0.032,
     align: 'center',
     valign: 'middle',
     marginTop: 96, marginRight: 96, marginBottom: 96, marginLeft: 96,
-    aspect: '16:9', customW: 1920, customH: 1080,
+    aspect: '4:5',
+    font: 'interdot',
     scale: 30,
     // congeal
     amount: 0.11,
@@ -2049,12 +1905,12 @@ function defaultSettings() {
     growth: 0.19,
     runShape: 'swell',
     hideCursor: false,
-    reach: 0.75,
+    reach: 0.55,
     bridgeMode: 'grid',
-    bridge: 0.5,
-    hoverGrow: 0.45,
-    heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 5.7, inner: 2.3, growth: 1.06, blend: 0, dry: true, dotsOnTop: false },
-    hoverPull: 0.12,
+    bridge: 0.78,
+    hoverGrow: 1.06,
+    heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 5.7, inner: 2.3, growth: 1.06, blend: 0, organic: 0.45, orgScale: 70, dry: true, dotsOnTop: false },
+    hoverPull: 0,
     image: { fit: 'cover', zoom: 1, x: 0, y: 0 },
     placed: [],
     mat: JSON.parse(JSON.stringify(PER_MATERIAL)),
@@ -2067,9 +1923,10 @@ function defaultSettings() {
   };
 }
 
+// the artboard in px at the chosen aspect ratio, its long side 1920
 function artboardSize(s) {
-  if (s.aspect === 'custom') return [Math.max(200, s.customW | 0), Math.max(200, s.customH | 0)];
-  return ARTBOARDS[s.aspect] || ARTBOARDS['16:9'];
+  const r = (ASPECTS.find(([k]) => k === s.aspect) || ASPECTS[1])[1];
+  return r >= 1 ? [1920, Math.round(1920 / r)] : [Math.round(1920 * r), 1920];
 }
 
 function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -2105,10 +1962,10 @@ const PRESETS = [
 
 // what a setting change requires downstream
 const EFFECTS = {
-  layout: new Set(['weight', 'fontSize', 'leading', 'tracking', 'align', 'valign', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft']),
-  reset: new Set(['aspect', 'customW', 'customH', 'scale', 'perf.simRes']),
+  layout: new Set(['font', 'weight', 'fontSize', 'leading', 'tracking', 'align', 'valign', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft']),
+  reset: new Set(['aspect', 'scale', 'perf.simRes']),
   env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
-  congeal: new Set(['amount', 'beadSize', 'variation', 'seed', 'congealStyle', 'pattern', 'runLength', 'growth', 'runShape']),
+  congeal: new Set(['font', 'amount', 'beadSize', 'variation', 'seed', 'congealStyle', 'pattern', 'runLength', 'growth', 'runShape']),
   union: new Set(['reach', 'bridge', 'bridgeMode']),
   dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
 };
@@ -2214,8 +2071,47 @@ class TextModel {
 // typesetting straight from the dot data: word wrap, tracking, alignment, caret map, and dot positions
 class DotSetter {
   glyph(ch) {
+    if (this.family && this.family !== 'interdot') return this.dotify(this.family, ch);
     const G = FONT.glyphs;
     return G[ch] || G[ch.toLowerCase()] || G[ch.toUpperCase()] || null;
+  }
+
+  // any other face is set on Interdot's grid: draw the letter, and keep a dot wherever the grid
+  // point falls inside it. Same pitch, bearing and units as Interdot, so every effect works on it
+  dotify(family, ch) {
+    const key = family + '\u0000' + ch;
+    this.cache ??= new Map();
+    if (this.cache.has(key)) return this.cache.get(key);
+    const px = 200, u = FONT.upm / px, pitch = 96.5;
+    const c = this.dotCanvas ??= document.createElement('canvas');
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.font = `${px}px ${family}`;
+    const adv = g.measureText(ch).width * u;
+    const w = Math.ceil(adv / u) + 40, h = Math.ceil(1.4 * px), base = Math.round(1.05 * px);
+    if (c.width < w || c.height < h) { c.width = Math.max(c.width, w); c.height = Math.max(c.height, h); }
+    g.clearRect(0, 0, c.width, c.height);
+    g.font = `${px}px ${family}`;
+    g.fillStyle = '#000';
+    g.fillText(ch, 0, base);
+    const img = g.getImageData(0, 0, c.width, c.height).data;
+    const at = (x, y) => (x < 0 || y < 0 || x >= c.width || y >= c.height) ? 0 : img[(y * c.width + x) * 4 + 3];
+    const dots = [];
+    if (!/\s/.test(ch)) {
+      for (let j = -3; j <= 10; j++) {
+        const fy = 31 + j * pitch;
+        for (let i = 0; 71 + i * pitch < adv + pitch * 0.5; i++) {
+          const fx = 71 + i * pitch;
+          const x = Math.round(fx / u), y = Math.round(base - fy / u);
+          // a little neighbourhood, so a thin stroke between grid points still lands its dot
+          const s = Math.round(pitch * 0.18 / u);
+          const cov = (at(x, y) + at(x - s, y) + at(x + s, y) + at(x, y - s) + at(x, y + s)) / (5 * 255);
+          if (cov > 0.45) dots.push(fx, fy);
+        }
+      }
+    }
+    const out = [Math.max(adv, 120), dots];
+    this.cache.set(key, out);
+    return out;
   }
 
   advance(ch) {
@@ -2227,11 +2123,12 @@ class DotSetter {
 
   // text: string; ids: stable per-character ids; s: typography settings; art: {w, h}
   layout(text, ids, s, art) {
+    this.family = s.font || 'interdot';
     const size = s.fontSize;
     const k = size / FONT.upm;
     const R = this.radius(s.weight);
     const off = R - FONT.base;
-    const track = (s.tracking / 1000) * size;
+    const track = s.tracking * size;
     const capHeight = (FONT.cap - FONT.base + off + R) * k;
     const descent = -FONT.desc * k;
     const lineH = s.leading * size;
@@ -2299,12 +2196,16 @@ class DotSetter {
       const vis = str.replace(/\s+$/, '');
       const width = vis.length ? measure(vis) - track : 0;
       let x0;
-      if (s.align === 'left') x0 = s.marginLeft;
+      if (s.align === 'left' || s.align === 'justify') x0 = s.marginLeft;
       else if (s.align === 'right') x0 = s.marginLeft + maxW - width;
       else x0 = s.marginLeft + (maxW - width) / 2;
+      // justify: every line but a paragraph's last is spread to the full measure, at its spaces
+      const lastOfPara = L.end >= text.length || text[L.end] === '\n';
+      const spaces = (vis.match(/ /g) || []).length;
+      const extra = s.align === 'justify' && !lastOfPara && spaces ? (maxW - width) / spaces : 0;
       const y = firstBaseline + li * lineH;
       const xs = [x0];
-      for (let i = 0; i < str.length; i++) xs.push(xs[i] + this.advance(str[i]) * k + track);
+      for (let i = 0; i < str.length; i++) xs.push(xs[i] + this.advance(str[i]) * k + track + (str[i] === ' ' && i < vis.length ? extra : 0));
       for (let i = 0; i < str.length; i++) {
         const gi = L.start + i;
         carets[gi] = { x: xs[i], y, line: li };
@@ -2800,6 +2701,7 @@ class Renderer {
     list.slice(0, 8).forEach((c, i) => cols.set(srgbToLinear(c), i * 3));
     k.run(this.p.heat, {
       uField: this.t.hm, uSeeds: src, uFieldSize: size, uTexArt: texArt, uDotTex: this.t.dot, uCols: cols, uN: Math.min(list.length, 8),
+      uOrganic: H.organic ?? 0, uOrgScale: H.orgScale ?? 60,
       uBand: Math.max(H.band, 0.5), uInner: H.inner, uGrowth: H.growth, uBlend: H.blend, uDotsOnTop: H.dotsOnTop ? 1 : 0, uDotCol: srgbToLinear(m.dots),
     }, this.t.hdr);
     k.run(this.p.final, {
@@ -2902,16 +2804,292 @@ class Renderer {
 }
 
 
-// ---- js/ui.js
-// controls in the Amigues system: two columns of grouped sections floating in glass over the
-// canvas, live edits with one undo step per gesture
-const fmtNum = (v, d = 0) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(d);
-const WAVE = '<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1 5C3.2-.5 5.8-.5 8 5s4.8 5.5 7 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-const secs = (t) => (t < 10 ? t.toFixed(1) : Math.round(t)) + ' s';
-const TIGHT_UNITS = new Set(['%', '°', '‰', '×']);
+// ---- js/house.js
+// the house controls, as in ~/.claude/design/starter.html: slider fill and read-outs, typed values,
+// sweeps, saving into the project, recording, the canvas edge and toasts
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+// slider fill and read-out follow the value (not while the read-out is being typed into)
+const fill = r => {
+  r.style.setProperty('--p', `${(r.value - r.min) / (r.max - r.min) * 100}%`);
+  const v = r.closest('.row')?.querySelector('.val');
+  if (!v || v.classList.contains('editing')) return;
+  const n = +(+r.value).toFixed(3), u = v.dataset.unit;
+  v.textContent = !u ? n : u === '×' ? `${n}×` : `${n} ${u}`;
+};
+// pop-up menus show their choice
+const showChoice = sel => sel.parentElement.querySelector('.pvalue').textContent = sel.selectedOptions[0]?.text ?? '';
 
-// item kinds: range (mult, unit, digits, log, osc, note, show, hint), seg, popup, color, switch, text,
-// margins, pair, presets, congealBtns, dotBtns, image, actions, settingsBtns, note
+// canvas edge: when the canvas colour is within 3:1 contrast of the page around it, the board
+// gets a hairline in the inverse of the canvas. Re-checked on every canvas colour change and
+// whenever the system switches between light and dark.
+function rgbOf(c) { return c.startsWith('#') ? c.slice(1).match(/../g).map(h => parseInt(h, 16)) : c.match(/[\d.]+/g).slice(0, 3).map(Number); }
+function lum(c) {
+  const [r, g, b] = rgbOf(c).map(v => (v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+// (the canvas colour is drawn in WebGL here, so it is passed in rather than read from #canvas)
+function canvasEdge(colour) {
+  const board = $('#board');
+  const c = lum(colour), page = lum(getComputedStyle($('.stage')).backgroundColor);
+  const close = (Math.max(c, page) + 0.05) / (Math.min(c, page) + 0.05) < 3;
+  board.dataset.edge = close ? (c < 0.18 ? 'bright' : 'dark') : '';
+}
+
+// ---------- typed values
+// Every value beside a slider or colour can be clicked (or tabbed to) and typed into. Enter or
+// leaving it sets the value, Esc puts it back, ↑/↓ nudge by a step (⇧ by ten). A number past
+// either end of the slider widens the slider to reach it.
+function typein(el, { get, set, nudge }) {
+  el.classList.add('typein'); el.tabIndex = 0; el.setAttribute('role', 'textbox');
+  let before = null;
+  const begin = () => {
+    if (before !== null) return;
+    before = el.textContent; el.textContent = get();
+    el.contentEditable = 'plaintext-only'; el.classList.add('editing'); el.focus();
+    getSelection().selectAllChildren(el);
+  };
+  const end = commit => {
+    if (before === null) return;
+    const text = el.textContent.trim();
+    el.contentEditable = 'false'; el.classList.remove('editing'); el.textContent = before; before = null;
+    if (commit) set(text);
+  };
+  el.addEventListener('focus', begin);
+  el.addEventListener('click', begin);
+  el.addEventListener('blur', () => end(true));
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    else if (e.key === 'Escape') { e.stopPropagation(); end(false); el.blur(); }
+    else if (nudge && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault(); nudge((e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1));
+      el.textContent = get(); getSelection().selectAllChildren(el);
+    }
+  });
+}
+const setRange = (r, n) => {
+  if (!isFinite(n)) return;
+  stopSweep(r);
+  if (n < +r.min) r.min = n;
+  if (n > +r.max) r.max = n;
+  const step = +r.step || 0;
+  if (step && Math.abs((n - r.min) / step - Math.round((n - r.min) / step)) > 1e-6) r.step = 'any';
+  r.value = n; r.dispatchEvent(new Event('input'));
+};
+const hexIn = (inp) => typein(inp.closest('.cwrap').querySelector('.val'), {
+  get: () => inp.value,
+  set: text => {
+    let h = text.trim().toLowerCase().replace(/^#?/, '#');
+    if (/^#[0-9a-f]{3}$/.test(h)) h = '#' + [...h.slice(1)].map(c => c + c).join('');
+    if (/^#[0-9a-f]{6}$/.test(h)) { inp.value = h; inp.dispatchEvent(new Event('input')); }
+  },
+});
+
+// ---------- sweeps
+// Every slider can run on its own: the round button beside its name opens a menu to bounce it
+// from one end to the other and back, or loop it from start to end, through the chosen
+// interpolation, with the chosen duration per sweep. It starts from where the slider is.
+// Moving the slider by hand or typing its value stops it.
+const EASE = {
+  linear: x => x,
+  inout: x => x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2,
+  in: x => x ** 3,
+  out: x => 1 - (1 - x) ** 3,
+  sine: x => (1 - Math.cos(Math.PI * x)) / 2,
+};
+const WAVE = {
+  bounce: '<svg viewBox="0 0 13 8" aria-hidden="true"><path d="M1 6.5 4 1.5 7 6.5 10 1.5 12 4.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  loop: '<svg viewBox="0 0 13 8" aria-hidden="true"><path d="M1 6.5 6 1.5V6.5L11 1.5V6.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+const sweeps = new Map();   // range → { mode: off | bounce | loop, ease, dur, p, btn }
+let menu = null;
+let current = null, raf = 0, last = 0;
+// where in the sweep the slider is now: invert the easing at its position, by halving
+function phaseOf(r, s) {
+  const x = clamp((r.value - r.min) / (r.max - r.min), 0, 1), f = EASE[s.ease];
+  let lo = 0, hi = 1;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (f(m) < x) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+function showSweep(r) {
+  const s = sweeps.get(r);
+  s.btn.classList.toggle('on', s.mode !== 'off');
+  s.btn.innerHTML = WAVE[s.mode === 'loop' ? 'loop' : 'bounce'];
+  s.btn.setAttribute('aria-label', `${r.getAttribute('aria-label')}: ${s.mode === 'off' ? 'still' : s.mode}`);
+  if (menu.matches(':popover-open') && current === r) $$('#sweepMode button').forEach(b => b.classList.toggle('on', b.dataset.mode === s.mode));
+}
+function setSweep(r, mode) {
+  const s = sweeps.get(r);
+  s.mode = mode;
+  if (mode !== 'off') s.p = phaseOf(r, s);
+  showSweep(r); run();
+}
+function stopSweep(r) { if (sweeps.has(r) && sweeps.get(r).mode !== 'off') setSweep(r, 'off'); }
+const sweeping = (r) => !!sweeps.get(r) && sweeps.get(r).mode !== 'off';
+function run() {
+  if (raf || ![...sweeps.values()].some(s => s.mode !== 'off')) return;
+  last = performance.now(); raf = requestAnimationFrame(tick);
+}
+function tick(now) {
+  const dt = clamp((now - last) / 1000, 0, 0.1); last = now;   // a frame's time can predate the start
+  let any = false;
+  for (const [r, s] of sweeps) {
+    if (s.mode === 'off') continue;
+    any = true;
+    s.p += dt / s.dur;
+    let u;
+    if (s.mode === 'bounce') { s.p %= 2; u = s.p < 1 ? s.p : 2 - s.p; } else { s.p %= 1; u = s.p; }
+    r.value = +r.min + (r.max - r.min) * EASE[s.ease](u);
+    r.dispatchEvent(new Event('input'));
+  }
+  raf = any ? requestAnimationFrame(tick) : 0;
+}
+function openSweep(r) {
+  const s = sweeps.get(r);
+  current = r;
+  $('#sweepName').textContent = r.getAttribute('aria-label');
+  $('#sweepEase').value = s.ease; $('#sweepDur').value = s.dur;
+  showChoice($('#sweepEase')); showChoice($('#sweepDur'));
+  menu.showPopover(); showSweep(r);
+  const b = s.btn.getBoundingClientRect(), m = menu.getBoundingClientRect();
+  menu.style.left = `${clamp(b.left - 12, 8, innerWidth - m.width - 8)}px`;
+  menu.style.top = `${b.bottom + 8 + m.height > innerHeight - 8 ? b.top - 8 - m.height : b.bottom + 8}px`;
+}
+// typed values and sweeps, attached to every slider row and colour well once the panels exist
+function attachHouse() {
+  menu = $('#sweep');
+  $$('.row').forEach(row => {
+    const r = row.querySelector('input[type=range]'), v = row.querySelector('.rowhead .val');
+    if (!r || !v) return;
+    typein(v, {
+      get: () => String(+(+r.value).toFixed(3)),
+      set: text => setRange(r, parseFloat(text.replace(',', '.'))),
+      nudge: k => setRange(r, +(+r.value + k * (+r.step || (r.max - r.min) / 100)).toFixed(6)),
+    });
+  });
+  $$('.well input').forEach(hexIn);
+  $$('.row').forEach(row => {
+    const r = row.querySelector('input[type=range]'), lab = row.querySelector('.rowhead > span:first-child');
+    if (!r || !lab) return;
+    const btn = document.createElement('button');
+    btn.className = 'osc'; btn.title = 'Bounce or loop this slider';
+    lab.classList.add('lab'); lab.append(btn);
+    sweeps.set(r, { mode: 'off', ease: 'inout', dur: 2, p: 0, btn });
+    showSweep(r);
+    // a press on the button while its menu is open closes the menu (light dismiss); don't reopen it
+    btn.addEventListener('pointerdown', () => btn.wasOpen = menu.matches(':popover-open') && current === r);
+    btn.addEventListener('click', () => { if (!btn.wasOpen) openSweep(r); btn.wasOpen = false; });
+    r.addEventListener('input', e => { if (e.isTrusted) stopSweep(r); });
+  });
+  $('#sweepMode').addEventListener('click', e => { const b = e.target.closest('button'); if (b && current) setSweep(current, b.dataset.mode); });
+  $('#sweepEase').addEventListener('change', e => {
+    const s = sweeps.get(current); s.ease = e.target.value;
+    if (s.mode !== 'off') s.p = s.mode === 'bounce' && s.p >= 1 ? 2 - phaseOf(current, s) : phaseOf(current, s);
+  });
+  $('#sweepDur').addEventListener('change', e => { sweeps.get(current).dur = +e.target.value; });
+  $$('#sweep .pwrap select').forEach(sel => { showChoice(sel); sel.addEventListener('change', () => showChoice(sel)); });
+}
+
+// ---------- saving
+// Every export lands in the project, in a folder named for its type (png/, jpg/, svg/, mp4/ …),
+// through serve.py's save endpoint, named for the app and the moment so nothing is overwritten.
+// Opened any other way (a plain server, the file system), it falls back to a download.
+const slug = () => (document.title || 'export').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const stamp = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`; };
+async function saveFile(blob, name) {
+  if (location.protocol.startsWith('http')) {
+    try {
+      const r = await fetch(`/__save/${encodeURIComponent(name)}`, { method: 'POST', headers: { 'X-Save': '1' }, body: blob });
+      if (r.ok) { const { path } = await r.json(); toast(`Saved ${path}`); return path; }
+    } catch {}
+  }
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast(`Downloaded ${name} (run serve.py to save into the project)`);
+}
+
+// ---------- recording
+// Record captures the canvas as video until it's pressed again, then saves it into mp4/ (or
+// webm/ where the browser can't make mp4). A board drawn in canvases (one, or a WebGL scene with
+// a 2D layer over it) is copied into the recording every frame, so a still canvas still records;
+// any other board is captured from this tab, cropped to the board, which Chrome asks to share
+// first.
+const VIDEO = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
+const rec = { r: null, t0: 0, timer: 0 };
+function compositeStream(layers) {
+  const out = document.createElement('canvas'), g = out.getContext('2d');
+  let on = true;
+  (function draw() {
+    if (!on) return;
+    const { width, height } = layers[0];
+    if (out.width !== width || out.height !== height) { out.width = width; out.height = height; }
+    g.clearRect(0, 0, width, height);
+    for (const c of layers) if (c.width && c.height) g.drawImage(c, 0, 0, width, height);
+    requestAnimationFrame(draw);
+  })();
+  return Object.assign(out.captureStream(60), { done: () => on = false });
+}
+async function boardStream() {
+  const board = $('#board');
+  const layers = [...board.querySelectorAll('canvas')];
+  if (layers.length) return compositeStream(layers);
+  if (!navigator.mediaDevices?.getDisplayMedia || !window.CropTarget) throw new Error('This browser can only record a <canvas> board');
+  const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 60 }, audio: false, preferCurrentTab: true });
+  await s.getVideoTracks()[0].cropTo(await CropTarget.fromElement(board));
+  return s;
+}
+async function startRecording(name = slug()) {
+  if (rec.r) return;
+  if (!window.MediaRecorder) return toast('This browser can’t record', true);
+  let stream;
+  try { stream = await boardStream(); } catch (e) { return toast(e.message, true); }
+  const type = VIDEO.find(t => MediaRecorder.isTypeSupported(t));
+  const r = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 16e6 }), parts = [];
+  r.ondataavailable = e => e.data.size && parts.push(e.data);
+  r.onstop = () => {
+    stream.done?.(); stream.getTracks().forEach(t => t.stop());
+    if (!parts.length) return toast('Nothing was recorded', true);
+    saveFile(new Blob(parts, { type: type.split(';')[0] }), `${name}-${stamp()}.${type.startsWith('video/mp4') ? 'mp4' : 'webm'}`);
+  };
+  stream.getVideoTracks()[0].addEventListener('ended', stopRecording);   // sharing stopped from the browser's own bar
+  rec.r = r; rec.t0 = performance.now(); r.start(1000);
+  showRec(); rec.timer = setInterval(showRec, 250);
+}
+function stopRecording() { if (!rec.r) return; rec.r.stop(); rec.r = null; clearInterval(rec.timer); showRec(); }
+function showRec() {
+  const b = $('#record'), s = Math.floor((performance.now() - rec.t0) / 1000);
+  b.classList.toggle('rec', !!rec.r);
+  b.textContent = rec.r ? `Stop ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : 'Record';
+}
+
+let toastT;
+function toast(msg, err) {
+  const el = $('#toast');
+  el.textContent = msg; el.className = 'float show' + (err ? ' err' : '');
+  clearTimeout(toastT); toastT = setTimeout(() => el.className = 'float', 3600);
+}
+
+// ---- js/ui.js
+// controls in the house style: two columns of collapsible panels floating in glass over the canvas.
+// Every slider's read-out is in its display units (a share shows as %), and moving it writes the
+// setting live; a gesture by hand is one undo step.
+
+// the standard aspect ratios; the artboard's long side is 1920 px
+const ASPECTS = [
+  ['1:1', 1], ['4:5', 4 / 5], ['3:4', 3 / 4], ['2:3', 2 / 3], ['9:16', 9 / 16], ['5:4', 5 / 4], ['4:3', 4 / 3], ['3:2', 3 / 2],
+  ['16:9', 16 / 9], ['2:1', 2], ['21:9', 21 / 9], ['A portrait', 1 / Math.SQRT2], ['A landscape', Math.SQRT2],
+];
+const ASPECT_NAMES = { 'A portrait': 'A-series portrait (1:√2)', 'A landscape': 'A-series landscape (√2:1)' };
+// Interdot itself, then the system faces, turned into dots on Interdot's grid
+const FACES = [
+  ['interdot', 'Interdot'],
+  ['-apple-system, "SF Pro Display", "Helvetica Neue", sans-serif', 'SF Pro'],
+  ['"Helvetica Neue", Helvetica, Arial, sans-serif', 'Helvetica Neue'],
+  ['ui-serif, "New York", Georgia, serif', 'New York'],
+  ['Georgia, serif', 'Georgia'],
+  ['"Times New Roman", Times, serif', 'Times'],
+  ['ui-monospace, "SF Mono", Menlo, monospace', 'SF Mono'],
+];
+
 function sections(app) {
   const tool = (t) => () => app.settings.tool === t;
   const heat = () => !!app.settings.heat.on;
@@ -2922,66 +3100,73 @@ function sections(app) {
     {
       col: 'left', badge: '1', title: 'Text', items: [
         { kind: 'text' },
-        { kind: 'seg', path: 'weight', options: WEIGHTS, hint: 'Interdot weight: every weight is the same dots, grown' },
+        { kind: 'face' },
+        { kind: 'seg', path: 'weight', options: WEIGHTS, hint: 'Dot weight: every weight is the same grid of dots, grown' },
         { kind: 'range', path: 'fontSize', label: 'Size', min: 24, max: 1600, step: 1, unit: 'px' },
-        { kind: 'range', path: 'leading', label: 'Leading', min: 0.5, max: 2.5, step: 0.01, mult: 100, unit: '%' },
-        { kind: 'range', path: 'tracking', label: 'Tracking', min: -200, max: 800, step: 1, unit: '‰' },
-        { kind: 'seg', path: 'align', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
+        { kind: 'range', path: 'leading', label: 'Leading', min: 0.5, max: 2.5, step: 0.01, unit: '×' },
+        { kind: 'range', path: 'tracking', label: 'Tracking', min: -0.2, max: 0.8, step: 0.005, unit: 'em' },
+        { kind: 'seg', path: 'align', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right'], ['justify', 'Justify']] },
         { kind: 'seg', path: 'valign', options: [['top', 'Top'], ['middle', 'Middle'], ['bottom', 'Bottom']] },
         { kind: 'margins' },
+        { kind: 'note', html: 'Click the canvas and type. Other faces are set on Interdot’s dot grid.' },
       ],
     },
     {
       col: 'left', badge: '2', title: 'Congeal', items: [
         { kind: 'presets' },
-        { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, digits: 2, unit: '×', hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges. Grown dots reach further in proportion' },
+        { kind: 'range', path: 'reach', label: 'Reach', min: 0, max: 5, step: 0.05, unit: '×', hint: 'Join congealed dots closer than this many dot spacings: 1 = side by side, 1.42 = diagonals too, 0 = no bridges. Grown dots reach further in proportion' },
         { kind: 'popup', path: 'bridgeMode', label: 'Bridges', options: [['any', 'Any direction'], ['grid', 'Neighbours only']], hint: 'Neighbours only: a dot joins just the dots directly above, below or beside it, never diagonally or further away, however much it grows' },
-        { kind: 'range', path: 'bridge', label: 'Bridge width', min: 0.1, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
-        { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 3, step: 0.01, mult: 100, unit: '%', hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
-        { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
+        { kind: 'range', path: 'bridge', label: 'Bridge width', min: 10, max: 100, step: 1, mult: 100, unit: '%', hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
+        { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 300, step: 1, mult: 100, unit: '%', hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
+        { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
         { kind: 'congealBtns' },
         { kind: 'seg', path: 'pattern', options: [['clusters', 'Clusters'], ['runs', 'Swelling runs']], hint: 'Clusters: random groups of dots congeal. Swelling runs: dots congeal along the strokes, each a little bigger than the last' },
-        { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: 'How much of each letterform’s dots congeal' },
+        { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: 'How much of each letterform’s dots congeal' },
         { kind: 'range', path: 'beadSize', label: 'Cluster size', min: 1, max: 16, step: 1, unit: 'dots', show: clusters, hint: 'Most dots that congeal together' },
         { kind: 'range', path: 'runLength', label: 'Run length', min: 2, max: 16, step: 1, unit: 'dots', show: runs, hint: 'How many dots each run follows along the stroke' },
-        { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run, compounding: at 40% a dot two steps in is nearly twice the size' },
+        { kind: 'range', path: 'growth', label: 'Growth rate', min: 0, max: 100, step: 1, mult: 100, unit: '%', show: runs, hint: 'How much bigger each dot is than the one before it along a run, compounding: at 40% a dot two steps in is nearly twice the size' },
         { kind: 'popup', path: 'runShape', label: 'Run shape', show: runs, options: [['ramp', 'Grow along the run'], ['swell', 'Swell in the middle'], ['both', 'Grow and swell']] },
-        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes and growth vary widely' },
+        { kind: 'range', path: 'variation', label: 'Variation', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: '0 = every cluster or run is the same, 100 = their sizes and growth vary widely' },
+        { kind: 'note', html: 'Every dry dot is live: hover to congeal it.' },
       ],
     },
     {
       col: 'left', badge: '3', title: 'Cursor', items: [
         { kind: 'seg', path: 'tool', options: [['congeal', 'Congeal'], ['dots', 'Place dots'], ['wipe', 'Dry']] },
         { kind: 'popup', path: 'liquefy', label: 'Congeal on', options: [['hover', 'Hover'], ['press', 'Press']], show: tool('congeal') },
-        { kind: 'note', html: 'Click to place a dot the size of the type’s dots; drag to draw a row; Alt-click removes one.', show: tool('dots') },
-        { kind: 'note', html: 'Press and drag to dry congealed dots again.', show: tool('wipe') },
         { kind: 'range', path: 'cursorRadius', label: 'Radius', min: 6, max: 400, step: 1, unit: 'px' },
         { kind: 'dotBtns' },
+        { kind: 'note', html: 'Place dots: click for a dot the size of the type’s dots, drag for a row, Alt-click to remove one.', show: tool('dots') },
+        { kind: 'note', html: 'Dry: press and drag to dry congealed dots again.', show: tool('wipe') },
+        { kind: 'note', html: 'Congeal: the cursor turns the dots it touches.', show: tool('congeal') },
       ],
     },
     {
       col: 'right', badge: '◐', title: 'Material', items: [
         { kind: 'look' },
-        { kind: 'color', path: 'mat.dots', label: 'Dots', show: notHeat, swatches: ['#000000', '#ffffff', '#b3262b'] },
-        { kind: 'color', path: 'mat.tint', label: 'Congealed', show: notHeat, swatches: ['#000000', '#ffffff', '#b3262b'] },
-        { kind: 'color', path: 'mat.background', label: 'Background', show: notHeat, swatches: ['#000000', '#ffffff', '#ff2a98'] },
+        { kind: 'color', path: 'mat.dots', label: 'Text', id: 'ink', show: notHeat },
+        { kind: 'color', path: 'mat.tint', label: 'Congealed', id: 'congealed', show: notHeat },
+        { kind: 'color', path: 'mat.background', label: 'Canvas', id: 'canvas', show: notHeat },
         { kind: 'heatColors', show: heat },
-        { kind: 'range', path: 'heat.band', label: 'Band width', min: 1, max: 120, step: 0.5, digits: 1, unit: 'px', log: true, show: heat, hint: 'The width of each colour band, measured from the edge of the blob' },
-        { kind: 'range', path: 'heat.inner', label: 'Bands inside', min: 0, max: 7, step: 0.1, digits: 1, unit: '', show: heat, hint: 'How many colours fall inside a blob’s edge; the rest ring the outside. Only blobs deeper than this reach the centre colour' },
-        { kind: 'range', path: 'heat.growth', label: 'Band growth', min: 0.5, max: 2, step: 0.01, digits: 2, unit: '×', show: heat, hint: 'Each band outward is this many times as wide as the one inside it: 1 = all bands even' },
+        { kind: 'range', path: 'heat.band', label: 'Band width', min: 1, max: 120, step: 0.1, unit: 'px', show: heat, hint: 'The width of each colour band, measured from the edge of the blob' },
+        { kind: 'range', path: 'heat.inner', label: 'Bands inside', min: 0, max: 7, step: 0.1, show: heat, hint: 'How many colours fall inside a blob’s edge; the rest ring the outside. Only blobs deeper than this reach the centre colour' },
+        { kind: 'range', path: 'heat.growth', label: 'Band growth', min: 0.5, max: 2, step: 0.01, unit: '×', show: heat, hint: 'Each band outward is this many times as wide as the one inside it: 1 = all bands even' },
+        { kind: 'range', path: 'heat.organic', label: 'Organic', min: 0, max: 100, step: 1, mult: 100, unit: '%', show: heat, hint: '0 = contours follow the letters exactly; higher = they wander off in soft, uneven lobes like a real thermal image' },
+        { kind: 'range', path: 'heat.orgScale', label: 'Organic scale', min: 5, max: 400, step: 1, unit: 'px', show: heat, hint: 'The size of the wandering: small = rippled edges, large = broad swells' },
         { kind: 'range', path: 'heat.merge', label: 'Merge', min: 0, max: 120, step: 1, unit: 'px', show: heat, hint: 'Rounds the outline and joins shapes closer than about this distance before the bands are laid out' },
-        { kind: 'range', path: 'heat.blend', label: 'Blend', min: 0, max: 1, step: 0.01, mult: 100, unit: '%', show: heat, hint: 'Blur between neighbouring colours: 0 = crisp contour bands, 100 = smooth gradient' },
+        { kind: 'range', path: 'heat.blend', label: 'Blend', min: 0, max: 100, step: 1, mult: 100, unit: '%', show: heat, hint: 'Blur between neighbouring colours: 0 = crisp contour bands, 100 = smooth gradient' },
         { kind: 'switch', path: 'heat.dry', label: 'Include dry dots', sub: 'Off: only congealed dots make heat', show: heat },
-        { kind: 'switch', path: 'heat.dotsOnTop', label: 'Dots on top', sub: 'Draw the dots over the map in the dot colour', show: heat },
-        { kind: 'color', path: 'mat.dots', label: 'Dots', show: () => heat() && app.settings.heat.dotsOnTop, swatches: ['#16161b', '#ffffff'] },
+        { kind: 'switch', path: 'heat.dotsOnTop', label: 'Dots on top', sub: 'The dots over the map in the text colour', show: heat },
+        { kind: 'color', path: 'mat.dots', label: 'Text', id: 'heatInk', show: () => heat() && app.settings.heat.dotsOnTop },
+        { kind: 'note', html: 'Heatmap: the closer to the heart of a blob, the further along the colours.' },
       ],
     },
     {
       col: 'right', badge: '↑', title: 'Canvas & output', items: [
-        { kind: 'popup', path: 'aspect', label: 'Artboard', options: [...Object.keys(ARTBOARDS).map(k => [k, `${k} · ${ARTBOARDS[k][0]}×${ARTBOARDS[k][1]}`]), ['custom', 'Custom…']] },
-        { kind: 'pair', paths: ['customW', 'customH'], label: 'Size', show: () => app.settings.aspect === 'custom', min: 200, max: 4000 },
-        { kind: 'range', path: 'perf.renderScale', label: 'Render scale', min: 0.35, max: 1, step: 0.05, mult: 100, unit: '%' },
+        { kind: 'popup', path: 'aspect', label: 'Aspect ratio', options: ASPECTS.map(([k]) => [k, ASPECT_NAMES[k] || k]) },
+        { kind: 'range', path: 'perf.renderScale', label: 'Render scale', min: 35, max: 100, step: 5, mult: 100, unit: '%' },
         { kind: 'actions' },
+        { kind: 'note', html: 'Exports and recordings save into the project, in png/, svg/ and mp4/ (open Start.command), or download otherwise.' },
       ],
     },
     {
@@ -2995,39 +3180,25 @@ function sections(app) {
 
 function buildUI(app) {
   const refreshers = [];
-  const tickers = [];
   let pending = null, bUndo = null, bRedo = null;
   const begin = () => { if (!pending) { pending = app.snapshot(); app.dragging = true; } };
   const commit = () => { if (pending) { app.history.push(pending); pending = null; } app.endDrag(); };
 
-  const $ = (id) => document.getElementById(id);
   const defaultOf = (path) => (path.startsWith('mat.')
     ? app.defaults.mat[app.settings.material]?.[path.slice(4)]
     : getPath(app.defaults, path));
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
   const btn = (cls, label, title) => { const b = el('button', cls, label); b.type = 'button'; if (title) b.title = title; return b; };
-  const val = (x) => (typeof x === 'function' ? x() : x);
   const showable = (node, it) => { if (it.show) refreshers.push(() => { node.hidden = !it.show(); }); return node; };
-  const cols = { left: $('colLeft'), right: $('colRight') };
-
-  // the wordmark, set in the face itself
+  const cols = { left: $('#colLeft'), right: $('#colRight') };
 
   for (const sec of sections(app)) {
-    const startOpen = false;
-    const box = el('section', 'panel' + (startOpen ? ' open' : ''));
-    const head = el('div', 'phead', `<span class="badge">${sec.badge}</span><span>${sec.title}</span>`);
-    let body = box;
-    {
-      const d = btn('disclose' + (startOpen ? ' open' : ''), null);
-      d.append(head, el('span', 'caret', '›'));
-      d.setAttribute('aria-expanded', String(startOpen));
-      d.addEventListener('click', () => {
-        const open = !box.classList.contains('open');
-        box.classList.toggle('open', open); d.classList.toggle('open', open); d.setAttribute('aria-expanded', String(open));
-      });
-      body = el('div', 'advbody');
-      box.append(d, body);
-    }
+    // every panel collapses from its head, and all start closed
+    const box = el('section', 'panel');
+    const head = btn('phead', `<span class="badge">${sec.badge}</span><span>${sec.title}</span>`);
+    head.setAttribute('aria-expanded', 'false');
+    head.addEventListener('click', () => head.setAttribute('aria-expanded', box.classList.toggle('open')));
+    box.append(head);
     cols[sec.col].append(box);
     // menus and colours sit together in rows split by hairlines
     let rows = null;
@@ -3035,9 +3206,9 @@ function buildUI(app) {
       const node = build(it);
       if (!node) continue;
       if (it.kind === 'popup' || it.kind === 'color') {
-        if (!rows) { rows = el('div', 'rows'); body.append(rows); }
+        if (!rows) { rows = el('div', 'rows'); rows.style.gap = '0'; box.append(rows); }
         rows.append(node);
-      } else { rows = null; body.append(node); }
+      } else { rows = null; box.append(node); }
     }
   }
 
@@ -3051,17 +3222,16 @@ function buildUI(app) {
       case 'heatColors': return showable(heatColorsCtl(), it);
       case 'look': return lookCtl();
       case 'text': return textCtl();
+      case 'face': return faceCtl();
       case 'margins': return rangeCtl({
         label: 'Margins', min: 0, max: 600, step: 1, unit: 'px', hint: 'All four margins together',
         get: () => app.settings.marginTop,
         set: (v) => ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(k => app.set(k, v, { history: false })),
         dflt: () => app.defaults.marginTop,
       });
-      case 'pair': return pairCtl(it);
       case 'presets': return presetsCtl();
       case 'congealBtns': return congealCtl();
       case 'dotBtns': return dotBtnsCtl();
-      case 'image': return imageCtl();
       case 'actions': return actionsCtl();
       case 'settingsBtns': return settingsCtl();
       case 'note': return showable(el('div', 'note', it.html), it);
@@ -3069,166 +3239,62 @@ function buildUI(app) {
     }
   }
 
-  // a value beside its label that can be clicked and typed into
-  function typeable(v, onCommit) {
-    v.classList.add('typein');
-    v.title = 'Click to type a value';
-    let editing = false, cancelled = false;
-    const finish = () => {
-      if (!editing) return;
-      editing = false;
-      v.contentEditable = 'false';
-      v.classList.remove('editing');
-      const n = parseFloat(String(v.textContent).replace(',', '.').replace(/[^0-9.eE+-]/g, ''));
-      if (!cancelled && Number.isFinite(n)) onCommit(n);
-      else onCommit(null);
-      cancelled = false;
-    };
-    v.addEventListener('mousedown', (e) => {
-      if (editing) return;
-      e.preventDefault();
-      editing = true; cancelled = false;
-      v.contentEditable = 'true';
-      v.classList.add('editing');
-      v.focus();
-      const r = document.createRange(); r.selectNodeContents(v);
-      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-    });
-    v.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); v.blur(); }
-      else if (e.key === 'Escape') { e.preventDefault(); cancelled = true; v.blur(); }
-    });
-    v.addEventListener('blur', finish);
-  }
-
+  // a slider in its display units; the setting is the value divided by mult
   function rangeCtl(it) {
-    const row = el('div', 'row' + (it.nested ? ' nested' : ''));
+    const row = el('div', 'row');
     if (it.hint) row.title = it.hint;
-    const head = el('div', 'rowhead'), lab = el('span', 'lab'), v = el('span', 'val');
-    lab.append(el('span', null, it.label));
-    head.append(lab, v);
+    const head = el('div', 'rowhead');
+    const v = el('span', 'val');
+    if (it.unit) v.dataset.unit = it.unit;
+    head.append(el('span', null, it.label), v);
     const r = el('input'); r.type = 'range'; r.setAttribute('aria-label', it.label);
+    r.min = it.min; r.max = it.max; r.step = it.step;
     row.append(head, r);
-    const extra = it.note ? el('div', 'note') : null;
-    if (extra) row.append(extra);
+    const mult = it.mult || 1;
     const get = it.get || (() => getPath(app.settings, it.path));
     const put = it.set || ((x) => app.set(it.path, x, { history: false }));
-    const oscPath = it.osc ? 'osc.' + it.path : null;
-    const oscOn = () => !!(oscPath && getPath(app.settings, oscPath)?.on);
-    let oscBtn = null;
-    if (it.osc) {
-      oscBtn = btn('osc', WAVE, 'Sweep back and forth');
-      oscBtn.setAttribute('aria-label', `Oscillate ${it.label.toLowerCase()}`);
-      oscBtn.addEventListener('click', () => { app.set(oscPath + '.on', !oscOn()); refreshAll(); });
-      lab.append(oscBtn);
-    }
-    const mult = it.mult || 1;
-    const digits = it.digits ?? (it.step < 1 && !it.mult ? 2 : 0);
-    const unitOf = (x) => {
-      if (!it.unit) return '';
-      if (it.unit === 'dots') return Math.round(x) === 1 ? ' dot' : ' dots';
-      return TIGHT_UNITS.has(it.unit) ? it.unit : ' ' + it.unit;
-    };
-    const toSlider = (x) => it.log ? 1000 * Math.log(x / val(it.min)) / Math.log(val(it.max) / val(it.min)) : x;
-    const fromSlider = (x) => it.log ? val(it.min) * Math.pow(val(it.max) / val(it.min), x / 1000) : x;
-    const setBounds = () => {
-      if (it.log) { r.min = 0; r.max = 1000; r.step = 1; }
-      else { r.min = val(it.min); r.max = val(it.max); r.step = it.step; }
-    };
-    const fill = () => {
-      const lo = parseFloat(r.min), hi = parseFloat(r.max);
-      r.style.setProperty('--p', (clamp((parseFloat(r.value) - lo) / (hi - lo || 1), 0, 1) * 100).toFixed(2) + '%');
-    };
-    const show = (x) => {
-      if (!(typeof x === 'number' && Number.isFinite(x))) return;
-      v.textContent = fmtNum(x * mult, digits) + unitOf(x);
-      if (it.note) extra.textContent = it.note(x);
-    };
-    const refresh = () => {
-      setBounds();
-      const x = get();
-      r.value = toSlider(x);
-      fill();
-      if (!v.classList.contains('editing')) show(x);
-      if (it.show) row.hidden = !it.show();
-      if (oscBtn) { const on = oscOn(); oscBtn.classList.toggle('on', on); oscBtn.setAttribute('aria-pressed', String(on)); }
-    };
-    const quant = (x) => {
-      const s = it.log ? Math.pow(10, Math.floor(Math.log10(Math.abs(x) || 1)) - 2) : it.step;
-      return Math.round(x / s) * s;
-    };
-    // a sweeping slider can still be grabbed or typed into, but its value is transient so it skips undo
-    const apply = (x) => {
-      if (oscOn()) put(x);
+    r.addEventListener('input', (e) => {
+      const x = +r.value / mult;
+      // by hand: one undo step per drag; typed: one step each; swept: no undo steps at all
+      if (e.isTrusted) { begin(); put(x); }
+      else if (sweeping(r)) put(x);
       else { begin(); put(x); commit(); }
-    };
-    r.addEventListener('input', () => {
-      const x = quant(fromSlider(parseFloat(r.value)));
-      if (!oscOn()) begin();
-      put(x);
-      show(x); fill();
+      fill(r);
     });
     r.addEventListener('change', commit);
     r.addEventListener('dblclick', () => {
       const d = it.dflt ? it.dflt() : defaultOf(it.path);
       if (d == null) return;
-      apply(d); refresh();
+      stopSweep(r);
+      begin(); put(d); commit(); refresh();
     });
-    typeable(v, (n) => {
-      if (n != null) apply(clamp(n / mult, val(it.min), val(it.max)));
-      refresh();
-    });
-    refreshers.push(refresh);
-    if (!it.osc) return row;
-
-    // cosine sweep across the slider's full travel. phase 0..0.5 runs left to right, 0.5..1 back
-    let phase = null, wrote = null, held = false;
-    r.addEventListener('pointerdown', () => { held = true; });
-    const release = () => { held = false; };
-    window.addEventListener('pointerup', release, true);
-    window.addEventListener('pointercancel', release, true);
-    tickers.push((dt) => {
-      const o = getPath(app.settings, oscPath);
-      if (!o?.on) { phase = null; return; }
-      if (held) return;
-      const lo = parseFloat(r.min), hi = parseFloat(r.max);
-      const cur = get();
-      if (phase === null || cur !== wrote) {
-        const a = Math.acos(1 - 2 * clamp((toSlider(cur) - lo) / (hi - lo), 0, 1)) / (2 * Math.PI);
-        phase = phase !== null && phase > 0.5 ? 1 - a : a;
+    const refresh = () => {
+      const x = get();
+      if (typeof x === 'number' && Number.isFinite(x)) {
+        const disp = x * mult;
+        // a value typed past either end widened the slider; never squeeze it back
+        if (disp < +r.min) r.min = disp;
+        if (disp > +r.max) r.max = disp;
+        if (Math.abs(+r.value - disp) > 1e-9) r.value = disp;
+        fill(r);
       }
-      phase = (phase + dt * o.speed / OSC_PERIOD) % 1;
-      const x = fromSlider(lo + (hi - lo) * (0.5 - 0.5 * Math.cos(2 * Math.PI * phase)));
-      put(x);
-      wrote = x;
-      r.value = toSlider(x);
-      fill();
-      if (!v.classList.contains('editing')) show(x);
-    });
-    const speed = rangeCtl({
-      path: oscPath + '.speed', label: 'Speed', min: 0.1, max: 10, step: 0.01, digits: 2, unit: '×', log: true, nested: true,
-      show: oscOn, hint: `1× = one sweep there and back every ${OSC_PERIOD} s`, note: (x) => `${secs(OSC_PERIOD / x)} per cycle`,
-    });
-    const group = el('div', 'group');
-    group.append(row, speed);
-    return group;
+      if (it.show) row.hidden = !it.show();
+    };
+    refreshers.push(refresh);
+    return row;
   }
 
   function segCtl(it) {
-    const seg = el('div', it.big ? 'seg' : 'seg small');
-    seg.setAttribute('role', 'radiogroup');
+    const seg = el('div', 'seg');
+    seg.setAttribute('role', 'group');
     if (it.hint) seg.title = it.hint;
     const btns = it.options.map(([v, t]) => {
       const b = btn(null, t);
-      b.setAttribute('role', 'radio');
       b.addEventListener('click', () => { app.set(it.path, v); refreshAll(); });
       seg.append(b);
       return [v, b];
     });
-    refreshers.push(() => btns.forEach(([v, b]) => {
-      const on = getPath(app.settings, it.path) === v;
-      b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on));
-    }));
+    refreshers.push(() => btns.forEach(([v, b]) => b.classList.toggle('on', getPath(app.settings, it.path) === v)));
     return seg;
   }
 
@@ -3237,67 +3303,109 @@ function buildUI(app) {
     if (it.hint) node.title = it.hint;
     const sel = document.createElement('select');
     sel.setAttribute('aria-label', it.label);
-    it.options.forEach(([v, t]) => { const o = el('option', null, t); o.value = String(v); sel.append(o); });
-    const shown = el('span', 'pvalue');
-    const wrap = el('span', 'pwrap');
-    wrap.append(shown, sel);
-    node.append(el('span', 'plabel', it.label), wrap);
-    sel.addEventListener('change', () => { app.set(it.path, it.number ? Number(sel.value) : sel.value); refreshAll(); });
-    refreshers.push(() => {
-      const cur = String(getPath(app.settings, it.path));
-      sel.value = cur;
-      shown.textContent = it.options.find(([v]) => String(v) === cur)?.[1] ?? '—';
-    });
+    it.options.forEach(([v, t]) => sel.append(new Option(t, String(v))));
+    const pw = el('span', 'pwrap');
+    pw.append(el('span', 'pvalue'), sel);
+    node.append(el('span', 'plabel', it.label), pw);
+    sel.addEventListener('change', () => { app.set(it.path, it.number ? Number(sel.value) : sel.value); showChoice(sel); refreshAll(); });
+    refreshers.push(() => { sel.value = String(getPath(app.settings, it.path)); showChoice(sel); });
     return node;
+  }
+
+  // the typeface: Interdot, the system faces, and any font opened from disk
+  function faceCtl() {
+    const wrap = el('div', 'rows');
+    const node = el('div', 'popup');
+    const sel = document.createElement('select');
+    sel.setAttribute('aria-label', 'Typeface');
+    const pw = el('span', 'pwrap');
+    pw.append(el('span', 'pvalue'), sel);
+    node.append(el('span', 'plabel', 'Typeface'), pw);
+    const fill = () => {
+      sel.innerHTML = '';
+      for (const [v, t] of [...FACES, ...app.fonts]) sel.append(new Option(t, v));
+    };
+    fill();
+    sel.addEventListener('change', () => { app.set('font', sel.value); showChoice(sel); });
+    const open = btn('btn', 'Open font…', 'Load a local .otf, .ttf, .woff or .woff2');
+    const file = Object.assign(document.createElement('input'), { type: 'file', accept: '.otf,.ttf,.woff,.woff2' });
+    open.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+      const f = file.files[0]; if (!f) return;
+      file.value = '';
+      const name = f.name.replace(/\.[^.]+$/, ''), family = `user-${Date.now()}`;
+      try {
+        document.fonts.add(await new FontFace(family, await f.arrayBuffer()).load());
+        app.fonts.push([`"${family}", sans-serif`, name]);
+        fill();
+        app.set('font', `"${family}", sans-serif`);
+        refreshAll();
+      } catch { toast(`Couldn't read ${f.name}`, true); }
+    });
+    const row = el('div', 'btnrow');
+    row.append(open);
+    wrap.append(node, row);
+    refreshers.push(() => { sel.value = app.settings.font; showChoice(sel); });
+    return wrap;
   }
 
   function colorCtl(it) {
     const node = el('div', 'colorrow');
-    if (it.hint) node.title = it.hint;
-    const wrapC = el('div', 'cwrap');
-    const sw = (it.swatches || []).map(hex => {
-      const b = btn('swatch', null, hex);
-      b.style.background = hex;
-      b.setAttribute('aria-label', `${it.label} ${hex}`);
-      b.addEventListener('click', () => { app.set(it.path, hex); refresh(); });
-      wrapC.append(b);
-      return [hex, b];
-    });
-    const well = el('label', 'well');
-    const chip = el('span');
-    const c = el('input'); c.type = 'color'; c.setAttribute('aria-label', it.label);
-    well.append(chip, c);
+    const cw = el('span', 'cwrap');
     const v = el('span', 'val');
-    wrapC.append(well, v);
-    node.append(el('span', 'plabel', it.label), wrapC);
-    c.addEventListener('input', () => { begin(); app.set(it.path, c.value, { history: false }); refresh(); });
-    c.addEventListener('change', commit);
-    typeable(v, () => {
-      let s = v.textContent.trim();
-      if (!s.startsWith('#')) s = '#' + s;
-      if (/^#[0-9a-f]{6}$/i.test(s)) app.set(it.path, s.toLowerCase());
-      refresh();
+    const well = el('label', 'well'), chip = el('span'), c = el('input');
+    c.type = 'color'; c.id = it.id; c.setAttribute('aria-label', `${it.label} colour`);
+    well.append(chip, c);
+    cw.append(v, well);
+    node.append(el('span', 'plabel', it.label), cw);
+    c.addEventListener('input', (e) => {
+      if (e.isTrusted) { begin(); app.set(it.path, c.value, { history: false }); }
+      else { begin(); app.set(it.path, c.value, { history: false }); commit(); }
+      show();
     });
-    const refresh = () => {
+    c.addEventListener('change', commit);
+    const show = () => {
       const x = getPath(app.settings, it.path);
       if (typeof x !== 'string') return;
-      c.value = x; chip.style.background = x;
+      if (c.value !== x) c.value = x;
+      chip.style.background = x;
       if (!v.classList.contains('editing')) v.textContent = x;
-      sw.forEach(([hex, b]) => b.classList.toggle('on', hex.toLowerCase() === x.toLowerCase()));
+      app.canvasEdge();
     };
-    refreshers.push(refresh);
+    refreshers.push(show);
     return node;
+  }
+
+  function switchCtl(it) {
+    const c = el('label', 'check');
+    const t = el('span');
+    t.append(document.createTextNode(it.label));
+    if (it.sub) t.append(el('span', 'sub', it.sub));
+    const inp = el('input'); inp.type = 'checkbox'; inp.setAttribute('role', 'switch');
+    c.append(t, inp, el('span', 'box'));
+    inp.addEventListener('change', () => { app.set(it.path, inp.checked); refreshAll(); });
+    refreshers.push(() => { inp.checked = !!getPath(app.settings, it.path); });
+    return c;
+  }
+
+  function textCtl() {
+    const ta = el('textarea', 'field');
+    ta.spellcheck = false;
+    ta.setAttribute('aria-label', 'Text');
+    ta.placeholder = 'Type here, or click the canvas';
+    ta.addEventListener('input', () => app.setText(ta.value));
+    refreshers.push(() => { if (document.activeElement !== ta && ta.value !== app.text.text) ta.value = app.text.text; });
+    return ta;
   }
 
   // the material: sweat or ink colours, or the heat map
   function lookCtl() {
     const seg = el('div', 'seg');
-    seg.setAttribute('role', 'radiogroup');
+    seg.setAttribute('role', 'group');
     const opts = [['sweat', 'Sweat'], ['ink', 'Ink'], ['heat', 'Heatmap']];
     const cur = () => (app.settings.heat.on ? 'heat' : app.settings.material);
     const btns = opts.map(([v, t]) => {
       const b = btn(null, t);
-      b.setAttribute('role', 'radio');
       b.addEventListener('click', () => {
         const before = app.snapshot();
         if (v === 'heat') app.set('heat.on', true, { history: false });
@@ -3308,24 +3416,25 @@ function buildUI(app) {
       seg.append(b);
       return [v, b];
     });
-    refreshers.push(() => btns.forEach(([v, b]) => { const on = cur() === v; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }));
+    refreshers.push(() => btns.forEach(([v, b]) => b.classList.toggle('on', cur() === v)));
     return seg;
   }
 
   // the heat map's colours, centre first: recolour, reorder, remove or add (up to eight)
   function heatColorsCtl() {
-    const wrap = el('div', 'group');
+    const wrap = el('div', 'rows');
     const list = el('div', 'rows');
+    list.style.gap = '0';
     const tools = el('div', 'btnrow');
     const add = btn('btn', 'Add colour'), rev = btn('btn', 'Reverse'), reset = btn('btn', 'Reset');
     tools.append(add, rev, reset);
-    wrap.append(el('div', 'note', 'Centre of a blob first, open surface last.'), list, tools);
+    wrap.append(list, tools);
     const cols = () => app.settings.heat.colors;
     const put = (c) => { app.set('heat.colors', c); draw(); };
     add.addEventListener('click', () => { const c = cols(); if (c.length < 8) put([...c, c[c.length - 1] || '#ffffff']); });
     rev.addEventListener('click', () => put([...cols()].reverse()));
     reset.addEventListener('click', () => put(clone(app.defaults.heat.colors)));
-    let sig = '';
+    let sig = null;
     function draw() {
       const c = cols();
       sig = c.join();
@@ -3333,79 +3442,43 @@ function buildUI(app) {
       c.forEach((hex, i) => {
         const row = el('div', 'colorrow');
         const lab = el('span', 'plabel', i === 0 ? 'Centre' : i === c.length - 1 ? 'Outside' : `Band ${i}`);
-        const cw = el('div', 'cwrap');
+        const cw = el('span', 'cwrap');
+        const v = el('span', 'val', hex);
         const well = el('label', 'well'), chip = el('span'), inp = el('input');
         inp.type = 'color'; inp.value = hex; chip.style.background = hex;
         inp.setAttribute('aria-label', lab.textContent + ' colour');
         well.append(chip, inp);
-        inp.addEventListener('input', () => { begin(); const n = [...cols()]; n[i] = inp.value; app.set('heat.colors', n, { history: false }); chip.style.background = inp.value; });
-        inp.addEventListener('change', () => { commit(); draw(); });
-        const up = btn('osc', '↑', 'Move toward the centre'), dn = btn('osc', '↓', 'Move outward'), x = btn('osc', '×', 'Remove');
+        inp.addEventListener('input', (e) => {
+          begin();
+          const n = [...cols()]; n[i] = inp.value;
+          app.set('heat.colors', n, { history: false });
+          chip.style.background = inp.value;
+          if (!v.classList.contains('editing')) v.textContent = inp.value;
+          sig = n.join();
+          if (!e.isTrusted) commit();
+        });
+        inp.addEventListener('change', commit);
+        const up = btn('mini', '↑', 'Move toward the centre'), dn = btn('mini', '↓', 'Move outward'), x = btn('mini', '×', 'Remove');
         up.disabled = i === 0; dn.disabled = i === c.length - 1; x.disabled = c.length <= 2;
         const swap = (j) => { const n = [...cols()]; [n[i], n[j]] = [n[j], n[i]]; put(n); };
         up.addEventListener('click', () => swap(i - 1));
         dn.addEventListener('click', () => swap(i + 1));
         x.addEventListener('click', () => put(cols().filter((_, k) => k !== i)));
-        cw.append(well, el('span', 'val', hex), up, dn, x);
+        cw.append(v, well, up, dn, x);
         row.append(lab, cw);
         list.append(row);
+        hexIn(inp);
       });
       add.disabled = c.length >= 8;
+      app.canvasEdge();
     }
-    draw();
     refreshers.push(() => { if (cols().join() !== sig && !pending) draw(); });
     return wrap;
   }
 
-  function switchCtl(it) {
-    const c = el('label', 'check');
-    c.append(el('span', 'box'));
-    const t = el('span');
-    t.append(document.createTextNode(it.label));
-    if (it.sub) t.append(el('span', 'sub', it.sub));
-    c.append(t);
-    c.setAttribute('role', 'switch');
-    c.tabIndex = 0;
-    const toggle = (e) => { e.preventDefault(); app.set(it.path, !getPath(app.settings, it.path)); refreshAll(); };
-    c.addEventListener('click', toggle);
-    c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') toggle(e); });
-    const refresh = () => { const on = !!getPath(app.settings, it.path); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); };
-    refreshers.push(refresh);
-    return c;
-  }
-
-  function textCtl() {
-    const ta = el('textarea', 'field textbox');
-    ta.spellcheck = false;
-    ta.setAttribute('aria-label', 'Text');
-    ta.placeholder = 'Type here';
-    ta.addEventListener('input', () => app.setText(ta.value));
-    const wrap = el('div', 'group');
-    wrap.append(ta, el('div', 'note', 'Or click the artboard and type. Interdot has A–Z, a–z, 0–9 and . , -'));
-    refreshers.push(() => { if (document.activeElement !== ta && ta.value !== app.text.text) ta.value = app.text.text; });
-    return wrap;
-  }
-
-  function pairCtl(it) {
-    const row = el('div', 'pair');
-    row.append(el('span', 'plabel', it.label));
-    const fields = el('div', 'fields');
-    const ins = it.paths.map((p) => {
-      const i = el('input', 'field'); i.type = 'text'; i.inputMode = 'numeric';
-      i.setAttribute('aria-label', p === 'customW' ? 'Artboard width' : 'Artboard height');
-      i.addEventListener('change', () => { app.set(p, clamp(parseInt(i.value, 10) || 0, it.min, it.max)); refresh(); });
-      return i;
-    });
-    fields.append(ins[0], el('span', 'x', '×'), ins[1]);
-    row.append(fields);
-    const refresh = () => { ins.forEach((i, k) => { if (document.activeElement !== i) i.value = getPath(app.settings, it.paths[k]); }); row.hidden = it.show && !it.show(); };
-    refreshers.push(refresh);
-    return row;
-  }
-
   // each preset is one undo step
   function presetsCtl() {
-    const chips = el('div', 'chips small');
+    const chips = el('div', 'chips');
     for (const p of PRESETS) {
       const b = btn('chip', p.name, p.hint);
       b.addEventListener('click', () => {
@@ -3413,7 +3486,7 @@ function buildUI(app) {
         const patch = p.patch();
         for (const k in patch) app.set(k, patch[k], { history: false });
         app.history.push(before);
-        app.toast(p.name);
+        toast(p.name);
         refreshAll();
       });
       chips.append(b);
@@ -3423,8 +3496,8 @@ function buildUI(app) {
 
   function congealCtl() {
     const row = el('div', 'btnrow');
-    const rnd = btn('btn primary wide', 'Random', 'Congeal a new random selection of dots (G)');
-    const again = btn('btn wide', 'Restart', 'Dry everything and congeal the same selection again (R)');
+    const rnd = btn('btn primary', 'Random', 'Congeal a new random selection of dots (G)');
+    const again = btn('btn', 'Restart', 'Dry everything and congeal the same selection again (R)');
     rnd.addEventListener('click', () => app.randomize());
     again.addEventListener('click', () => app.restart(true));
     row.append(rnd, again);
@@ -3433,9 +3506,9 @@ function buildUI(app) {
 
   function dotBtnsCtl() {
     const row = el('div', 'btnrow');
-    const clr = btn('btn wide', 'Clear placed dots');
+    const clr = btn('btn', 'Clear placed dots');
     clr.addEventListener('click', () => {
-      if (!app.settings.placed.length) { app.toast('No placed dots'); return; }
+      if (!app.settings.placed.length) { toast('No placed dots'); return; }
       app.set('placed', []);
       refreshAll();
     });
@@ -3444,38 +3517,13 @@ function buildUI(app) {
     return row;
   }
 
-  function imageCtl() {
-    const wrap = el('div', 'group');
-    const file = $('imgFile');
-    const drop = el('div', 'drop');
-    drop.tabIndex = 0;
-    drop.setAttribute('role', 'button');
-    drop.append(el('span', null, 'Background image'), el('span', 'note', 'Drop an image anywhere, or click to choose. Liquid refracts and magnifies what is under it.'));
-    drop.addEventListener('click', () => file.click());
-    drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } });
-    const has = el('div', 'imgrow');
-    const thumb = el('span', 'thumb'), name = el('span', 'name');
-    const swap = btn('btn', 'Replace'), rm = btn('btn', 'Remove');
-    has.append(thumb, name, swap, rm);
-    swap.addEventListener('click', () => file.click());
-    rm.addEventListener('click', () => app.setImage(null));
-    file.addEventListener('change', () => { if (file.files[0]) app.loadImage(file.files[0]); file.value = ''; });
-    wrap.append(drop, has);
-    refreshers.push(() => {
-      drop.hidden = !!app.image; has.hidden = !app.image;
-      if (app.image) { name.textContent = app.image.name; thumb.style.backgroundImage = `url(${app.image.thumb})`; }
-    });
-    return wrap;
-  }
-
   function actionsCtl() {
     const row = el('div', 'btnrow');
-    const png = btn('btn primary', 'Export PNG');
-    const rec = btn('btn', 'Record video');
+    const png = btn('btn', 'Export PNG');
     png.addEventListener('click', () => app.exportPNG());
-    rec.addEventListener('click', () => app.toggleRecord());
-    row.append(png, rec);
-    refreshers.push(() => { rec.textContent = app.recorder ? 'Stop recording' : 'Record video'; rec.classList.toggle('on', !!app.recorder); });
+    const svg = btn('btn', 'Export SVG', 'The dots and congealed shapes as vectors (a heat map goes in as an image)');
+    svg.addEventListener('click', () => app.exportSVG());
+    row.append(png, svg);
     return row;
   }
 
@@ -3498,50 +3546,44 @@ function buildUI(app) {
   app.history.onChange = () => { bUndo.disabled = !app.history.canUndo; bRedo.disabled = !app.history.canRedo; };
   app.history.onChange();
 
-  // the stage bar
-  const bPause = $('pause');
+  // the top bar
+  const bPause = $('#pause');
   bPause.addEventListener('click', () => app.togglePause());
-  $('hideui').addEventListener('click', () => app.setUiHidden(true));
-  $('dryall').addEventListener('click', () => app.dryAll());
-  const bCursor = $('hidecursor');
+  $('#dryall').addEventListener('click', () => app.dryAll());
+  const bCursor = $('#hidecursor');
   bCursor.addEventListener('click', () => { app.set('hideCursor', !app.settings.hideCursor); refreshAll(); });
-  $('fullscreen').addEventListener('click', () => app.toggleFullscreen());
-  $('showui').addEventListener('click', () => app.setUiHidden(false));
+  $('#record').addEventListener('click', () => rec.r ? stopRecording() : startRecording());
+  $('[data-hide-ui]').addEventListener('click', () => app.setUiHidden(true));
+  $('#showUi').addEventListener('click', () => app.setUiHidden(false));
+  $('#fullscreen').addEventListener('click', () => app.toggleFullscreen());
 
-  // drag & drop background images
-  window.addEventListener('dragover', (e) => { e.preventDefault(); document.body.classList.add('dragging'); });
-  window.addEventListener('dragleave', (e) => { if (e.target === document.body || e.clientX <= 0) document.body.classList.remove('dragging'); });
-  window.addEventListener('drop', (e) => {
-    e.preventDefault();
-    document.body.classList.remove('dragging');
-    const f = [...(e.dataTransfer?.files || [])].find(x => /^image\//.test(x.type) || /\.(png|jpe?g|webp|gif|avif|bmp)$/i.test(x.name));
-    if (f) app.loadImage(f); else app.toast('Drop an image file to use it as the surface');
-  });
+  // typed values and sweeps on every slider and colour built above
+  attachHouse();
 
-  const hudEl = $('hud');
+  const hudEl = $('#hud');
   function refreshAll() {
     refreshers.forEach(f => f());
     bPause.textContent = app.paused ? 'Resume' : 'Pause';
+    bPause.classList.toggle('on', app.paused);
     bCursor.textContent = app.settings.hideCursor ? 'Show cursor' : 'Hide cursor';
     bCursor.classList.toggle('on', !!app.settings.hideCursor);
-    bPause.classList.toggle('on', app.paused);
     app.board.classList.toggle('tool-dots', app.settings.tool === 'dots');
     app.board.classList.toggle('tool-wipe', app.settings.tool === 'wipe');
     app.board.classList.toggle('nocursor', !!app.settings.hideCursor);
-    app.updateLetterbox();
+    app.canvasEdge();
   }
-  refreshAll();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => app.canvasEdge());
 
   return {
     refresh: refreshAll,
-    tick(dt) { tickers.forEach(f => f(dt)); },
+    tick() {},
     hud() {
       const total = app.dots?.length || 0;
       const wet = app.dots ? app.dots.reduce((n, d) => n + (d.liquid ? 1 : 0), 0) : 0;
-      const name = MATERIALS[app.settings.material].name;
-      const vol = app.sim.stats.volume * 1e9;
-      const slow = app.sim.slowdown < 0.98 ? ` · sim ${(app.sim.slowdown * app.settings.timeScale).toFixed(2)}×` : '';
-      hudEl.innerHTML = `<b>${name}</b> · ${total} dots · ${wet} congealed · ${vol < 1000 ? vol.toFixed(0) + ' mm³' : (vol / 1000).toFixed(2) + ' ml'} · ${Math.round(app.fps)} fps${slow}${app.paused ? ' · <b>paused</b>' : ''}`;
+      const name = app.settings.heat.on ? 'Heatmap' : MATERIALS[app.settings.material].name;
+      hudEl.innerHTML = total
+        ? `<b>${name}</b> · ${total} dots · ${wet} congealed${app.paused ? ' · <b>paused</b>' : ''}`
+        : `<b>${name}</b> · click the canvas and type`;
     },
   };
 }
@@ -3555,12 +3597,13 @@ class App {
   constructor() {
     this.settings = defaultSettings();
     this.defaults = defaultSettings();
-    this.text = new TextModel('Sweat');
+    this.text = new TextModel('');
+    this.fonts = [];             // faces opened from disk: [css family, name]
     this.history = new History();
     this.frameCount = 0;
     this.paused = false;
     this.pointer = { inside: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, down: null, seen: false };
-    this.caret = 5;
+    this.caret = 0;
     this.focused = false;
     this.dirty = { layout: false, alloc: false, env: false, congeal: false };
     this.lastTime = performance.now();
@@ -3586,9 +3629,6 @@ class App {
     this.overlay = document.getElementById('overlay');
     this.board = document.getElementById('board');
     this.stage = document.getElementById('stage');
-    this.colL = document.getElementById('colLeft');
-    this.colR = document.getElementById('colRight');
-    this.stagebar = document.querySelector('.stagebar');
     this.ta = document.getElementById('typing');
     try {
       this.kit = new GLKit(this.canvas);
@@ -3608,21 +3648,18 @@ class App {
     this.renderer.buildEnv(this.settings);
     this.ta.value = this.text.text;
     this.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.fatal('The GPU context was lost. Reload the page to continue.'); });
-    new ResizeObserver(() => this.fitBoard()).observe(this.stage);
-    window.addEventListener('resize', () => this.fitBoard());
+    new ResizeObserver(() => this.fitBoard()).observe(this.board);
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement && this.fsHid) { this.fsHid = false; this.setUiHidden(false); }
-      this.fitBoard();
     });
-    // with the controls hidden, a way back appears whenever the pointer moves
-    window.addEventListener('pointermove', () => { if (this.uiHidden) this.peekUi(); });
+    this.ui.refresh();
     requestAnimationFrame((t) => this.loop(t));
     window.sweat = this; // console / test access
   }
 
   fatal(msg) {
     const el = document.getElementById('fatal');
-    if (el) { el.textContent = msg; el.hidden = false; }
+    if (el) { el.textContent = msg; el.hidden = false; el.style.opacity = 1; }
     console.error(msg);
   }
 
@@ -3678,7 +3715,7 @@ class App {
       if (EFFECTS.dots.has(p)) this.renderer.dotsDirty = true;
       if (EFFECTS.union.has(p)) this.staticDirty = true;
       if (p === 'heat.on') this.dirty.layout = true;
-      if (p === 'aspect' || p === 'customW' || p === 'customH') this.fitBoard();
+      if (p === 'aspect') this.fitBoard();
       if (p === 'perf.renderScale') this.fitBoard();
       if (p === 'tool') this.ui?.refresh();
     }
@@ -3686,34 +3723,13 @@ class App {
   }
 
   // ------------------------------------------------------------ geometry
+  // the board is sized by CSS to the open canvas at the artboard's ratio; the canvases follow it
   fitBoard() {
-    if (!this.stage) return;
+    if (!this.board) return;
     const [aw, ah] = this.art;
-    const r = this.stage.getBoundingClientRect();
-    // the open canvas: clear of the floating columns and the stage bar, or the whole window when hidden
-    let L = 0, T = 0, R = r.width, B = r.height;
-    if (!this.uiHidden) {
-      const floating = getComputedStyle(this.colL).position === 'absolute';
-      const gap = 24;
-      if (floating) {
-        for (const c of [this.colL, this.colR]) {
-          const q = c.getBoundingClientRect();
-          if (!q.width) continue;
-          if (q.left + q.width / 2 - r.left < r.width / 2) L = Math.max(L, q.right - r.left + gap);
-          else R = Math.min(R, q.left - r.left - gap);
-        }
-      } else { L += 16; R -= 16; }
-      const sb = this.stagebar.getBoundingClientRect();
-      T = Math.max(T, sb.bottom - r.top + 16);
-      B -= floating ? 36 : 16;
-    }
-    const availW = Math.max(100, R - L), availH = Math.max(100, B - T);
-    const sc = Math.min(availW / aw, availH / ah);
-    const cw = Math.floor(aw * sc), ch = Math.floor(ah * sc);
-    this.board.style.width = cw + 'px';
-    this.board.style.height = ch + 'px';
-    this.board.style.left = Math.round(L + (availW - cw) / 2) + 'px';
-    this.board.style.top = Math.round(T + (availH - ch) / 2) + 'px';
+    this.board.style.setProperty('--r', aw / ah);
+    const q = this.board.getBoundingClientRect();
+    const cw = Math.max(1, Math.round(q.width)), ch = Math.max(1, Math.round(q.height));
     const dpr = Math.min(window.devicePixelRatio || 1, 2) * this.settings.perf.renderScale;
     const pw = Math.max(64, Math.min(3840, Math.round(cw * dpr)));
     const ph = Math.max(64, Math.round(pw * ah / aw));
@@ -3829,7 +3845,7 @@ class App {
       const g = this.geo.get(d.key);
       return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat, x0: d.x, y0: d.y } : { ...d, x0: d.x, y0: d.y };
     });
-    const hot = [];
+    const hot = [], pairs = [];
     const n = wet.length;
     const dots = new Float32Array(Math.max(1, n) * 8);
     wet.forEach((d, i) => dots.set([d.x, ah - d.y, d.x, ah - d.y, d.r, d.r, 0, 0], i * 8));
@@ -3861,12 +3877,14 @@ class App {
               if (Math.min(gx, gy) > 0.25 * pitch || Math.max(gx, gy) > 1.15 * pitch) continue;
             }
             out.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
+            pairs.push([a, b]);
             if (a.heat && b.heat) hot.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
           }
         }
       });
     }
     this.renderer.setUnion(dots, n, new Float32Array(out.length ? out : new Array(8).fill(0)), out.length / 8, s.bridge);
+    this.unionGeom = { wet, pairs };   // kept for SVG export, in artboard px
     // the same shapes again, only those of heat-map lines, for the heat map's own mask
     const hw = wet.filter(d => d.heat);
     const hd = new Float32Array(Math.max(1, hw.length) * 8);
@@ -4184,20 +4202,11 @@ class App {
     this.caret = Math.min(this.caret, this.text.text.length);
   }
 
-  // the artwork alone: controls hidden, the artboard fitted to the whole window
+  // the artwork alone: controls hidden, the artboard fitted to the whole window (H, Esc)
   setUiHidden(off) {
     this.uiHidden = !!off;
-    document.documentElement.classList.toggle('ui-off', this.uiHidden);
-    if (this.uiHidden) { this.ta.blur(); this.peekUi(); this.toast('Press H or Esc to show the controls'); }
-    else document.documentElement.classList.remove('peek', 'idle');
-    this.fitBoard();
-  }
-
-  peekUi() {
-    const h = document.documentElement;
-    h.classList.add('peek'); h.classList.remove('idle');
-    clearTimeout(this._peekT);
-    this._peekT = setTimeout(() => { h.classList.remove('peek'); h.classList.add('idle'); }, 1800);
+    document.documentElement.dataset.ui = this.uiHidden ? 'off' : 'on';
+    if (this.uiHidden) this.ta.blur();
   }
 
   toggleFullscreen() {
@@ -4209,22 +4218,21 @@ class App {
     el.requestFullscreen().catch(() => { this.fsHid = false; });
   }
 
-  // the margin round a fitted artboard, coloured like its surface so the artwork reads edge to edge
-  updateLetterbox() {
-    const c = this.image ? '#000000' : this.matSettings.background;
-    document.documentElement.style.setProperty('--letter', c);
+  // the colour the canvas shows: the surface, or the heat map's outside colour
+  get canvasColour() {
+    const h = this.settings.heat;
+    return h.on ? (h.colors[h.colors.length - 1] || '#ffffff') : this.matSettings.background;
+  }
+
+  canvasEdge() {
+    if (!this.board) return;
+    this.board.style.setProperty('--canvas', this.canvasColour);
+    canvasEdge(this.canvasColour);
   }
 
   endDrag() { this.dragging = false; }
 
-  toast(msg) {
-    const el = document.getElementById('toast');
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(this._toastT);
-    this._toastT = setTimeout(() => el.classList.remove('show'), 1600);
-  }
+  toast(msg, err) { toast(msg, err); }
 
   // ------------------------------------------------------------ frame
   loop(now) {
@@ -4249,7 +4257,7 @@ class App {
     if (this.dirty.alloc) { this.allocSim(); this.dirty.alloc = false; this.dirty.layout = true; this.dirty.congeal = true; }
     if (this.dirty.layout) { this.rebuildLayout(); this.dirty.layout = false; }
     if (this.dirty.congeal) this.restart(false);
-    if (this.dirty.env) { this.renderer.buildEnv(s, this.image?.avg); this.dirty.env = false; this.updateLetterbox(); }
+    if (this.dirty.env) { this.renderer.buildEnv(s, this.image?.avg); this.dirty.env = false; this.canvasEdge(); }
 
     const [aw, ah] = this.art;
     const nx = this.sim.nx, ny = this.sim.ny;
@@ -4431,71 +4439,81 @@ class App {
     }
   }
 
-  async saveFile(blob, filename) {
-    if (window.claude && typeof window.claude.use === 'function') {
-      let dl = null;
-      try { dl = await window.claude.use('downloads'); } catch (_) { dl = null; }
-      if (dl) {
-        try {
-          await dl.save({ filename, data: blob });
-          this.toast('Saved ' + filename);
-        } catch (e) {
-          const code = e && e.code;
-          if (code === 'declined') return;
-          if (code === 'rate_limited') this.toast('A save prompt is already open');
-          else if (code === 'too_large') this.toast('That file is too large to save here');
-          else this.toast('Saving files is not available in this view');
-        }
-        return;
+  // the artwork as vectors: the canvas, the dry dots, and each congealed dot with its bridges drawn
+  // exactly as the shader draws them (a straight hull at full width, or two fillet arcs tangent to
+  // both dots). A heat map is pixels, so it goes in as an embedded image under any vector dots.
+  exportSVG() {
+    const build = (heatPng) => {
+      const [aw, ah] = this.art, s = this.settings, m = this.matSettings;
+      const f = (v) => +v.toFixed(2);
+      const out = [`<svg xmlns="http://www.w3.org/2000/svg" width="${aw}" height="${ah}" viewBox="0 0 ${aw} ${ah}">`];
+      out.push(`<rect id="canvas" width="${aw}" height="${ah}" fill="${this.canvasColour}"/>`);
+      if (heatPng) out.push(`<image id="heatmap" width="${aw}" height="${ah}" href="${heatPng}"/>`);
+      const drawDots = !s.heat.on || s.heat.dotsOnTop;
+      if (drawDots) {
+        const dry = this.dots.filter(d => !d.liquid);
+        out.push(`<g id="dots" fill="${m.dots}">`);
+        for (const d of dry) out.push(`<circle cx="${f(d.x)}" cy="${f(d.y)}" r="${f(d.r)}"/>`);
+        out.push('</g>');
+        const { wet = [], pairs = [] } = this.unionGeom || {};
+        out.push(`<g id="congealed" fill="${s.heat.on ? m.dots : m.tint}">`);
+        for (const d of wet) out.push(`<circle cx="${f(d.x)}" cy="${f(d.y)}" r="${f(d.r)}"/>`);
+        for (const [a, b] of pairs) { const p = this.neckPath(a, b, s.bridge, f); if (p) out.push(`<path d="${p}"/>`); }
+        out.push('</g>');
       }
+      out.push('</svg>');
+      saveFile(new Blob([out.join('\n')], { type: 'image/svg+xml' }), `${slug()}-${stamp()}.svg`);
+    };
+    if (this.settings.heat.on) this.exportRequest = () => build(this.canvas.toDataURL('image/png'));
+    else build(null);
+  }
+
+  // the bridge between two congealed dots, as an SVG path in artboard px (y down)
+  neckPath(a, b, wf, f) {
+    const rA = a.r, rB = b.r, dx = b.x - a.x, dy = b.y - a.y, D = Math.hypot(dx, dy);
+    if (D <= Math.abs(rA - rB) + 1e-3) return null;
+    const u = [dx / D, dy / D], n = [-u[1], u[0]];
+    const P = (o, k1, v1, k2, v2) => [o.x + k1 * v1[0] + k2 * v2[0], o.y + k1 * v1[1] + k2 * v2[1]];
+    const xy = (p) => `${f(p[0])} ${f(p[1])}`;
+    if (wf >= 0.999) {
+      // full width: the straight-sided hull, bounded by the two outer tangent lines
+      const bb = (rA - rB) / D, c = Math.sqrt(1 - bb * bb);
+      const side = (sg) => [P(a, rA * bb, u, sg * rA * c, n), P(b, rB * bb, u, sg * rB * c, n)];
+      const [a1, b1] = side(1), [a2, b2] = side(-1);
+      return `M${xy(a1)}L${xy(b1)}L${xy(b2)}L${xy(a2)}Z`;
     }
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.append(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    const rm = (rA + rB) / 2, q = D / 2, w = wf * rm;
+    const F = (q * q + w * w - rm * rm) / (2 * (rm - w));
+    if (!(F > 0)) return null;   // the dots already overlap wider than the waist
+    const x0 = (D * D + (rA + F) ** 2 - (rB + F) ** 2) / (2 * D), h2 = (rA + F) ** 2 - x0 * x0;
+    if (!(h2 > 0)) return null;
+    const h = Math.sqrt(h2);
+    const arc = (sg) => {
+      const C = P(a, x0, u, sg * h, n);
+      const tA = [a.x + (C[0] - a.x) * rA / (rA + F), a.y + (C[1] - a.y) * rA / (rA + F)];
+      const tB = [b.x + (C[0] - b.x) * rB / (rB + F), b.y + (C[1] - b.y) * rB / (rB + F)];
+      return { C, tA, tB };
+    };
+    // the short way round each fillet circle, from one tangent point to the other
+    const sweep = (C, p0, p1) => {
+      let d = Math.atan2(p1[1] - C[1], p1[0] - C[0]) - Math.atan2(p0[1] - C[1], p0[0] - C[0]);
+      while (d > Math.PI) d -= 2 * Math.PI;
+      while (d <= -Math.PI) d += 2 * Math.PI;
+      return d > 0 ? 1 : 0;
+    };
+    const t = arc(1), bt = arc(-1), R = f(F);
+    return `M${xy(t.tA)}A${R} ${R} 0 0 ${sweep(t.C, t.tA, t.tB)} ${xy(t.tB)}L${xy(bt.tB)}A${R} ${R} 0 0 ${sweep(bt.C, bt.tB, bt.tA)} ${xy(bt.tA)}Z`;
   }
 
   exportPNG() {
     this.exportRequest = () => {
       this.canvas.toBlob((blob) => {
-        if (blob) this.saveFile(blob, `sweat-${stamp()}.png`);
+        if (blob) saveFile(blob, `${slug()}-${stamp()}.png`);
       }, 'image/png');
     };
   }
-
-  toggleRecord() {
-    if (this.recorder) {
-      this.recorder.stop();
-      return;
-    }
-    if (!this.canvas.captureStream || !window.MediaRecorder) { this.toast('Recording is not supported in this browser'); return; }
-    const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'].find(m => MediaRecorder.isTypeSupported(m));
-    if (!mime) { this.toast('Recording is not supported in this browser'); return; }
-    const stream = this.canvas.captureStream(60);
-    const chunks = [];
-    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 16e6 });
-    rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
-    rec.onstop = () => {
-      const blob = new Blob(chunks, { type: mime });
-      this.recorder = null;
-      this.ui?.refresh();
-      this.saveFile(blob, `sweat-${stamp()}.${mime.includes('mp4') ? 'mp4' : 'webm'}`);
-    };
-    rec.start();
-    this.recorder = rec;
-    this.toast('Recording… press Stop recording to save');
-    this.ui?.refresh();
-  }
 }
 
-function stamp() {
-  const d = new Date();
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-}
 
 function luminance(hex) {
   const v = parseInt(hex.slice(1), 16);

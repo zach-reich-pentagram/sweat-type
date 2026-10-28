@@ -4,7 +4,10 @@
     {
       "name": "sweat-type",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "47193", "--bind", "127.0.0.1"],
+      "runtimeArgs": [
+        "serve.py",
+        "47193"
+      ],
       "port": 47193,
       "autoPort": false
     }
