@@ -1911,6 +1911,7 @@ function defaultSettings() {
     hoverGrow: 1.06,
     heat: { on: false, colors: ['#6b5cff', '#ff2a98', '#ff3b3b', '#ff8a30', '#f2ff00', '#ffffff', '#ffffff'], merge: 0, band: 5.7, inner: 2.3, growth: 1.06, blend: 0, organic: 0.45, orgScale: 70, dry: true, dotsOnTop: false },
     hoverPull: 0,
+    tension: 0,
     image: { fit: 'cover', zoom: 1, x: 0, y: 0 },
     placed: [],
     mat: JSON.parse(JSON.stringify(PER_MATERIAL)),
@@ -1966,7 +1967,7 @@ const EFFECTS = {
   reset: new Set(['aspect', 'scale', 'perf.simRes']),
   env: new Set(['light.env', 'light.azimuth', 'light.elevation', 'mat.background', 'material']),
   congeal: new Set(['font', 'amount', 'beadSize', 'variation', 'seed', 'congealStyle', 'pattern', 'runLength', 'growth', 'runShape']),
-  union: new Set(['reach', 'bridge', 'bridgeMode']),
+  union: new Set(['reach', 'bridge', 'bridgeMode', 'tension']),
   dots: new Set(['mat.dotStyle', 'mat.contactAngle', 'material']),
 };
 
@@ -3119,6 +3120,7 @@ function sections(app) {
         { kind: 'range', path: 'bridge', label: 'Bridge width', min: 10, max: 100, step: 1, mult: 100, unit: '%', hint: 'Width at the narrowest point of each bridge, as a share of the dot’s diameter. Below 100% the sides curve in as fillets tangent to both dots' },
         { kind: 'range', path: 'hoverGrow', label: 'Hover grow', min: 0, max: 300, step: 1, mult: 100, unit: '%', hint: 'How much congealed dots swell once the cursor has passed over them (100% = twice the size). Restart or Dry all to reset' },
         { kind: 'range', path: 'hoverPull', label: 'Hover pull', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: 'How far congealed dots move toward the cursor once it has passed over them, as a share of their distance. Dots pulled within reach bridge together' },
+        { kind: 'range', path: 'tension', label: 'Surface tension', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: 'How strongly the dots the cursor touches gather into one bead, like mercury: at 100% each touch becomes a single round bead holding all its dots. The cursor radius sets how big a bead can get' },
         { kind: 'congealBtns' },
         { kind: 'seg', path: 'pattern', options: [['clusters', 'Clusters'], ['runs', 'Swelling runs']], hint: 'Clusters: random groups of dots congeal. Swelling runs: dots congeal along the strokes, each a little bigger than the last' },
         { kind: 'range', path: 'amount', label: 'Amount', min: 0, max: 100, step: 1, mult: 100, unit: '%', hint: 'How much of each letterform’s dots congeal' },
@@ -3611,6 +3613,7 @@ class App {
     this.exportRequest = null;
     this.liquid = new Set();     // keys of dots that have turned to liquid
     this.geo = new Map();        // geometric mode: hover offset and growth per congealed dot
+    this.beads = new Map();      // surface tension: id -> where the cursor first gathered that bead
     this.seen = new Set();       // glyph ids that have already had their share congealed
     this.injectQueue = [];
     this.dots = [];
@@ -3835,6 +3838,19 @@ class App {
     this.staticDirty = true;
   }
 
+  // the bead a freshly touched dot joins: one gathered near both it and the cursor, else a new one
+  beadFor(d, p, R) {
+    let best = 0, bd = Infinity;
+    for (const [id, b] of this.beads) {
+      const e = Math.hypot(d.x - b.x, d.y - b.y);
+      if (e < R && e < bd && Math.hypot(p.x - b.x, p.y - b.y) < R) { best = id; bd = e; }
+    }
+    if (best) return best;
+    const id = this.beads.size + 1;
+    this.beads.set(id, { x: p.x, y: p.y });
+    return id;
+  }
+
   // Pathfinder-style union of the congealed dots: each dot, plus a straight bridge to every other
   // congealed dot within reach (in dot spacings)
   uploadUnion() {
@@ -3843,8 +3859,23 @@ class App {
     // each congealed dot where the hover has moved and grown it to
     const wet = this.dots.filter(d => d.liquid && d.geo).map(d => {
       const g = this.geo.get(d.key);
-      return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat, x0: d.x, y0: d.y } : { ...d, x0: d.x, y0: d.y };
+      return g ? { x: d.x + g.ox, y: d.y + g.oy, r: d.r * g.s, heat: d.heat, x0: d.x, y0: d.y, bead: g.bead, m: g.m || 0 } : { ...d, x0: d.x, y0: d.y };
     });
+    // surface tension: each bead's dots run toward their shared centre and swell, keeping their area,
+    // until at full strength they are one round bead
+    const beads = new Map();
+    for (const d of wet) if (d.bead && d.m > 0.01) {
+      if (!beads.has(d.bead)) beads.set(d.bead, []);
+      beads.get(d.bead).push(d);
+    }
+    for (const ms of beads.values()) {
+      let A = 0, cx = 0, cy = 0;
+      for (const d of ms) { const a = d.r * d.r; A += a; cx += d.x * a; cy += d.y * a; }
+      cx /= A; cy /= A;
+      const R = Math.sqrt(A);
+      for (const d of ms) { d.x += (cx - d.x) * d.m; d.y += (cy - d.y) * d.m; d.r += (R - d.r) * d.m; }
+    }
+    const inBead = (d) => d.bead && d.m > 0.01 && beads.get(d.bead).length > 1;
     const hot = [], pairs = [];
     const n = wet.length;
     const dots = new Float32Array(Math.max(1, n) * 8);
@@ -3870,6 +3901,8 @@ class App {
           for (const j of cell.get(key(gx, gy)) || []) {
             if (j <= i) continue;
             const b = wet[j];
+            // a bead holds together on its own and lets go of the dots around it
+            if (inBead(a) || inBead(b)) continue;
             if (Math.hypot(a.x - b.x, a.y - b.y) > reachOf(a, b)) continue;
             // neighbours only: straight up, down or across on the type's grid, and no further than the next dot
             if (grid) {
@@ -3882,6 +3915,13 @@ class App {
           }
         }
       });
+    }
+    for (const ms of beads.values()) for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) {
+      const a = ms[i], b = ms[j];
+      if (Math.hypot(a.x - b.x, a.y - b.y) < 0.5) continue;   // already run together
+      out.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
+      pairs.push([a, b]);
+      if (a.heat && b.heat) hot.push(a.x, ah - a.y, b.x, ah - b.y, a.r, b.r, 0, 0);
     }
     this.renderer.setUnion(dots, n, new Float32Array(out.length ? out : new Array(8).fill(0)), out.length / 8, s.bridge);
     this.unionGeom = { wet, pairs };   // kept for SVG export, in artboard px
@@ -4003,6 +4043,7 @@ class App {
   // dry everything, then congeal every letterform (and the placed dots) from the current seed
   restart(toast) {
     this.geo.clear();
+    this.beads.clear();
     this.sim.clear();
     this.liquid.clear();
     this.injectQueue.length = 0;
@@ -4029,6 +4070,7 @@ class App {
 
   dryAll() {
     this.geo.clear();
+    this.beads.clear();
     this.sim.clear();
     this.liquid.clear();
     this.injectQueue.length = 0;
@@ -4279,7 +4321,7 @@ class App {
     }
     // geometric hover: congealed dots the cursor passes over swell and drift toward it, and stay that way
     // (each keeps the strongest touch it has had, pulled toward where the cursor was at that moment)
-    if (this.geometric && !this.paused && (this.geo.size || (tool === 'congeal' && active && (s.hoverGrow > 0 || s.hoverPull > 0)))) {
+    if (this.geometric && !this.paused && (this.geo.size || (tool === 'congeal' && active && (s.hoverGrow > 0 || s.hoverPull > 0 || s.tension > 0)))) {
       const on = tool === 'congeal' && active, R = Math.max(s.cursorRadius, 1);
       const k = 1 - Math.exp(-dt * 9);
       let moved = false;
@@ -4293,6 +4335,11 @@ class App {
         let g = this.geo.get(d.key);
         if (!g) { if (!w) continue; g = { s: 1, base: 1, ox: 0, oy: 0, w: 0, px: d.x, py: d.y }; this.geo.set(d.key, g); }
         if (w > g.w) { g.w = w; g.px = p.x; g.py = p.y; }
+        // every touch joins a bead; surface tension decides how far its dots run together
+        if (w > 0 && !g.bead) g.bead = this.beadFor(d, p, R);
+        const tm = g.bead ? s.tension : 0, gm = g.m || 0;
+        g.m = gm + (tm - gm) * (1 - Math.exp(-dt * 6));
+        if (Math.abs(g.m - gm) > 1e-4) moved = true;
         const ts = (g.base || 1) * (1 + s.hoverGrow * g.w), tx = (g.px - d.x) * s.hoverPull * g.w, ty = (g.py - d.y) * s.hoverPull * g.w;
         const ns = g.s + (ts - g.s) * k, nx = g.ox + (tx - g.ox) * k, ny = g.oy + (ty - g.oy) * k;
         if (Math.abs(ns - g.s) > 1e-4 || Math.abs(nx - g.ox) > 0.01 || Math.abs(ny - g.oy) > 0.01) moved = true;
